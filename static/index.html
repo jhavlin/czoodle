@@ -1,0 +1,201 @@
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Czoodle.cz - vytvořit hlasování</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/info.css">
+    <script src="js/encryptionutils.js"></script>
+    <script src="js/createproject.elm.js"></script>
+</head>
+<body>
+    <header>
+        <h1 class="header">
+            <span class="cz-start">Cz</span><span class="oo">oo</span><span class="d">d</span><span class="le">le</span>.<span class="cz-end">cz</span>
+        </h1>
+    </header>
+    <main>
+        <div id="project" class="project">
+            <div class="width">
+                <h2>Nový projekt</h2>
+                <div id="elm-root"></div>
+            </div>
+        </div>
+        <div class="info-dark">
+            <div class="info-width">
+                <h1>Podmínky použití</h1>
+                <p>
+                    Užívání služby je na vlastní nebezpečí. Nic od vás nepožadujeme a nic neslibujeme.
+                </p>
+                <p>
+                    Hlasování by měla být dostupná alespoň tři měsíce od vytvoření.
+                    Poté mohou být kvůli úspoře místa odstraněna. V horším případě mohou být také
+                    vymazána po síťovém útoku na server nebo kvůli technickým potížím.
+                </p>
+                <h1>Varování: Prototyp</h1>
+                <p>
+                    Systém je stále ve stádiu prototypu. Některé funkce mohou být rozbité.
+                </p>
+            </div>
+        </div>
+        <div class="info-light">
+            <div class="info-width">
+                <div class="info-boxes">
+                    <div class="info-box info-box-green">
+                        <div class="info-box-content-big">0%</div>
+                        <div class="info-box-content">blockchain</div>
+                    </div>
+                    <div class="info-box info-box-red">
+                        <div class="info-box-content">Nezotročuje</div>
+                        <div class="info-box-content-big">AI</div>
+                    </div>
+                    <div class="info-box info-box-blue">
+                        <div class="info-box-content-big">100%</div>
+                        <div class="info-box-content">crypto</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="info">
+            <div class="info-width">
+                <h1>Skupinové hlasování, které ctí vaše soukromí</h1>
+
+                <h2>Zcela bez registrace</h2>
+                <p>
+                    Nevyžadujeme email ani nepoužíváme <a href="https://en.wikipedia.org/wiki/CAPTCHA">CAPTCHA</a>.
+                    Za vytvoření projektu „zaplatíte“ spočítáním ověřovacího řetězce, a to jenom proto, abychom odradili
+                    různé syčáky od spamování.
+                </p>
+                <p>
+                    Jinými slovy, není pro nás podstatné, jestli jste nebo nejste robot, ale jestli jste ochotni obětovat
+                    trochu svého výpočetního výkonu za poskytnutí trochy místa na našem serveru.
+                </p>
+
+                <h2>End-to-end šifrování</h2>
+                <p>
+                    Informace zadané uživateli opouštějí tyto stránky pouze v zašifrované podobě. Dešifrovací klíč je
+                    součástí odkazu, který libovolným způsobem (typicky e-mailem) sdělíte hlasujícím.
+                </p>
+                <p>
+                    Je tedy zcela vaše odpovědnost, kdo může data číst. Provozovatelé této služby tuto možnost nemají.
+                    Ani v případě odcizení dat ze serveru není možné data zneužít.
+                </p>
+                <p>
+                    (Nebezpečí stále hrozí, pokud by někdo napadl server a podvrhl upravené klientské soubory.)
+                </p>
+                <h2>Žádné sledovací prvky</h2>
+                <p>
+                    Na těchto stránkách nenajdete žádné cílené reklamy, analytické nástroje ani další prostředky ke sledování
+                    chování uživatelů na síti.
+                </p>
+                <h2>Proč se zabývat soukromím na internetu</h2>
+                <p><a href="https://kampan.primitiweb.cz/" target="_new">Další informace v kampani!</a></p>
+            </div>
+        </div>
+        <div class="info-light">
+            <div class="info-width">
+                <h1>Poděkování</h1>
+                <p>Czoodle byl významně inspirován těmito službami:</p>
+                <ul>
+                    <li><a href="https://www.doodle.com" target="_new">Doodle</a></li>
+                    <li><a href="https://www.protonmail.com" target="_new">Protonmail</a></li>
+                    <li><a href="https://send.firefox.com" target="_new">Firefox Send</a></li>
+                </ul>
+                <p>Pro tvorbu a provoz této služby se využívá spousta otevřeného softwaru:</p>
+                <ul>
+                    <li><a href="https://elm-lang.org" target="_new">Elm</a> pro front-end.</li>
+                    <li><a href="https://rust-lang.org" target="_new">Rust</a> a <a href="https://actix.rs/" target="_new">Actix Web</a> pro (zatím jednoduchý) back-end.</li>
+                    <li>A mnoho dalších pro všechno ostatní.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="info">
+            <div class="info-width">
+                Jaroslav Havlín / <a href="https://github.com/jhavlin/czoodle" target="_new">Github repositář</a>
+            </div>
+        </div>
+    </main>
+    <script type="text/javascript">
+        const date = new Date();
+        const today = {
+            year: date.getFullYear(),
+            month: date.getMonth() + 1,
+            day: date.getDate(),
+        }
+        const baseUrl = /(https?:\/\/[^/]*)(\/.*)?/.exec(window.location)[1];
+        let app = Elm.CreateProject.init({
+            node: document.getElementById('elm-root'),
+            flags: { today, baseUrl },
+        });
+        app.ports.persist.subscribe(async function(data) {
+            try {
+                const evidence = byteArrayToHex(generateRandomByteArray(32));
+                data.evidence = evidence;
+                const key = await generateKey();
+                const { encryptedData, iv } = await encryptJson(data, key);
+
+                const trySave = async() => {
+                    const requestKeyResult = await get('/data/v01/requestProjectKey');
+                    const keyVerification = await verify(requestKeyResult.projectKey, requestKeyResult.requiredHashPrefix);
+                    const body = {
+                        encryptedData,
+                        iv,
+                        evidence,
+                        projectKey: requestKeyResult.projectKey,
+                        keyVerification,
+                    };
+                    const result = await post('/data/v01/create', body);
+                    if (result.result === 'key_used') {
+                        trySave()
+                    } else if (result.result === 'verification_failed') {
+                        // that is bad
+                    } else if (result.result === 'created') {
+                        app.ports.createdProjectInfo.send({
+                            projectKey: result.projectKey,
+                            secretKey: key,
+                        });
+                    }
+                }
+                trySave();
+            } catch (e) {
+                console.log(e);
+            }
+        });
+
+        async function sha256(message) {
+            // https://stackoverflow.com/questions/18338890/are-there-any-sha-256-javascript-implementations-that-are-generally-considered-t
+            // encode as UTF-8
+            const msgBuffer = new TextEncoder('utf-8').encode(message);
+            // hash the message
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            // convert ArrayBuffer to Array
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            // convert bytes to hex string
+            const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
+            return hashHex;
+        }
+
+        const verify = async (base, requiredPrefix) => {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
+            const queue = [''];
+            let start = 0;
+            const tryNext = () => {
+                const prefix = queue[start++];
+                chars.forEach((c) => {
+                    queue.push(prefix + c);
+                });
+                return sha256(base + prefix).then((hash) => {
+                    if (hash.startsWith(requiredPrefix)) {
+                        return prefix;
+                    } else {
+                        return tryNext()
+                    }
+                });
+            }
+            return Promise.resolve().then(tryNext);
+        }
+
+    </script>
+</body>
+</html>

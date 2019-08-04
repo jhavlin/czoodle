@@ -1,0 +1,60 @@
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Czoodle.cz - hlasování</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <script src="../js/encryptionutils.js"></script>
+    <script src="js/vote.elm.js"></script>
+</head>
+<body>
+    <header>
+        <h1 class="header">
+            <span class="cz-start">Cz</span><span class="oo">oo</span><span class="d">d</span><span class="le">le</span>.<span class="cz-end">cz</span>
+        </h1>
+    </header>
+    <main>
+        <div class="project">
+            <div id="elm-root"></div>
+        </div>
+    </main>
+    <script type="text/javascript">
+        const date = new Date();
+        let app = Elm.Vote.init({
+            node: document.getElementById('elm-root'),
+            flags: { urlHash: location.hash },
+        });
+        let version;
+        app.ports.load.subscribe(async function (data) {
+            const result = await get('/data/v01/get/' + data.projectKey);
+            const json = await decryptJson(result.encryptedData, result.iv, data.secretKey);
+            version = result.version;
+            app.ports.loaded.send(json);
+        });
+        app.ports.modify.subscribe(async function(data) {
+            const { encryptedData, iv } = await encryptJson(data.project, data.secretKey);
+            const toSend = {
+                encryptedData,
+                iv,
+                evidence: data.project.evidence,
+                previousVersion: version,
+                projectKey: data.projectKey,
+                version,
+            }
+            const result = await post('/data/v01/update', toSend);
+            if (result.success) {
+                version = result.version;
+                app.ports.loaded.send(data.project);
+            } else if (!result.success && result.version) {
+                version = result.version;
+                const json = await decryptJson(result.encryptedData, result.iv, data.secretKey);
+                app.ports.updatedVersionReceived.send(json);
+            } else if (!result.success && !result.version) {
+                // some bigger problem
+            }
+        });
+
+    </script>
+</body>
+</html>

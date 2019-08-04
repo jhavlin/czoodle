@@ -1,0 +1,654 @@
+body {
+    margin: 0 0;
+    padding: 0 0;
+}
+header {
+    padding: 50px 0;
+}
+h1.header {
+    margin: 0 0;
+    padding: 0 0;
+    text-align: center;
+    font-size: 40pt;
+}
+h1.header > .cz-start, h1.header > .cz-end {
+    background: rgb(100, 100, 100);
+    color: white;
+    padding: 0.5rem;
+    border: 1px #444 solid;
+    border-radius: 0.2rem;
+    box-shadow: -0.2rem 0.2rem 4px rgb(44, 44, 44);
+}
+h1.header > .oo {
+    background: #e4fcdf;
+    font-size: 80%;
+    color: #48cd0e;
+    padding: 0.1rem;
+    border: 1px #48cd0e solid;
+    border-radius: 4px;
+    box-shadow: -0.2rem 0.2rem 4px rgb(44, 44, 44);
+}
+h1.header > .d {
+    background: #ffffd9;
+    font-size: 110%;
+    color: #ffc800;
+    padding: 0.5rem;
+    border: 1px #ffc800 solid;
+    border-radius: 4px;
+    box-shadow: -0.2rem 0.2rem 4px rgb(44, 44, 44);
+}
+h1.header > .le {
+    background: white;
+    font-size: 60%;
+    color: #ffb4b4;
+    padding: 0.5rem;
+    border: 1px #ffb4b4 solid;
+    border-radius: 4px;
+    box-shadow: -0.2rem 0.2rem 4px rgb(44, 44, 44);
+}
+.width {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0.5rem;
+}
+@media (min-width: 600px) {
+    .width {
+        padding: 2rem;
+    }
+}
+.desc {
+    font-size: 24px;
+    text-align: center;
+}
+.start {
+    padding: 50px 0;
+    text-align: center;
+}
+
+/* Common UI types */
+
+.common-button,
+.common-select {
+    cursor: pointer;
+    text-decoration: none;
+    font-family: sans-serif;
+    background: #f5f5f5 linear-gradient(to bottom, #f5f5f5, #dddddd);
+    border-radius: 4px;
+}
+
+.common-button:hover,
+.common-select:hover {
+    background: #f5f5f5;
+}
+
+.common-button.common-wide {
+    padding: 4px 10px;
+}
+
+.common-add-icon::before {
+    content: "+ ";
+    font-weight: bold;
+    font-size: 120%;
+    line-height: 1;
+}
+
+.common-input {
+    color: black;
+    padding: 4px 5px;
+    font-size: 100%;
+    border: 1px gray solid;
+}
+
+.common-icon-button {
+    font-size: 120%;
+    border: 1px transparent solid;
+    border-radius: 5px;
+    background: none;
+    vertical-align: middle;
+}
+.common-icon-button:hover {
+    border-color: gray;
+}
+.common-icon-button:disabled:hover {
+    border-color: transparent;
+}
+
+.common-group-first {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.common-group-middle {
+    border-radius: 0;
+    border-left: none;
+}
+
+.common-group-last {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-left: none;
+}
+
+
+/* Colors */
+
+.colors-add {
+    color: white;
+    background: rgb(21, 177, 0);
+}
+
+.colors-add:hover {
+    background: rgb(13, 110, 0);
+}
+
+.colors-edit {
+    color: white;
+    background: rgb(27, 27, 247);
+}
+
+.colors-edit:hover {
+    background: rgb(15, 15, 124)
+}
+
+/* Create project page */
+
+.start-button {
+    border-radius: 10px;
+    min-width: 100px;
+    padding: 15px 25px;
+    font-size: 18pt;
+    box-shadow: -3px 3px 9px gray;
+}
+@media (min-width: 600px) {
+    .start-button {
+        font-size: 22pt;
+        padding: 25px 35px;
+    }
+}
+
+.project {
+    background: rgb(239, 239, 239);
+    padding-bottom: 1rem;
+}
+.project-title {
+    width: 100%;
+    padding: 8px 10px 5px 10px ;
+    font-size: 14pt;
+}
+.project-title-label {
+    font-weight: bold;
+    display: block;
+}
+.add-poll-line {
+    margin-top: 1.5rem;
+}
+.add-poll-button {
+    margin: 1px;
+    padding: 7px 7px 5px 7px;
+    font-size: 12pt;
+    box-shadow: -1px 1px 3px gray;
+    border-radius: 5px;
+    border: none;
+}
+
+.poll {
+    margin: 1rem 0;
+    /*background: rgb(252, 239, 216);*/
+    background: rgb(237, 244, 255);
+    border: 1px rgb(34, 133, 151) solid;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.poll-header-row {
+    display: flex;
+    padding: 0.5rem 1rem;
+    align-items: center;
+    color: white;
+    background: rgb(34, 133, 151);
+}
+
+.poll-body {
+    padding: 1rem;
+}
+
+.poll-header-name {
+    flex: 1 1 auto;
+    font-family: sans-serif;
+}
+
+.poll-header-delete {
+    flex: 0 0 auto;
+}
+
+.delete-poll-button {
+    color: white;
+    background: rgb(34, 133, 151);
+    border-color: white;
+    border-width: 2px;
+}
+
+.delete-poll-button:hover {
+    background: rgb(172, 0, 0);
+}
+
+.poll-name-label {
+    display: block;
+}
+
+.poll-name-input {
+    width: 100%;
+}
+
+.poll-options-header {
+    margin: 1rem 0;
+}
+
+.poll-option-generic {
+    margin: 0.5rem;
+}
+
+.poll-options-list {
+    padding-left: 25px;
+}
+
+/* Generic */
+
+.nowrap {
+    white-space: nowrap;
+}
+
+/* Calendar */
+
+.calendar-table {
+    margin-top: 0.5rem;
+    user-select: none;
+}
+
+.calendar-row {
+    display: flex;
+}
+
+.calendar-cell {
+    min-height: 3rem;
+    font-size: 150%;
+    margin: 3px;
+    border-radius: 5px;
+    flex: 1 1 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px white solid;
+    color: lightgray;
+    cursor: pointer;
+}
+
+.calendar-cell.calendar-header-cell {
+    border-color: transparent;
+    background: none;
+    cursor: default;
+    color: gray;
+}
+
+.calendar-cell.calendar-cell-active {
+    color: black;
+    background: rgba(255,255, 255, 0.7);
+}
+
+.calendar-cell.calendar-cell-selected {
+    background-color: rgb(180, 223, 223);
+    color: white;
+    font-weight: bold;
+}
+.calendar-cell.calendar-cell-selected.calendar-cell-active {
+    background-color: rgb(34, 133, 151);
+}
+
+.calendar-cell.calendar-cell-active:hover {
+    background-color: white;
+    border-color: gray;
+}
+
+.calendar-cell.calendar-cell-selected.calendar-cell-highlighted,
+.calendar-cell.calendar-cell-selected:hover,
+.calendar-cell.calendar-cell-selected.calendar-cell-active:hover {
+    background-color: rgb(14, 103, 121);
+    color: white;
+    font-weight: bold;
+    border-color: white;
+}
+
+.calendar-cell-today.calendar-cell-active {
+    border-color: rgb(34, 133, 151);
+}
+
+.calendar-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.calendar-controls-buttons {
+    flex: 1 1 auto;
+    text-align: center;
+    white-space: nowrap;
+    margin: 1rem 0 0.5rem 0;
+}
+.calendar-controls-buttons-today {
+    margin-right: 0.5rem;
+}
+
+.calendar-controls-direct {
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: center;
+    margin: 1rem 0 0.5rem 0;
+}
+
+input.calendar-controls-year {
+    width: 6em;
+}
+
+.poll-date-tags {
+    margin-top: 1rem;
+    border-top: 1px gray solid;
+    padding-top: 1rem;
+}
+
+.poll-date-tag {
+    display: inline-block;
+    color: white;
+    margin: 4px;
+}
+
+.poll-date-tag-name {
+    display: inline-block;
+    background: rgb(34, 133, 151);
+    line-height: 1.5;
+    padding: 0 5px;
+    border-radius: 3px 0 0 3px;
+    cursor: default;
+}
+.poll-date-tag-name.poll-date-tag-name-highlighted {
+    background-color: rgb(14, 103, 121);
+}
+
+
+.poll-date-tag-name-active {
+    cursor: pointer;
+}
+
+.poll-date-tag-name-active:hover {
+    text-decoration: underline;
+}
+
+.poll-date-tag-delete {
+    display: inline-block;
+    background: rgb(34, 133, 151);
+    border-left: 1px rgba(255, 255, 255, 0.4) solid;
+    line-height: 1.5;
+    padding: 0 3px;
+    border-radius: 0 3px 3px 0;
+    cursor: pointer;
+}
+.poll-date-tag-delete:hover {
+    background-color: rgb(172, 0, 0);
+}
+
+.poll-date-tag-info {
+    display: inline-block;
+    line-height: 1.5;
+    padding: 0 5px;
+    margin: 4px;
+    border-radius: 3px;
+    background: gray;
+}
+
+.submit-row {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px darkgray dashed;
+}
+
+.submit-button {
+    margin: 10px;
+    padding: 10px;
+    font-size: 15pt;
+    box-shadow: -1px 1px 3px gray;
+    border-radius: 5px;
+    border: none;
+}
+
+.submit-button:disabled {
+    background: gray;
+    color: lightgray;
+}
+
+.project-created-title {
+    border-left: 7px orange solid;
+    padding: 7px 7px 7px 20px;
+    font-size: 150%;
+    margin: 30px 0;
+}
+
+.project-created-info-main {
+    font-weight: bold;
+}
+
+.project-created-link {
+    border: 1px white solid;
+    background: white;
+    border-radius: 2px;
+    display: block;
+    padding: 10px 5px;
+    font-weight: bold;
+    text-align: center;
+    word-break: break-all;
+}
+
+.project-created-link-secret {
+    font-size: 70%;
+}
+
+.vote-project {
+    margin: 0 auto;
+    padding: 0.5rem;
+}
+
+.vote-project-title {
+    font-family: sans-serif;
+    font-size: 22px;
+}
+
+.vote-process-overlay {
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vote-process-overlay-text {
+    color: white;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 1rem;
+    border: 2px lightgray solid;
+    font-size: 150%;
+}
+
+.vote-poll-center-outer {
+    display: flex;
+    justify-content: center;
+}
+
+.vote-poll-center {
+    overflow: auto;
+}
+
+.vote-poll {
+    padding-bottom: 10px;
+}
+
+.vote-poll-preferred-width {
+    width: 750px;
+    max-width: 100%;
+}
+
+.vote-poll-title {
+    font-family: sans-serif;
+    font-size: 18px;
+    color: rgb(102, 106, 102);
+    border-bottom: 1px rgb(102, 106, 102) solid;
+    padding-bottom: 5px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.vote-poll-header-cell {
+    padding: 5px;
+    color: white;
+    background: rgb(102, 106, 102);
+    border-radius: 2px;
+    min-width: 3rem;
+}
+
+.vote-poll-day-in-week {
+    font-size: 130%;
+}
+
+.vote-poll-name-cell {
+    vertical-align: middle;
+}
+
+.vote-poll-header-cell-generic {
+    width: 6em;
+}
+
+.vote-poll-count-cell {
+    text-align: center;
+    vertical-align: center;
+    padding: 3px 0;
+}
+
+.vote-poll-count-cell-max {
+    font-weight: bold;
+}
+
+.vote-poll-count-positive {
+    margin-right: 3px;
+}
+
+.vote-poll-count-yes {
+    font-size: 90%;
+    color: #48cd0e;
+}
+
+.vote-poll-new-name-input, .vote-poll-existing-name-input {
+    padding: 4px 2px;
+    width: 12em;
+    border: 1px gray solid;
+    background: white;
+}
+
+.vote-poll-existing-name-input {
+    background: transparent;
+    border: 1px lightgray solid;
+}
+
+.vote-poll-existing-name-input.changed, .vote-poll-existing-name-input:hover, .vote-poll-existing-name-input:focus {
+    border: 1px gray solid;
+    background: white;
+}
+
+.vote-poll-new-name-input-invalid {
+    border-color: red;
+}
+
+.vote-poll-select-cell {
+    border: 1px rgb(197, 197, 197) solid;
+    border-radius: 2px;
+    text-align: center;
+    vertical-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.vote-poll-select-cell.changed {
+    border-color: black;
+}
+
+.vote-poll-select-cell-yes {
+    background: #e4fcdf;
+    border-color: #48cd0e;
+}
+.vote-poll-select-cell-yes:hover {
+    background: #b8ffa8;
+}
+
+.vote-poll-select-cell-svg-yes {
+    fill: #48cd0e;
+    stroke: #48cd0e;
+    stroke-width: 3;
+}
+
+.vote-poll-select-cell-no {
+    background: white;
+    border-color: #ffb4b4;
+}
+.vote-poll-select-cell-no:hover {
+    background: #ffeeee;
+}
+
+.vote-poll-select-cell-svg-no {
+    fill: transparent;
+    stroke: #ffcccc;
+    stroke-width: 2;
+}
+
+.vote-poll-select-cell-ifneeded {
+    background: #ffffd9;
+    border-color: #ffc800;
+}
+.vote-poll-select-cell-ifneeded:hover {
+    background: #fbfbb0;
+}
+
+.vote-poll-select-cell-svg-ifneeded {
+    fill: transparent;
+    stroke: #ffc800;
+    stroke-width: 3;
+}
+
+.vote-poll-deleted-cell {
+    border: 1px gray solid;
+    text-align: center;
+    background: transparent;
+    color: gray;
+}
+
+.vote-poll-edit-cell {
+    text-align: center;
+    vertical-align: middle;
+    padding: 2px 5px;
+    user-select: none;
+}
+
+.vote-poll-edit-link {
+    font-size: 80%;
+    cursor: pointer;
+    color: #555;
+}
+.vote-poll-edit-link:hover {
+    text-decoration: underline;
+}

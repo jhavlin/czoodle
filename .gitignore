@@ -1,0 +1,7 @@
+/target
+/data
+/static/**/js/*.elm.js
+**/*.rs.bk
+rls*.log
+elm-stuff
+.vscode
