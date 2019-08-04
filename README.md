@@ -8,7 +8,7 @@ The project is still rather a prototype, code needs major refactoring.
 
 - End-to-end encryption
 - Simple proof-of-work required to create a project instead of captcha or email verification
-- Competition for offered project key may work as prevention of DDOS attacks
+- Competition for offered project key may work as prevention of DDoS attacks
 - Detection of collisions and patching of changes on the client-side (mandatory because of the encryption)
 
 # TODO
