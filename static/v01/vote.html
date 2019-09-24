@@ -3,10 +3,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google" content="notranslate">
     <title>Czoodle.cz - hlasování</title>
+    <link rel="icon" href="../favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon"/>
     <link rel="stylesheet" href="../css/main.css">
     <script src="../js/encryptionutils.js"></script>
     <script src="js/vote.elm.js"></script>
+    <meta property="og:title" content="Czoodle.cz"/>
+    <meta property="og:image" content="https://czoodle.cz/og/czoodle_og_image.png"/>
+    <meta property="og:site_name" content="Czoodle.cz"/>
+    <meta property="og:description" content="Jednoduché skupinové hlasování"/>
 </head>
 <body>
     <header>
@@ -15,10 +22,15 @@
         </h1>
     </header>
     <main>
-        <div class="project">
+        <div class="project notranslate" translate="no">
             <div id="elm-root"></div>
         </div>
     </main>
+    <footer>
+        <div class="vote-footer">
+            Vytvořte si hlasování na <a href="https://czoodle.cz">czoodle.cz</a>
+        </div>
+    </footer>
     <script type="text/javascript">
         const date = new Date();
         let app = Elm.Vote.init({
@@ -54,6 +66,9 @@
                 // some bigger problem
             }
         });
+        window.addEventListener("hashchange", () => {
+            app.ports.hashChanged.send({ urlHash: location.hash });
+        }, false);
 
     </script>
 </body>

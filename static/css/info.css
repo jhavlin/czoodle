@@ -1,3 +1,8 @@
+.info, .info-dark, .info-light {
+    line-height: 1.35;
+    font-size: 14pt;
+}
+
 .info {
     background: rgb(34, 133, 151);
     color: white;

@@ -25,6 +25,9 @@ port modify : E.Value -> Cmd msg
 port loaded : (D.Value -> msg) -> Sub msg
 
 
+port hashChanged : (D.Value -> msg) -> Sub msg
+
+
 port modified : (D.Value -> msg) -> Sub msg
 
 
@@ -50,6 +53,7 @@ type ViewMode
 
 type alias ViewState =
     { viewMode : ViewMode
+    , editableExistingRows : Set Int
     }
 
 
@@ -112,6 +116,7 @@ type PollInfo
 type alias Poll =
     { pollId : PollId
     , title : Maybe String
+    , description : Maybe String
     , pollInfo : PollInfo
     , personRows : List PersonRow
     , lastPersonId : Int
@@ -169,9 +174,13 @@ type Msg
     = NoOp
     | NoOpJson D.Value
     | LoadedData D.Value
+    | HashChanged D.Value
+    | MakePersonRowEditable PollId PersonId
+    | MakePersonRowNotEditable PollId PersonId
     | SetAddedPersonRowOption PollId Int OptionId SelectedOption
     | SetAddedPersonRowName PollId Int String
     | DeleteAddedPersonRow PollId Int
+    | DeleteAllEmptyPersonRows
     | AddAnotherPersonRow PollId
     | SetExistingPersonRowOption PollId PersonId OptionId SelectedOption
     | SetExistingPersonRowName PollId PersonId String
@@ -241,7 +250,7 @@ emptyChangesInPoll =
 
 emptyViewState : ViewState
 emptyViewState =
-    { viewMode = OptionsInRow }
+    { viewMode = OptionsInRow, editableExistingRows = Set.empty }
 
 
 emptyChangesInPersonRow : ChangesInPersonRow
@@ -263,6 +272,7 @@ subscriptions _ =
         [ loaded LoadedData
         , modified NoOpJson
         , updatedVersionReceived RetrySaveChanges
+        , hashChanged HashChanged
         ]
 
 
@@ -288,6 +298,37 @@ update msg model =
             in
             ( newModel, Cmd.none )
 
+        HashChanged hash ->
+            init hash
+
+        MakePersonRowEditable pollId (PersonId personId) ->
+            let
+                doFn poll changesInPoll viewState =
+                    let
+                        updatedViewState =
+                            { viewState | editableExistingRows = Set.insert personId viewState.editableExistingRows }
+                    in
+                    ( poll, changesInPoll, updatedViewState )
+            in
+            ( doWithPoll model pollId doFn, Cmd.none )
+
+        MakePersonRowNotEditable pollId (PersonId personId) ->
+            let
+                doFn poll changesInPoll viewState =
+                    let
+                        updatedViewState =
+                            { viewState | editableExistingRows = Set.remove personId viewState.editableExistingRows }
+
+                        updatedChangesInPoll =
+                            { changesInPoll
+                                | changesInPersonRows = Dict.remove personId changesInPoll.changesInPersonRows
+                                , deletedPersonRows = Set.remove personId changesInPoll.deletedPersonRows
+                            }
+                    in
+                    ( poll, updatedChangesInPoll, updatedViewState )
+            in
+            ( doWithPoll model pollId doFn, Cmd.none )
+
         SetAddedPersonRowOption pollId index (OptionId id) selectedOption ->
             let
                 fn addedVote =
@@ -299,9 +340,6 @@ update msg model =
             let
                 doFn project changes viewState =
                     let
-                        fromFirst =
-                            isFirstPoll pollId project.polls
-
                         sourceChanges =
                             Dict.get (pollIdInt pollId) changes.changesInPolls
 
@@ -319,7 +357,7 @@ update msg model =
                             Maybe.withDefault "" <| Maybe.map findOrigName sourceChanges
 
                         updateName pId i addedVote =
-                            if i == index && (fromFirst && addedVote.name == origName || pId == pollId) then
+                            if i == index && (addedVote.name == origName || pId == pollId) then
                                 { addedVote | name = name }
 
                             else
@@ -340,27 +378,13 @@ update msg model =
 
         AddAnotherPersonRow pollId ->
             let
-                doFn project changes viewState =
-                    let
-                        fromFirst =
-                            isFirstPoll pollId project.polls
+                updateAddedPersonRows addedVotes =
+                    addedVotes ++ [ { name = "", selectedOptions = Dict.empty } ]
 
-                        updateAddedPersonRows pId addedVotes =
-                            if fromFirst || pId == pollId then
-                                addedVotes ++ [ { name = "", selectedOptions = Dict.empty } ]
-
-                            else
-                                addedVotes
-
-                        updateChangesItem id changesItem =
-                            { changesItem | addedPersonRows = updateAddedPersonRows (PollId id) changesItem.addedPersonRows }
-
-                        updatedChanges =
-                            Dict.map updateChangesItem changes.changesInPolls
-                    in
-                    Loaded project { changes | changesInPolls = updatedChanges } viewState
+                doFn changesInPoll =
+                    { changesInPoll | addedPersonRows = updateAddedPersonRows changesInPoll.addedPersonRows }
             in
-            ( doWithLoadedProject model doFn, Cmd.none )
+            ( doWithEachPollChanges model doFn, Cmd.none )
 
         DeleteAddedPersonRow pollId addedVoteIndex ->
             let
@@ -382,6 +406,16 @@ update msg model =
                     ( poll, updatedChangesItem, viewState )
             in
             ( doWithPoll model pollId doFn, Cmd.none )
+
+        DeleteAllEmptyPersonRows ->
+            let
+                updateAddedPersonRows addedVotes =
+                    List.filter (\av -> not <| String.isEmpty av.name) addedVotes
+
+                doFn changesInPoll =
+                    { changesInPoll | addedPersonRows = updateAddedPersonRows changesInPoll.addedPersonRows }
+            in
+            ( doWithEachPollChanges model doFn, Cmd.none )
 
         SaveChanges ->
             case model.projectState of
@@ -589,6 +623,19 @@ doWithAddedVote model pollId addedVoteIndex fn =
             ( poll, updatedChangesItem, viewState )
     in
     doWithPoll model pollId doFn
+
+
+doWithEachPollChanges : Model -> (ChangesInPoll -> ChangesInPoll) -> Model
+doWithEachPollChanges model fn =
+    let
+        doFn project changes viewState =
+            let
+                updatedChanges =
+                    Dict.map (\a b -> fn b) changes.changesInPolls
+            in
+            Loaded project { changes | changesInPolls = updatedChanges } viewState
+    in
+    doWithLoadedProject model doFn
 
 
 applyPersonRowChanges : ChangesInPoll -> PersonRow -> PersonRow
@@ -946,9 +993,10 @@ decodePersonRow =
 
 decodePoll : D.Decoder Poll
 decodePoll =
-    D.map5 Poll
+    D.map6 Poll
         (D.map PollId <| D.field "id" D.int)
         (D.map stringToMaybe <| D.field "title" D.string)
+        (D.maybe <| D.field "description" D.string)
         (D.field "def" decodePollInfo)
         (D.field "people" <| D.list decodePersonRow)
         (D.field "lastPersonId" D.int)
@@ -1033,15 +1081,26 @@ encodeProject project =
                 , ( "options", encodeSelectedOptions personRow.selectedOptions )
                 ]
 
+        descriptionToFieldEncoder : Maybe String -> List ( String, E.Value )
+        descriptionToFieldEncoder description =
+            case description of
+                Nothing ->
+                    []
+
+                Just desc ->
+                    [ ( "description", E.string desc ) ]
+
         encodePoll : Poll -> E.Value
-        encodePoll { pollId, title, pollInfo, personRows, lastPersonId } =
+        encodePoll { pollId, title, description, pollInfo, personRows, lastPersonId } =
             E.object
-                [ ( "title", E.string <| Maybe.withDefault "" title )
-                , ( "def", encodePollInfo pollInfo )
-                , ( "id", E.int <| pollIdInt pollId )
-                , ( "lastPersonId", E.int lastPersonId )
-                , ( "people", E.list encodePersonRow personRows )
-                ]
+                ([ ( "title", E.string <| Maybe.withDefault "" title )
+                 , ( "def", encodePollInfo pollInfo )
+                 , ( "id", E.int <| pollIdInt pollId )
+                 , ( "lastPersonId", E.int lastPersonId )
+                 , ( "people", E.list encodePersonRow personRows )
+                 ]
+                    ++ descriptionToFieldEncoder description
+                )
 
         encodeComment : Comment -> E.Value
         encodeComment comment =
@@ -1136,8 +1195,8 @@ viewProject project changes states =
         stateForPoll (PollId id) =
             Maybe.withDefault emptyViewState <| Dict.get id states
 
-        viewForPoll poll =
-            viewPoll poll (changesForPoll poll.pollId) (stateForPoll poll.pollId)
+        viewForPoll pollIndex poll =
+            viewPoll pollIndex poll (changesForPoll poll.pollId) (stateForPoll poll.pollId)
     in
     div [ class "vote-project" ]
         [ div [ class "vote-poll-center-outer" ]
@@ -1145,16 +1204,50 @@ viewProject project changes states =
                 [ h1 [ class "vote-project-title vote-poll-preferred-width" ]
                     [ text <| Maybe.withDefault "(nepojmenovaný projekt)" project.title
                     ]
+                , legend
                 ]
             ]
-        , div [ class "vote-polls" ] (List.map viewForPoll project.polls)
+        , div [ class "vote-polls" ] (List.indexedMap viewForPoll project.polls)
         , viewSubmitRow project changes states
         ]
 
 
-viewPoll : Poll -> ChangesInPoll -> ViewState -> Html Msg
-viewPoll poll changes state =
+legend : Html Msg
+legend =
+    div [ class "vote-legend" ]
+        [ table []
+            [ tr []
+                [ td [ class "vote-legend-text" ] [ text "Legenda: " ]
+                , viewCellYes False False "" NoOp
+                , td [ class "vote-legend-text" ] [ text "Ano " ]
+                , viewCellIfNeeded False False "" NoOp
+                , td [ class "vote-legend-text" ] [ text "V nouzi " ]
+                , viewCellNo False False "" NoOp
+                , td [ class "vote-legend-text" ] [ text "Ne " ]
+                ]
+            ]
+        ]
+
+
+viewPoll : Int -> Poll -> ChangesInPoll -> ViewState -> Html Msg
+viewPoll pollIndex poll changes state =
     let
+        emptyCell =
+            td [] []
+
+        headerRow =
+            viewPollHeader poll state
+
+        resultCells =
+            viewPollResultCells poll changes state
+
+        resultsRow =
+            if pollIndex == 0 then
+                tr [] ((viewAddNewVoteCell poll changes :: resultCells) ++ [ emptyCell ])
+
+            else
+                tr [] ((emptyCell :: resultCells) ++ [ emptyCell ])
+
         addedRow index addedVote =
             viewAddedVoteRow poll index addedVote
 
@@ -1167,23 +1260,34 @@ viewPoll poll changes state =
         isToBeDeleted personRow =
             Set.member (personIdInt personRow.personId) changes.deletedPersonRows
 
+        isEditable personRow =
+            Set.member (personIdInt personRow.personId) state.editableExistingRows
+
         existingVoteRow personRow =
-            viewExistingVoteRow poll personRow (changesForPerson personRow) (isToBeDeleted personRow)
+            viewExistingVoteRow poll personRow (changesForPerson personRow) (isToBeDeleted personRow) (isEditable personRow)
 
         existingRows =
             List.map existingVoteRow poll.personRows
+
+        marginClass =
+            if pollIndex > 0 then
+                " margin-bottom"
+
+            else
+                ""
     in
     div [ class "vote-poll" ]
         [ div [ class "vote-poll-center-outer" ]
             [ div [ class "vote-poll-center" ]
-                [ h2 [ class "vote-poll-title vote-poll-preferred-width" ] [ text <| Maybe.withDefault "" poll.title ]
+                [ h2 [ class "vote-poll-title vote-poll-preferred-width" ] [ text <| Maybe.withDefault (String.concat [ "Hlasování ", String.fromInt <| pollIndex + 1 ]) poll.title ]
+                , div [ class "vote-poll-description vote-poll-preferred-width" ] [ text <| Maybe.withDefault "" poll.description ]
                 ]
             ]
         , div [ class "vote-poll-center-outer" ]
             [ div [ class "vote-poll-center" ]
                 [ div [ class "vote-poll-preferred-width" ] []
-                , table [ class "vote-poll-table" ]
-                    ([ viewPollHeader poll state, viewPollResults poll changes state ] ++ existingRows ++ addedVotesRows ++ [ viewAddNewVoteRow poll ])
+                , table [ class <| "vote-poll-table" ++ marginClass ]
+                    ([ headerRow, resultsRow ] ++ (List.reverse <| existingRows ++ addedVotesRows))
                 ]
             ]
         ]
@@ -1227,9 +1331,11 @@ viewPollHeader poll state =
                 ]
 
         dateTupleCell dayInWeek dateString =
-            th [ class "vote-poll-header-cell" ]
-                [ div [ class "vote-poll-day-in-week" ] [ text <| weekDayToString dayInWeek ]
-                , text dateString
+            th []
+                [ div [ class "vote-poll-header-cell" ]
+                    [ div [ class "vote-poll-day-in-week" ] [ text <| weekDayToString dayInWeek ]
+                    , text dateString
+                    ]
                 ]
 
         dateCell { optionId, value } =
@@ -1239,7 +1345,9 @@ viewPollHeader poll state =
             tr [] ([ th [] [] ] ++ List.map dateCell items)
 
         genericCell item =
-            th [ class "vote-poll-header-cell vote-poll-header-cell-generic" ] [ text item.value ]
+            th []
+                [ div [ class "vote-poll-header-cell vote-poll-header-cell-generic" ] [ text item.value ]
+                ]
 
         genericHeader items =
             tr [] ([ th [] [] ] ++ List.map genericCell items ++ [ th [] [] ])
@@ -1252,12 +1360,9 @@ viewPollHeader poll state =
             genericHeader items
 
 
-viewPollResults : Poll -> ChangesInPoll -> ViewState -> Html Msg
-viewPollResults poll changesInPoll state =
+viewPollResultCells : Poll -> ChangesInPoll -> ViewState -> List (Html Msg)
+viewPollResultCells poll changesInPoll state =
     let
-        emptyCell =
-            td [] []
-
         merged =
             mergePollWithChanges poll changesInPoll
 
@@ -1317,11 +1422,8 @@ viewPollResults poll changesInPoll state =
                 [ span [ class "vote-poll-count-positive" ] [ text <| String.fromInt <| Tuple.first count ]
                 , span [ class "vote-poll-count-yes" ] [ text "(", text <| String.fromInt <| Tuple.second count, text ")" ]
                 ]
-
-        resultCells =
-            List.map countCell counts
     in
-    tr [] ((emptyCell :: resultCells) ++ [ emptyCell ])
+    List.map countCell counts
 
 
 changedToClass changed =
@@ -1332,12 +1434,44 @@ changedToClass changed =
         ""
 
 
-viewCellYes : Bool -> Msg -> Html Msg
-viewCellYes changed toggleMsg =
-    td
-        [ class <| "vote-poll-select-cell vote-poll-select-cell-yes" ++ changedToClass changed
+editableToClass editable =
+    if editable then
+        " editable"
+
+    else
+        ""
+
+
+invisibleToClass invisible =
+    if invisible then
+        " invisible"
+
+    else
+        ""
+
+
+transparentToClass transparent =
+    if transparent then
+        " transparent"
+
+    else
+        ""
+
+
+fixTooltip info state =
+    if String.isEmpty <| String.trim info then
+        state
+
+    else
+        info ++ ": " ++ state
+
+
+viewCellYes : Bool -> Bool -> String -> Msg -> Html Msg
+viewCellYes changed transparent tooltip toggleMsg =
+    div
+        [ class <| "vote-poll-select-cell vote-poll-select-cell-yes" ++ changedToClass changed ++ transparentToClass transparent
         , onClick toggleMsg
-        , title "Ano"
+        , title <| fixTooltip tooltip "Ano"
         ]
         [ svg [ SAttr.class "vote-poll-select-cell-svg-yes", SAttr.width "20", SAttr.height "20", SAttr.viewBox "0 0 20 20" ]
             [ circle [ SAttr.cx "10", SAttr.cy "10", SAttr.r "7" ] []
@@ -1345,12 +1479,12 @@ viewCellYes changed toggleMsg =
         ]
 
 
-viewCellNo : Bool -> Msg -> Html Msg
-viewCellNo changed toggleMsg =
-    td
-        [ class <| "vote-poll-select-cell vote-poll-select-cell-no" ++ changedToClass changed
+viewCellNo : Bool -> Bool -> String -> Msg -> Html Msg
+viewCellNo changed transparent tooltip toggleMsg =
+    div
+        [ class <| "vote-poll-select-cell vote-poll-select-cell-no" ++ changedToClass changed ++ transparentToClass transparent
         , onClick toggleMsg
-        , title "Ne"
+        , title <| fixTooltip tooltip "Ne"
         ]
         [ svg [ SAttr.class "vote-poll-select-cell-svg-no", SAttr.width "20", SAttr.height "20", SAttr.viewBox "0 0 20 20" ]
             [ line [ SAttr.x1 "4", SAttr.y1 "4", SAttr.x2 "16", SAttr.y2 "16" ] []
@@ -1359,12 +1493,12 @@ viewCellNo changed toggleMsg =
         ]
 
 
-viewCellIfNeeded : Bool -> Msg -> Html Msg
-viewCellIfNeeded changed toggleMsg =
-    td
-        [ class <| "vote-poll-select-cell vote-poll-select-cell-ifneeded" ++ changedToClass changed
+viewCellIfNeeded : Bool -> Bool -> String -> Msg -> Html Msg
+viewCellIfNeeded changed transparent tooltip toggleMsg =
+    div
+        [ class <| "vote-poll-select-cell vote-poll-select-cell-ifneeded" ++ changedToClass changed ++ transparentToClass transparent
         , onClick toggleMsg
-        , title "V nouzi"
+        , title <| fixTooltip tooltip "V nouzi"
         ]
         [ svg [ SAttr.class "vote-poll-select-cell-svg-ifneeded", SAttr.width "20", SAttr.height "20", SAttr.viewBox "0 0 20 20" ]
             [ circle [ SAttr.cx "10", SAttr.cy "10", SAttr.r "7" ] []
@@ -1390,7 +1524,7 @@ viewAddedVoteRow poll addedVoteIndex addedPersonRow =
                 "Vyplňte jméno!"
 
             else
-                "(nový záznam)"
+                "(nový hlasující)"
 
         nameInput =
             input
@@ -1413,31 +1547,43 @@ viewAddedVoteRow poll addedVoteIndex addedPersonRow =
                 GenericPollInfo { items } ->
                     List.map .optionId items
 
+        changeMessage optionId selectedOption =
+            if changed then
+                SetAddedPersonRowOption poll.pollId addedVoteIndex (OptionId optionId) selectedOption
+
+            else
+                NoOp
+
         optionToCell (OptionId id) =
             case Maybe.withDefault No <| Dict.get id addedPersonRow.selectedOptions of
                 Yes ->
-                    viewCellYes changed (SetAddedPersonRowOption poll.pollId addedVoteIndex (OptionId id) IfNeeded)
+                    viewCellYes changed (not changed) addedPersonRow.name (changeMessage id IfNeeded)
 
                 No ->
-                    viewCellNo changed (SetAddedPersonRowOption poll.pollId addedVoteIndex (OptionId id) Yes)
+                    viewCellNo changed (not changed) addedPersonRow.name (changeMessage id Yes)
 
                 IfNeeded ->
-                    viewCellIfNeeded changed (SetAddedPersonRowOption poll.pollId addedVoteIndex (OptionId id) No)
+                    viewCellIfNeeded changed (not changed) addedPersonRow.name (changeMessage id No)
 
         selectCells =
-            List.map optionToCell itemIds
+            List.map (\id -> td [] [ optionToCell id ]) itemIds
 
         editCell =
             td [ class "vote-poll-edit-cell" ]
-                [ a [ class "vote-poll-edit-link", onClick (DeleteAddedPersonRow poll.pollId addedVoteIndex) ]
+                [ a
+                    [ class "vote-poll-edit-link"
+                    , onClick (DeleteAddedPersonRow poll.pollId addedVoteIndex)
+                    , title "Smaž řádek pouze v tomto hlasování"
+                    ]
                     [ text "Smaž" ]
                 ]
     in
-    tr [] (td [ class "vote-poll-name-cell" ] [ nameInput ] :: (selectCells ++ [ editCell ]))
+    tr [ class <| "vote-poll-row vote-poll-row-added" ++ editableToClass changed ]
+        (td [ class "vote-poll-name-cell" ] [ nameInput ] :: (selectCells ++ [ editCell ]))
 
 
-viewExistingVoteRow : Poll -> PersonRow -> ChangesInPersonRow -> Bool -> Html Msg
-viewExistingVoteRow poll personRow changesInPersonRow deleted =
+viewExistingVoteRow : Poll -> PersonRow -> ChangesInPersonRow -> Bool -> Bool -> Html Msg
+viewExistingVoteRow poll personRow changesInPersonRow deleted editable =
     let
         personId =
             personRow.personId
@@ -1449,15 +1595,34 @@ viewExistingVoteRow poll personRow changesInPersonRow deleted =
             input
                 [ type_ "text"
                 , value nameToDisplay
-                , class <| "vote-poll-existing-name-input" ++ (changedToClass <| nameToDisplay /= personRow.name && nameToDisplay /= "")
+                , class <| "vote-poll-existing-name-input" ++ editableToClass editable
                 , onInput <| SetExistingPersonRowName poll.pollId personRow.personId
                 , placeholder personRow.name
-                , disabled deleted
+                , disabled <| deleted || not editable
                 ]
                 []
 
         nameCell =
-            td [] [ nameInput ]
+            td []
+                [ div [ class "vote-poll-name-cell-existing" ]
+                    [ if editable then
+                        button
+                            [ class "vote-poll-name-cell-button"
+                            , title "Zapomeň a zruš úpravy v tomto řádku."
+                            , onClick <| MakePersonRowNotEditable poll.pollId personId
+                            ]
+                            [ text "↶" ]
+
+                      else
+                        button
+                            [ class "vote-poll-name-cell-button"
+                            , title "Uprav tento řádek. Pamatujte, prosím, že měnit hlasování ostatních bez dovolení není hezké!"
+                            , onClick <| MakePersonRowEditable poll.pollId personId
+                            ]
+                            [ text "✎" ]
+                    , div [ class "vote-poll-name-cell-name" ] [ nameInput ]
+                    ]
+                ]
 
         allIds =
             pollOptionIds poll
@@ -1478,68 +1643,89 @@ viewExistingVoteRow poll personRow changesInPersonRow deleted =
 
                 changed =
                     original /= actual
+
+                changeMessage selectedOption =
+                    if editable then
+                        SetExistingPersonRowOption poll.pollId personId optionId selectedOption
+
+                    else
+                        NoOp
             in
             case actual of
                 Yes ->
-                    viewCellYes changed <| SetExistingPersonRowOption poll.pollId personId optionId IfNeeded
+                    viewCellYes changed False nameToDisplay <| changeMessage IfNeeded
 
                 No ->
-                    viewCellNo changed <| SetExistingPersonRowOption poll.pollId personId optionId Yes
+                    viewCellNo changed False nameToDisplay <| changeMessage Yes
 
                 IfNeeded ->
-                    viewCellIfNeeded changed <| SetExistingPersonRowOption poll.pollId personId optionId No
+                    viewCellIfNeeded changed False nameToDisplay <| changeMessage No
 
         optionCells =
             if deleted then
-                [ td [ class "vote-poll-select-cell vote-poll-deleted-cell", colspan <| List.length allIds ] [ text "Ke smazání" ] ]
+                [ td [ colspan <| List.length allIds ]
+                    [ div [ class "vote-poll-select-cell vote-poll-deleted-cell" ]
+                        [ text "Ke smazání" ]
+                    ]
+                ]
 
             else
-                List.map optionCell allIds
+                List.map (\id -> td [] [ optionCell id ]) allIds
 
         editCell =
             if deleted then
-                td [ class "vote-poll-edit-cell" ]
+                td [ class <| "vote-poll-edit-cell" ++ invisibleToClass (not editable) ]
                     [ a [ class "vote-poll-edit-link", onClick (UndeleteExistingPersonRow poll.pollId personId) ]
                         [ text "Vrať" ]
                     ]
 
             else
-                td [ class "vote-poll-edit-cell" ]
-                    [ a [ class "vote-poll-edit-link", onClick (DeleteExistingPersonRow poll.pollId personId) ]
+                td [ class <| "vote-poll-edit-cell" ++ invisibleToClass (not editable) ]
+                    [ a
+                        [ class "vote-poll-edit-link"
+                        , onClick (DeleteExistingPersonRow poll.pollId personId)
+                        , title "Smaž řádek pouze v tomto hlasování"
+                        ]
                         [ text "Smaž" ]
                     ]
     in
-    tr [] ((nameCell :: optionCells) ++ [ editCell ])
+    tr [ class <| "vote-poll-row vote-poll-row-existing" ++ editableToClass editable ]
+        ((nameCell :: optionCells) ++ [ editCell ])
 
 
-viewAddNewVoteRow : Poll -> Html Msg
-viewAddNewVoteRow poll =
+viewAddNewVoteCell : Poll -> ChangesInPoll -> Html Msg
+viewAddNewVoteCell poll changes =
     let
-        nameCell =
-            td [ class "vote-poll-edit-cell" ]
-                [ a [ class "vote-poll-edit-link", onClick (AddAnotherPersonRow poll.pollId) ]
-                    [ text "Ještě přidej"
+        allNamesFilled =
+            List.all (\a -> not <| String.isEmpty a.name) changes.addedPersonRows
+
+        ( hasFilled, hasEmpty ) =
+            List.foldl (\c ( f, e ) -> ( f || (not <| String.isEmpty c.name), e || String.isEmpty c.name )) ( False, False ) changes.addedPersonRows
+
+        link =
+            if allNamesFilled then
+                a
+                    [ class "vote-poll-edit-link"
+                    , onClick (AddAnotherPersonRow poll.pollId)
+                    , title "Přidej nového hlasujícího do všech hlasování"
                     ]
-                ]
+                    [ text "+ Přidej člověka"
+                    ]
 
-        cols =
-            case poll.pollInfo of
-                GenericPollInfo { items } ->
-                    List.length items
+            else if hasFilled && hasEmpty then
+                a
+                    [ class "vote-poll-edit-link"
+                    , onClick DeleteAllEmptyPersonRows
+                    , title "Odebrat řádky s nevyplněným jménem ze všech hlasování"
+                    ]
+                    [ text "Odeber nevyplněné"
+                    ]
 
-                DatePollInfo { items } ->
-                    List.length items
-
-        spanCell =
-            td [ colspan cols ] []
-
-        editCell =
-            td [] []
+            else
+                span [ class "vote-poll-edit-link invisible" ] [ text "()" ]
     in
-    tr []
-        [ nameCell
-        , spanCell
-        , editCell
+    td [ class "vote-poll-edit-cell" ]
+        [ link
         ]
 
 

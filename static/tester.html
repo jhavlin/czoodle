@@ -1,0 +1,55 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Czoodle backend test</title>
+    <script>
+
+        let lastVersion;
+        let lastKey;
+
+        const callCreate = () => {
+            const req = new XMLHttpRequest();
+            req.onreadystatechange = () => {
+                if (req.readyState == 4 && req.status == 200) {
+                    document.getElementById("output").innerHTML += "\n" + req.responseText;
+                    const json = JSON.parse(req.responseText);
+                    lastVersion = 1;
+                    lastKey = json.projectKey;
+                }
+            }
+            req.open("POST", "v01/create");
+            req.setRequestHeader("Content-Type", "application/json");
+            req.send(JSON.stringify({ encryptedData: "abc", evidence: "abcd123ef" }));
+        }
+
+        const callUpdate = () => {
+            const req = new XMLHttpRequest();
+            req.onreadystatechange = () => {
+                if (req.readyState == 4 && req.status == 200) {
+                    document.getElementById("output").innerHTML += "\n" + req.responseText;
+                    const json = JSON.parse(req.responseText);
+                    lastVersion = json.version;
+                }
+            }
+            req.open("POST", "v01/update");
+            req.setRequestHeader("Content-Type", "application/json");
+            req.send(JSON.stringify({
+                encryptedData: "abc",
+                evidence: "abcd123ef",
+                previousVersion: lastVersion,
+                projectKey: lastKey,
+            }));
+        }
+    </script>
+</head>
+<body>
+    <input type="button" onclick="callCreate();" value="Call Create">
+    <input type="button" onclick="callUpdate();" value="Call Update">
+    <code>
+        <div id="output" style="white-space: pre;">
+        </div>
+    </code>
+</body>
+</html>

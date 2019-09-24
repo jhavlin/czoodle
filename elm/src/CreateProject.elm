@@ -4,7 +4,7 @@ import Browser
 import Browser.Dom
 import Decoders exposing (decodeCreateFlags)
 import Encoders exposing (encodeDayTuple)
-import Html exposing (Html, a, b, button, div, input, label, li, ol, option, p, select, span, text)
+import Html exposing (Html, a, b, button, div, input, label, li, ol, option, p, select, span, text, textarea)
 import Html.Attributes exposing (class, disabled, href, min, placeholder, selected, tabindex, title, type_, value)
 import Html.Events exposing (on, onClick, onInput, onMouseEnter, onMouseLeave)
 import Json.Decode as D
@@ -27,6 +27,7 @@ type Msg
     | AddDatePoll
     | RemovePoll Int
     | SetPollTitle Int String
+    | SetPollDescription Int String
     | SetGenericPollItem Int Int String
     | AddGenericPollItem Int
     | RemoveGenericPollItem Int Int
@@ -47,6 +48,7 @@ type alias DayTuple =
 
 type alias PollData =
     { title : String
+    , description : String
     , def : PollDef
     }
 
@@ -105,10 +107,11 @@ init jsonFlags =
             Result.withDefault { today = defaultDay, baseUrl = "" } flagsResult
     in
     ( { title = ""
-      , polls = [ emptyDatePoll today ]
+      , polls = []
       , today = today
       , baseUrl = baseUrl
       , wait = False
+
       --   , created = Just { projectKey = "196u6", secretKey = "KXM8c0jaaZwJ3IRsTw0uRtJE9zY-l3-WQ8dnOnl07Iw" }
       , created = Nothing
       }
@@ -167,6 +170,9 @@ update msg model =
         SetPollTitle num title ->
             ( { model | polls = ListUtils.changeIndex (setPollTitle title) num model.polls }, Cmd.none )
 
+        SetPollDescription num description ->
+            ( { model | polls = ListUtils.changeIndex (setPollDescription description) num model.polls }, Cmd.none )
+
         SetGenericPollItem num itemNumber itemVal ->
             ( doWithGenericPoll (setGenericItem itemNumber itemVal) model num, Cmd.none )
 
@@ -199,12 +205,12 @@ update msg model =
 
         ProjectCreated projectInfo ->
             let
-                scroll id = Browser.Dom.getViewportOf id
-                    |> Task.andThen (\info -> Browser.Dom.setViewport 0 info.viewport.y)
-                    |> Task.attempt (\_ -> NoOp)
+                scroll id =
+                    Browser.Dom.getViewportOf id
+                        |> Task.andThen (\info -> Browser.Dom.setViewport 0 info.viewport.y)
+                        |> Task.attempt (\_ -> NoOp)
             in
             ( { model | created = Just projectInfo }, scroll "project" )
-
 
 
 doWithGenericPoll : (GenericPollData -> GenericPollData) -> Model -> Int -> Model
@@ -260,7 +266,7 @@ doWithDatePollState fn model pollNumber =
 
 emptyGenericPoll : Poll
 emptyGenericPoll =
-    Poll { title = "", def = GenericPollDef { items = [ "", "" ] } }
+    Poll { title = "", description = "", def = GenericPollDef { items = [ "", "" ] } }
 
 
 emptyDatePoll : SDay -> Poll
@@ -272,12 +278,17 @@ emptyDatePoll today =
         def =
             DatePollDef state { items = Set.empty }
     in
-    Poll { title = "", def = def }
+    Poll { title = "", description = "", def = def }
 
 
 setPollTitle : String -> Poll -> Poll
 setPollTitle newTitle (Poll pollDef) =
     Poll { pollDef | title = newTitle }
+
+
+setPollDescription : String -> Poll -> Poll
+setPollDescription newDescription (Poll pollDef) =
+    Poll { pollDef | description = newDescription }
 
 
 addGenericItem : GenericPollData -> GenericPollData
@@ -378,14 +389,23 @@ encodeModel model =
                         , ( "lastItemId", E.int <| Set.size items )
                         ]
 
-        encodePoll ( index, Poll { title, def } ) =
+        descriptionToFieldEncoder description =
+            if String.isEmpty <| String.trim description then
+                []
+
+            else
+                [ ( "description", E.string description ) ]
+
+        encodePoll ( index, Poll { title, description, def } ) =
             E.object
-                [ ( "title", E.string title )
-                , ( "def", encodePollDef def )
-                , ( "id", E.int <| index + 1 )
-                , ( "lastPersonId", E.int <| 0 )
-                , ( "people", E.list E.string [] ) -- not actual strings, just preparing empty array
-                ]
+                ([ ( "title", E.string title )
+                 , ( "def", encodePollDef def )
+                 , ( "id", E.int <| index + 1 )
+                 , ( "lastPersonId", E.int <| 0 )
+                 , ( "people", E.list E.string [] ) -- not actual strings, just preparing empty array
+                 ]
+                    ++ descriptionToFieldEncoder description
+                )
     in
     E.object
         [ ( "title", E.string model.title )
@@ -413,19 +433,27 @@ viewEditing model =
     div []
         [ label []
             [ span [ class "project-title-label" ] [ text "Název:" ]
-            , input [ type_ "text", class "project-title", placeholder "Teambuilding, dárek pro tetu, nebo třeba sraz baletek", onInput SetTitle, value model.title ] []
+            , input [ type_ "text", class "project-title", placeholder "např. Teambuilding, dárek pro tetu, nebo třeba sraz baletek", onInput SetTitle, value model.title ] []
             ]
-        , div [ class "polls" ] (List.indexedMap (viewPoll model) model.polls)
-        , div [ class "add-poll-line" ]
-            [ text "Přidat "
-            , b [] [ text "hlasování" ]
-            , text " pro: "
-            , span [ class "nowrap" ]
-                [ button [ class "common-button colors-add common-add-icon add-poll-button add-poll-generic", onClick AddGenericPoll ] [ text "Obecné" ]
-                , text " "
-                , button [ class "common-button colors-add common-add-icon add-poll-button add-poll-date", onClick AddDatePoll ] [ text "Datum" ]
+        , if List.isEmpty model.polls then
+            viewEmptyInfo
+
+          else
+            div [ class "polls" ] (List.indexedMap (viewPoll model) model.polls)
+        , if List.isEmpty model.polls then
+            viewChooseFirstPoll
+
+          else
+            div [ class "add-poll-line" ]
+                [ text "Přidat "
+                , b [] [ text "hlasování" ]
+                , text " pro: "
+                , span [ class "nowrap" ]
+                    [ button [ class "common-button common-button-bigger colors-add common-add-icon add-poll-button add-poll-generic", onClick AddGenericPoll ] [ text "Obecné" ]
+                    , text " "
+                    , button [ class "common-button common-button-bigger colors-add common-add-icon add-poll-button add-poll-date", onClick AddDatePoll ] [ text "Datum" ]
+                    ]
                 ]
-            ]
         , case model.created of
             Nothing ->
                 div [ class "submit-row" ]
@@ -434,6 +462,27 @@ viewEditing model =
 
             Just { projectKey, secretKey } ->
                 div [] [ text "created", text projectKey, text secretKey ]
+        ]
+
+
+viewEmptyInfo =
+    div
+        [ class "polls-empty-info" ]
+        [ div [ class "polls-empty-info-icon" ] [ text "i" ]
+        , div [ class "polls-empty-info-text" ] [ text "Projekt obsahuje jedno či více hlasování různých typů." ]
+        ]
+
+
+viewChooseFirstPoll =
+    div []
+        [ a [ class "polls-empty-add", onClick AddDatePoll ]
+            [ div [ class "polls-empty-add-title" ] [ text "+ Datum" ]
+            , div [ class "polls-empty-add-description" ] [ text "Když se rozhoduje o\u{00A0}tom KDY." ]
+            ]
+        , a [ class "polls-empty-add", onClick AddGenericPoll ]
+            [ div [ class "polls-empty-add-title" ] [ text "+ Obecné" ]
+            , div [ class "polls-empty-add-description" ] [ text "Když se rozhoduje o\u{00A0}tom CO, KDO, KAM nebo KDE." ]
+            ]
         ]
 
 
@@ -457,7 +506,7 @@ viewCreated { projectKey, secretKey } model =
         , div []
             [ div []
                 [ p [ class "project-created-info-main" ] [ text "Hurá. Projekt byl vytvořen. Tento odkaz si zkopírujte a pošlete všem hlasujícím!" ]
-                , p [] [ text "Odkaz obsahuje dešifrovací klíč. Pokud o něj přijdete, nebudte moci k hlasování přistupovat." ]
+                , p [] [ text "Odkaz obsahuje dešifrovací klíč. Pokud o něj přijdete, nebudete moci k hlasování přistupovat." ]
                 , p [] [ text "Na server se posílají pouze zašifrovaná data. Bez dešifrovacího klíče jsou bezcenná. Tak ho neztraťte ;-)" ]
                 ]
             , a [ class "project-created-link", href url ]
@@ -483,17 +532,17 @@ optClass present name =
 
 
 viewPoll : Model -> Int -> Poll -> Html Msg
-viewPoll model num (Poll { title, def }) =
+viewPoll model num (Poll { title, description, def }) =
     case def of
         GenericPollDef genericDef ->
-            viewPollGeneric num title genericDef
+            viewPollGeneric num title description genericDef
 
         DatePollDef state dateDef ->
-            viewPollDate num title state dateDef model.today
+            viewPollDate num title description state dateDef model.today
 
 
-viewPollGeneric : Int -> String -> GenericPollData -> Html Msg
-viewPollGeneric num name { items } =
+viewPollGeneric : Int -> String -> String -> GenericPollData -> Html Msg
+viewPollGeneric num name description { items } =
     div [ class "poll poll-generic" ]
         [ div [ class "poll-header-row" ]
             [ div [ class "poll-header-name" ] [ text ("Hlasování " ++ String.fromInt (num + 1) ++ ": Obecné") ]
@@ -503,10 +552,15 @@ viewPollGeneric num name { items } =
         , div [ class "poll-body" ]
             [ div [ class "poll-name-row" ]
                 [ label []
-                    [ span [ class "poll-name-label" ] [ text "Popis:" ]
-                    , input [ type_ "text", class "common-input poll-name-input", placeholder "Co za dárek? nebo Jaká hospoda?", value name, onInput (SetPollTitle num) ] []
+                    [ span [ class "poll-name-label" ] [ text "Nadpis:" ]
+                    , input [ type_ "text", class "common-input poll-name-input", placeholder "např. Co za dárek? nebo Jaká hospoda?", value name, onInput (SetPollTitle num) ] []
+                    ]
+                , label []
+                    [ span [ class "poll-description-label" ] [ text "Popis:" ]
+                    , textarea [ class "common-input poll-description-textarea", placeholder "Sem můžete napsat podrobnější informace o hlasování, ale nemusíte.", value description, onInput (SetPollDescription num) ] []
                     ]
                 ]
+            , div [ class "poll-instructions" ] [ text "Zadejte možnosti, o kterých se bude hlasovat (alespoň dvě)." ]
             , div [ class "poll-options" ]
                 [ div [ class "poll-options-header" ] [ text "Možnosti:" ]
                 , ol [ class "poll-options-list" ] (viewPollGenericItems num items)
@@ -525,8 +579,9 @@ viewPollGenericItems pollNumber items =
             li [ class "poll-option-generic" ]
                 [ button
                     [ onClick (AddGenericPollItem pollNumber)
+                    , class "common-button common-button-bigger colors-neutral common-add-icon"
                     ]
-                    [ text "Přidat" ]
+                    [ text "Přidat možnost" ]
                 ]
     in
     existing ++ [ add ]
@@ -553,8 +608,8 @@ viewPollGenericItem pollNumber itemNumber itemValue =
         ]
 
 
-viewPollDate : Int -> String -> CalendarStateData -> DatePollData -> SDay -> Html Msg
-viewPollDate num name state pollData today =
+viewPollDate : Int -> String -> String -> CalendarStateData -> DatePollData -> SDay -> Html Msg
+viewPollDate num name description state pollData today =
     div [ class "poll poll-date" ]
         [ div [ class "poll-header-row" ]
             [ div [ class "poll-header-name" ] [ text ("Hlasování " ++ String.fromInt (num + 1) ++ ": Datum") ]
@@ -564,10 +619,15 @@ viewPollDate num name state pollData today =
         , div [ class "poll-body" ]
             [ div [ class "poll-name-row" ]
                 [ label []
-                    [ span [ class "poll-name-label" ] [ text "Popis:" ]
-                    , input [ type_ "text", class "common-input poll-name-input", placeholder "Kdy se sejdeme?", value name, onInput (SetPollTitle num) ] []
+                    [ span [ class "poll-name-label" ] [ text "Nadpis:" ]
+                    , input [ type_ "text", class "common-input poll-name-input", placeholder "např. Kdy se sejdeme?", value name, onInput (SetPollTitle num) ] []
+                    ]
+                , label []
+                    [ span [ class "poll-description-label" ] [ text "Popis:" ]
+                    , textarea [ class "common-input poll-description-textarea", placeholder "Sem můžete napsat podrobnější informace o hlasování, ale nemusíte.", value description, onInput (SetPollDescription num) ] []
                     ]
                 ]
+            , div [ class "poll-instructions" ] [ text "Označte v kalendáři termíny, o kterých se bude hlasovat (alespoň dva)." ]
             , viewDateCalendar num state pollData today
             , viewPollDateItemTags num state pollData
             ]
@@ -785,6 +845,7 @@ submitButton model =
         buttonText =
             if model.wait then
                 [ text "Čekejte, prosím." ]
+
             else
                 [ text "Vytvořit projekt (", text (String.fromInt <| List.length model.polls), text " hlasování)" ]
     in

@@ -3,11 +3,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google" content="notranslate">
     <title>Czoodle.cz - vytvořit hlasování</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/info.css">
     <script src="js/encryptionutils.js"></script>
     <script src="js/createproject.elm.js"></script>
+    <meta property="og:title" content="Czoodle.cz"/>
+    <meta property="og:image" content="https://czoodle.cz/og/czoodle_og_image.png"/>
+    <meta property="og:site_name" content="Czoodle.cz"/>
+    <meta property="og:description" content="Jednoduché skupinové hlasování"/>
 </head>
 <body>
     <header>
@@ -16,7 +23,7 @@
         </h1>
     </header>
     <main>
-        <div id="project" class="project">
+        <div id="project" class="project notranslate" translate="no">
             <div class="width">
                 <h2>Nový projekt</h2>
                 <div id="elm-root"></div>
@@ -26,11 +33,11 @@
             <div class="info-width">
                 <h1>Podmínky použití</h1>
                 <p>
-                    Užívání služby je na vlastní nebezpečí. Nic od vás nepožadujeme a nic neslibujeme.
+                    Užívání služby je na vlastní nebezpečí. Nic od vás nepožadujeme a&nbsp;nic neslibujeme.
                 </p>
                 <p>
                     Hlasování by měla být dostupná alespoň tři měsíce od vytvoření.
-                    Poté mohou být kvůli úspoře místa odstraněna. V horším případě mohou být také
+                    Poté mohou být kvůli úspoře místa odstraněna. V&nbsp;horším případě mohou být také
                     vymazána po síťovém útoku na server nebo kvůli technickým potížím.
                 </p>
                 <h1>Varování: Prototyp</h1>
@@ -64,7 +71,7 @@
                 <h2>Zcela bez registrace</h2>
                 <p>
                     Nevyžadujeme email ani nepoužíváme <a href="https://en.wikipedia.org/wiki/CAPTCHA">CAPTCHA</a>.
-                    Za vytvoření projektu „zaplatíte“ spočítáním ověřovacího řetězce, a to jenom proto, abychom odradili
+                    Za vytvoření projektu „zaplatíte“ spočítáním ověřovacího řetězce, a&nbsp;to jenom proto, abychom odradili
                     různé syčáky od spamování.
                 </p>
                 <p>
@@ -74,15 +81,15 @@
 
                 <h2>End-to-end šifrování</h2>
                 <p>
-                    Informace zadané uživateli opouštějí tyto stránky pouze v zašifrované podobě. Dešifrovací klíč je
+                    Informace zadané uživateli opouštějí tyto stránky pouze v&nbsp;zašifrované podobě. Dešifrovací klíč je
                     součástí odkazu, který libovolným způsobem (typicky e-mailem) sdělíte hlasujícím.
                 </p>
                 <p>
                     Je tedy zcela vaše odpovědnost, kdo může data číst. Provozovatelé této služby tuto možnost nemají.
-                    Ani v případě odcizení dat ze serveru není možné data zneužít.
+                    Ani v&nbsp;případě odcizení dat ze serveru není možné data zneužít.
                 </p>
                 <p>
-                    (Nebezpečí stále hrozí, pokud by někdo napadl server a podvrhl upravené klientské soubory.)
+                    (Nebezpečí stále hrozí, pokud by někdo napadl server a&nbsp;podvrhl upravené klientské soubory.)
                 </p>
                 <h2>Žádné sledovací prvky</h2>
                 <p>
@@ -90,7 +97,7 @@
                     chování uživatelů na síti.
                 </p>
                 <h2>Proč se zabývat soukromím na internetu</h2>
-                <p><a href="https://kampan.primitiweb.cz/" target="_new">Další informace v kampani!</a></p>
+                <p><a href="https://kampan.primitiweb.cz/" target="_new">Další informace v&nbsp;<strong>kampani</strong>!</a></p>
             </div>
         </div>
         <div class="info-light">
@@ -102,17 +109,17 @@
                     <li><a href="https://www.protonmail.com" target="_new">Protonmail</a></li>
                     <li><a href="https://send.firefox.com" target="_new">Firefox Send</a></li>
                 </ul>
-                <p>Pro tvorbu a provoz této služby se využívá spousta otevřeného softwaru:</p>
+                <p>Pro tvorbu a&nbsp;provoz této služby se využívá spousta otevřeného softwaru:</p>
                 <ul>
                     <li><a href="https://elm-lang.org" target="_new">Elm</a> pro front-end.</li>
-                    <li><a href="https://rust-lang.org" target="_new">Rust</a> a <a href="https://actix.rs/" target="_new">Actix Web</a> pro (zatím jednoduchý) back-end.</li>
+                    <li><a href="https://rust-lang.org" target="_new">Rust</a> a&nbsp;<a href="https://actix.rs/" target="_new">Actix Web</a> pro (zatím jednoduchý) back-end.</li>
                     <li>A mnoho dalších pro všechno ostatní.</li>
                 </ul>
             </div>
         </div>
         <div class="info">
             <div class="info-width">
-                Jaroslav Havlín / <a href="https://github.com/jhavlin/czoodle" target="_new">Github repositář</a>
+                Jaroslav Havlín / <a href="https://github.com/jhavlin/czoodle" target="_new">Github repositář</a> / <a href="https://primitiweb.cz/" target="_new">Primitiweb</a>
             </div>
         </div>
     </main>
