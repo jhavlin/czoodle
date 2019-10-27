@@ -10,9 +10,9 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/info.css">
     <script src="js/encryptionutils.js"></script>
-    <script src="js/createproject.elm.js"></script>
+    <script src="js/create.elm.js?v01"></script>
     <meta property="og:title" content="Czoodle.cz"/>
-    <meta property="og:image" content="https://czoodle.cz/og/czoodle_og_image.png"/>
+    <meta property="og:image" content="https://czoodle.cz/og/czoodle_og_image.png?v2"/>
     <meta property="og:site_name" content="Czoodle.cz"/>
     <meta property="og:description" content="Jednoduché skupinové hlasování"/>
 </head>
@@ -115,6 +115,70 @@
                     <li><a href="https://rust-lang.org" target="_new">Rust</a> a&nbsp;<a href="https://actix.rs/" target="_new">Actix Web</a> pro (zatím jednoduchý) back-end.</li>
                     <li>A mnoho dalších pro všechno ostatní.</li>
                 </ul>
+                <p>
+                    Děkuji také prvním uživatelům za připomínky.
+                </p>
+            </div>
+        </div>
+        <div class="info-dark">
+            <div class="info-width">
+                <h1>Nekladené otázky a&nbsp;nevyžádané odpovědi</h1>
+
+                <p class="info-question">
+                    Jak se čte název domény?
+                </p>
+                <p>
+                    Nejčastěji asi „čůdl cé zet“, češtinářští puristé mohou zvolit variantu „čůdl dot č“.
+                </p>
+
+                <p class="info-question">
+                    Nevidím sušenkový proužek. Neporušuje tato služba GDPR? Jsou má osobní data v&nbsp;bezpečí?
+                </p>
+                <p>
+                    Czoodle nepoužívá cookies ani jiné techniky k&nbsp;identifikaci uživatele.
+                    Nesnaží se těžit uživatelské informace, naopak je navržen tak, aby byly co nejlépe
+                    zabezpečené. (Viz <a href="https://kampan.primitiweb.cz/" target="_new">kampaň</a>.)
+                </p>
+
+                <p class="info-question">
+                    Nevidím reklamy. Cítím se zmateně. Kde se dozvím, co si mám přát, a&nbsp;za co utrácet své peníze?
+                </p>
+                <p>
+                    Doporučujeme naladit teleshoppingový kanál.
+                </p>
+
+                <p class="info-question">
+                    Nevidím reklamy. Cítím se nepoctivě. Jak jinak než sledováním reklam mohu přispět na provoz své oblíbené webové služby?
+                </p>
+                <p>
+                    Nemějte obavy, vývoj Czoodlu je zábava a&nbsp;jeho provozování třešnička na dortu.
+                    Pokud byste přesto cítili potřebu přispět, pošlete to dál a&nbsp;pomozte někomu potřebnému
+                    třeba příspěvkem na dobročinnost nebo učiňte dobrý skutek dle vlastního výběru.
+                </p>
+                <p class="info-question">
+                    Proč si nemohu nechat posílat e-maily s&nbsp;upozorněním, že přibyl hlasující?
+                </p>
+                <p>
+                    Z&nbsp;principu. Na server se odesílají všechna uživatelská data v&nbsp;zašifrované podobě, a&nbsp;tím je zaručeno,
+                    že nemohou být provozovatelem služby zneužita, a&nbsp;je to dokonce uživatelsky ověřitelné.
+                    Pokud bychom na server odeslali e-mail v&nbsp;nezašifrované podobě, uživatel nikdy nemůže s&nbsp;jistotou vědět,
+                    co se s&nbsp;ním ve skutečnosti děje. (Kromě toho, starat se o&nbsp;mailsever je nelehká a&nbsp;nevděčná práce.)
+                </p>
+                <p class="info-question">
+                    Může má data ohrozit vývoj kvantových počítačů a&nbsp;co s&nbsp;tím mohu dělat?
+                </p>
+                <p>
+                    Čistě teoreticky, může. Pokud tedy budete mít to štěstí a&nbsp;dostanete
+                    se do blízkosti tak úžasného zařízení, jako je kvantový počítač, rozmlaťte ho.
+                </p>
+                <p class="info-question">
+                    Jaké funkce zatím v&nbsp;Czoodlu chybí, ale chystají se?
+                </p>
+                <p>
+                    Snad se povede naprogramovat úpravu možností v&nbsp;existujícím hlasování a&nbsp;uzavření
+                    hlasování s&nbsp;označením vítězných možností. A&nbsp;s&nbsp;trochou štěstí i&nbsp;možnost přepnutí
+                    ovládání do anglického jazyka.
+                </p>
             </div>
         </div>
         <div class="info">
@@ -131,7 +195,7 @@
             day: date.getDate(),
         }
         const baseUrl = /(https?:\/\/[^/]*)(\/.*)?/.exec(window.location)[1];
-        let app = Elm.CreateProject.init({
+        let app = Elm.CreatePage.init({
             node: document.getElementById('elm-root'),
             flags: { today, baseUrl },
         });

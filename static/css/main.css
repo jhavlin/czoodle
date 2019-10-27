@@ -276,7 +276,6 @@ h1.header > .le {
 
 .poll {
     margin: 1rem 0;
-    /*background: rgb(252, 239, 216);*/
     background: rgb(237, 244, 255);
     border: 1px rgb(34, 133, 151) solid;
     border-bottom-right-radius: 10px;
@@ -629,17 +628,21 @@ input.calendar-controls-year {
 
 .vote-poll-table {
     border-spacing: 0px 1px;
+    height: 100%; /* to make relative heights in cells work */
+    box-sizing: border-box;
+    padding-bottom: 0.5rem;
 }
-.vote-poll-table.margin-bottom {
-    margin-bottom: 1.5rem;
+.vote-poll-table.padding-bottom {
+    padding-bottom: 1.5rem;
+}
+.vote-poll-table > tr {
+    height: 100%;
 }
 
 .vote-poll-table th {
     padding: 2px;
     height: 100%;
-    min-height: 1px;
     box-sizing: border-box;
-    vertical-align: bottom;
 }
 
 .vote-poll-header-cell {
@@ -647,7 +650,7 @@ input.calendar-controls-year {
     color: white;
     background: rgb(102, 106, 102);
     border-radius: 2px;
-    min-width: 4rem;
+    min-width: 4.5em;
     height: 100%;
     box-sizing: border-box;
 }
