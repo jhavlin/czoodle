@@ -33,9 +33,14 @@
     </footer>
     <script type="text/javascript">
         const date = new Date();
+        const today = {
+            year: date.getFullYear(),
+            month: date.getMonth() + 1,
+            day: date.getDate(),
+        }
         let app = Elm.VotePage.init({
             node: document.getElementById('elm-root'),
-            flags: { urlHash: location.hash },
+            flags: { urlHash: location.hash, today },
         });
         let version;
         let evidence;

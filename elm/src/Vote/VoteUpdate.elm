@@ -1,13 +1,46 @@
 port module Vote.VoteUpdate exposing (init, subscriptions, update)
 
-import Data.DataDecoders exposing (..)
-import Data.DataEncoders exposing (..)
-import Data.DataModel exposing (..)
-import Dict exposing (..)
+import Browser.Dom
+import Common.CommonDecoders exposing (decodeDay)
+import Data.DataDecoders exposing (decodeProject)
+import Data.DataEncoders exposing (encodeProjectAndKeys)
+import Data.DataModel
+    exposing
+        ( OptionId(..)
+        , PersonId(..)
+        , PersonRow
+        , Poll
+        , PollId(..)
+        , Project
+        , SelectedOption(..)
+        , optionIdInt
+        , personIdInt
+        , pollIdInt
+        )
+import Dict exposing (Dict)
+import EditProject.EditProjectModel exposing (mergeProjectWithDefinitionChanges)
+import EditProject.EditProjectUpdate exposing (init, update)
 import Json.Decode as D
 import Json.Encode as E
-import Set exposing (..)
-import Vote.VoteModel exposing (..)
+import SDate.SDate exposing (defaultDay)
+import Set
+import Task
+import Vote.VoteModel
+    exposing
+        ( AddedPersonRow
+        , ChangesInPersonRow
+        , ChangesInPoll
+        , ChangesInProject
+        , Model
+        , Msg(..)
+        , ProjectState(..)
+        , ViewMode(..)
+        , ViewState
+        , ViewStates
+        , actualChanges
+        , emptyChangesInProject
+        , mergeWithChanges
+        )
 
 
 port load : E.Value -> Cmd msg
@@ -67,9 +100,16 @@ init jsonFlags =
 
                 Err _ ->
                     Cmd.none
+
+        todayResult =
+            D.decodeValue (D.field "today" decodeDay) jsonFlags
+
+        today =
+            Result.withDefault Nothing todayResult |> Maybe.withDefault defaultDay
     in
     ( { keys = { projectKey = projectKey, secretKey = secretKey }
       , projectState = projectState
+      , today = today
       }
     , command
     )
@@ -127,8 +167,17 @@ update msg model =
             let
                 newModel =
                     { model | projectState = loadProject json }
+
+                cmd =
+                    case model.projectState of
+                        SavingDefinition _ _ ->
+                            Browser.Dom.setViewport 0 0
+                                |> Task.attempt (\_ -> NoOp)
+
+                        _ ->
+                            Cmd.none
             in
-            ( newModel, Cmd.none )
+            ( newModel, cmd )
 
         HashChanged hash ->
             init hash
@@ -208,7 +257,7 @@ update msg model =
             in
             ( doWithLoadedProject model doFn, Cmd.none )
 
-        AddAnotherPersonRow pollId ->
+        AddAnotherPersonRow ->
             let
                 updateAddedPersonRows addedVotes =
                     addedVotes ++ [ { name = "", selectedOptions = Dict.empty } ]
@@ -325,12 +374,12 @@ update msg model =
             ( doWithPoll model pollId doFn, Cmd.none )
 
         RetrySaveChanges json ->
+            let
+                loadResult =
+                    loadProject json
+            in
             case model.projectState of
                 Saving _ origChanges _ ->
-                    let
-                        loadResult =
-                            loadProject json
-                    in
                     case loadResult of
                         Loaded project _ _ ->
                             let
@@ -347,6 +396,69 @@ update msg model =
 
                         _ ->
                             ( model, Cmd.none )
+
+                SavingDefinition _ changesInProjectDefinition ->
+                    case loadResult of
+                        Loaded project _ _ ->
+                            let
+                                merged =
+                                    mergeProjectWithDefinitionChanges project changesInProjectDefinition
+
+                                encoded =
+                                    encodeProjectAndKeys merged model.keys
+                            in
+                            ( model, modify encoded )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        SwitchToDefinitionEditor ->
+            case model.projectState of
+                Loaded project _ _ ->
+                    ( { model | projectState = Editing project (EditProject.EditProjectUpdate.init project model.today) }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        SwitchToVotesEditor scroll ->
+            let
+                cmd =
+                    if scroll then
+                        Browser.Dom.setViewport 0 0
+                            |> Task.attempt (\_ -> NoOp)
+
+                    else
+                        Cmd.none
+            in
+            case model.projectState of
+                Editing project _ ->
+                    ( { model | projectState = Loaded project (emptyChangesInProject project) Dict.empty }, cmd )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        SaveProjectDefinitionChanges ->
+            case model.projectState of
+                Editing project changesInProjectDefinition ->
+                    let
+                        merged =
+                            mergeProjectWithDefinitionChanges project changesInProjectDefinition
+
+                        encoded =
+                            encodeProjectAndKeys merged model.keys
+                    in
+                    ( { model | projectState = SavingDefinition project changesInProjectDefinition }, modify encoded )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        EditProjectMsg editProjectMsg ->
+            case model.projectState of
+                Editing project changesInProjectDefinition ->
+                    ( { model | projectState = Editing project <| EditProject.EditProjectUpdate.update editProjectMsg project changesInProjectDefinition }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -463,13 +575,14 @@ doWithEachPollChanges model fn =
         doFn project changes viewState =
             let
                 updatedChanges =
-                    Dict.map (\a b -> fn b) changes.changesInPolls
+                    Dict.map (\_ b -> fn b) changes.changesInPolls
             in
             Loaded project { changes | changesInPolls = updatedChanges } viewState
     in
     doWithLoadedProject model doFn
 
 
+loadProject : D.Value -> ProjectState
 loadProject json =
     let
         decodeResult =
@@ -477,20 +590,7 @@ loadProject json =
     in
     case decodeResult of
         Ok r ->
-            let
-                changesForPoll poll =
-                    { changesInPersonRows = Dict.empty
-                    , addedPersonRows = [ { name = "", selectedOptions = Dict.empty } ]
-                    , deletedPersonRows = Set.empty
-                    }
-
-                pollId (PollId id) =
-                    id
-
-                changes =
-                    List.foldl (\curr acc -> Dict.insert (pollId curr.pollId) (changesForPoll curr) acc) Dict.empty r.polls
-            in
-            Loaded r { changesInPolls = changes, addedComments = [] } Dict.empty
+            Loaded r (emptyChangesInProject r) Dict.empty
 
         Err e ->
             Error (D.errorToString e)

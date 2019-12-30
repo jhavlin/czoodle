@@ -1,7 +1,6 @@
 module Common.CommonEncoders exposing (encodeDayTuple)
 
 import Json.Encode exposing (Value, int, object)
-import SDate.SDate exposing (SDay, dayToTuple)
 
 
 encodeDayTuple : ( Int, Int, Int ) -> Value

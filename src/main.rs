@@ -95,7 +95,7 @@ fn next_key_info() -> NextKeyInfo {
     let year = today.year();
     let month = today.month();
     let day = today.day();
-    let path_str = format!("./data/{}/{}/{}/{}", CURRENT_VERSION, year, month, day);
+    let path_str = format!("./data/{}/{}/{:02}/{:02}", CURRENT_VERSION, year, month, day);
     let path = PathBuf::from(&path_str);
     std::fs::create_dir_all(&path).expect("Cannot create directory");
     let dir_contents = std::fs::read_dir(&path);

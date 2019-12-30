@@ -2,15 +2,17 @@ port module Create.CreateUpdate exposing (init, subscriptions, update)
 
 import Browser.Dom exposing (getViewportOf)
 import Common.ListUtils as ListUtils
-import Create.CreateDecoders exposing (..)
-import Create.CreateModel exposing (..)
+import Create.CreateDecoders exposing (decodeCreateFlags)
+import Create.CreateModel exposing (CreatedProjectInfo, Model, Msg(..), newPollsToProject)
 import Data.DataEncoders exposing (encodeProject)
-import Dict exposing (..)
+import Dict
 import Json.Decode as D
 import Json.Encode as E
-import SDate.SDate exposing (..)
-import Set exposing (..)
-import Task exposing (..)
+import PollEditor.PollEditorModel exposing (PollEditor(..), PollEditorModel)
+import PollEditor.PollEditorUpdate as PollEditorUpdate exposing (update)
+import SDate.SDate exposing (SDay, defaultDay, monthFromDay)
+import Set
+import Task
 
 
 port persist : E.Value -> Cmd msg
@@ -93,38 +95,8 @@ update msg model =
         RemovePoll num ->
             ( { model | polls = ListUtils.removeIndex num model.polls }, Cmd.none )
 
-        SetPollTitle num title ->
-            ( { model | polls = ListUtils.changeIndex (setPollTitle title) num model.polls }, Cmd.none )
-
-        SetPollDescription num description ->
-            ( { model | polls = ListUtils.changeIndex (setPollDescription description) num model.polls }, Cmd.none )
-
-        SetGenericPollItem num itemNumber itemVal ->
-            ( doWithGenericPoll (setGenericItem itemNumber itemVal) model num, Cmd.none )
-
-        AddGenericPollItem num ->
-            ( doWithGenericPoll addGenericItem model num, Cmd.none )
-
-        RemoveGenericPollItem num itemNumber ->
-            ( doWithGenericPoll (removeGenericItem itemNumber) model num, Cmd.none )
-
-        AddDatePollItem num dayTuple ->
-            ( doWithDatePoll (\data -> { data | items = Set.insert dayTuple data.items }) model num, Cmd.none )
-
-        RemoveDatePollItem num dayTuple ->
-            ( doWithDatePoll (\data -> { data | items = Set.remove dayTuple data.items }) model num, Cmd.none )
-
-        SetCalendarMonth num sMonth ->
-            ( doWithDatePollState (\state -> { state | month = sMonth }) model num, Cmd.none )
-
-        SetCalendarMonthDirect num str ->
-            ( doWithDatePollState (setCalendarMonthDirect str) model num, Cmd.none )
-
-        SetCalendarYearDirect num str ->
-            ( doWithDatePollState (setCalendarYearDirect str) model num, Cmd.none )
-
-        SetHighlightedDay num maybeTuple ->
-            ( doWithDatePollState (\state -> { state | highlightedDay = maybeTuple }) model num, Cmd.none )
+        EditPoll num pollEditorMsg ->
+            ( { model | polls = ListUtils.changeIndex (PollEditorUpdate.update pollEditorMsg) num model.polls }, Cmd.none )
 
         Persist ->
             ( { model | wait = True }, persist <| encodeProject <| newPollsToProject model )
@@ -139,142 +111,33 @@ update msg model =
             ( { model | created = Just projectInfo }, scroll "project" )
 
 
-doWithGenericPoll : (NewGenericPollData -> NewGenericPollData) -> Model -> Int -> Model
-doWithGenericPoll fn model pollNumber =
-    let
-        checkAndDo newPoll =
-            case newPoll.def of
-                NewGenericPollModel genericPollData ->
-                    { newPoll | def = NewGenericPollModel (fn genericPollData) }
-
-                _ ->
-                    newPoll
-
-        polls =
-            ListUtils.changeIndex checkAndDo pollNumber model.polls
-    in
-    { model | polls = polls }
-
-
-doWithDatePoll : (NewDatePollData -> NewDatePollData) -> Model -> Int -> Model
-doWithDatePoll fn model pollNumber =
-    let
-        checkAndDo newPoll =
-            case newPoll.def of
-                NewDatePollModel state datePollData ->
-                    { newPoll | def = NewDatePollModel state (fn datePollData) }
-
-                _ ->
-                    newPoll
-
-        polls =
-            ListUtils.changeIndex checkAndDo pollNumber model.polls
-    in
-    { model | polls = polls }
-
-
-doWithDatePollState : (CalendarStateModel -> CalendarStateModel) -> Model -> Int -> Model
-doWithDatePollState fn model pollNumber =
-    let
-        checkAndDo newPoll =
-            case newPoll.def of
-                NewDatePollModel state datePollData ->
-                    { newPoll | def = NewDatePollModel (fn state) datePollData }
-
-                _ ->
-                    newPoll
-
-        polls =
-            ListUtils.changeIndex checkAndDo pollNumber model.polls
-    in
-    { model | polls = polls }
-
-
-emptyGenericPoll : NewPoll
+emptyGenericPoll : PollEditorModel
 emptyGenericPoll =
-    { title = "", description = "", def = NewGenericPollModel { items = [ "", "" ] } }
+    let
+        editor =
+            GenericPollEditor
+                { addedItems = [ "", "" ]
+                , originalItems = []
+                , hiddenItems = Set.empty
+                , unhiddenItems = Set.empty
+                , renamedItems = Dict.empty
+                }
+    in
+    { originalTitle = "", originalDescription = "", changedTitle = Nothing, changedDescription = Nothing, editor = editor }
 
 
-emptyDatePoll : SDay -> NewPoll
+emptyDatePoll : SDay -> PollEditorModel
 emptyDatePoll today =
     let
         state =
             { month = monthFromDay today, highlightedDay = Nothing, today = today }
 
-        def =
-            NewDatePollModel state { items = Set.empty }
+        editor =
+            DatePollEditor state
+                { addedItems = Set.empty
+                , originalItems = []
+                , hiddenItems = Set.empty
+                , unhiddenItems = Set.empty
+                }
     in
-    { title = "", description = "", def = def }
-
-
-setPollTitle : String -> NewPoll -> NewPoll
-setPollTitle newTitle newPoll =
-    { newPoll | title = newTitle }
-
-
-setPollDescription : String -> NewPoll -> NewPoll
-setPollDescription newDescription newPoll =
-    { newPoll | description = newDescription }
-
-
-addGenericItem : NewGenericPollData -> NewGenericPollData
-addGenericItem data =
-    { data | items = data.items ++ [ "" ] }
-
-
-setGenericItem : Int -> String -> NewGenericPollData -> NewGenericPollData
-setGenericItem itemNumber newValue data =
-    { data | items = ListUtils.changeIndex (\_ -> newValue) itemNumber data.items }
-
-
-removeGenericItem : Int -> NewGenericPollData -> NewGenericPollData
-removeGenericItem itemNumber data =
-    let
-        newItems =
-            if List.length data.items > 2 then
-                ListUtils.removeIndex itemNumber data.items
-
-            else
-                ListUtils.changeIndex (\_ -> "") itemNumber data.items
-    in
-    { data | items = newItems }
-
-
-setCalendarMonthDirect : String -> CalendarStateModel -> CalendarStateModel
-setCalendarMonthDirect str data =
-    let
-        ( year, _ ) =
-            monthToTuple data.month
-
-        monthOpt =
-            String.toInt str
-
-        newMonthOpt =
-            Maybe.andThen (\m -> monthFromTuple ( year, m )) monthOpt
-    in
-    case newMonthOpt of
-        Just sMonth ->
-            { data | month = sMonth }
-
-        Nothing ->
-            data
-
-
-setCalendarYearDirect : String -> CalendarStateModel -> CalendarStateModel
-setCalendarYearDirect str data =
-    let
-        ( _, month ) =
-            monthToTuple data.month
-
-        yearOpt =
-            String.toInt str
-
-        newYearOpt =
-            Maybe.andThen (\y -> monthFromTuple ( y, month )) yearOpt
-    in
-    case newYearOpt of
-        Just sMonth ->
-            { data | month = sMonth }
-
-        Nothing ->
-            data
+    { originalTitle = "", originalDescription = "", changedTitle = Nothing, changedDescription = Nothing, editor = editor }

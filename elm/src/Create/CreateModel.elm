@@ -1,10 +1,16 @@
-module Create.CreateModel exposing (CalendarStateModel, CreatedProjectInfo, Model, Msg(..), NewDatePollData, NewGenericPollData, NewPoll, NewPollModel(..), newPollsToProject)
+module Create.CreateModel exposing
+    ( CreatedProjectInfo
+    , Model
+    , Msg(..)
+    , newPollsToProject
+    )
 
-import Common.CommonUtils exposing (stringToMaybe)
+import Common.CommonUtils exposing (normalizeStringMaybe, stringToMaybe)
 import Common.ListUtils exposing (filterNothings)
-import Data.DataModel exposing (DayTuple, OptionId(..), Poll, PollId(..), PollInfo(..), Project)
-import SDate.SDate exposing (SDay, SMonth, dayFromTuple)
-import Set exposing (..)
+import Data.DataModel exposing (OptionId(..), Poll, PollId(..), PollInfo(..), Project)
+import PollEditor.PollEditorModel exposing (PollEditor(..), PollEditorModel, PollEditorMsg)
+import SDate.SDate exposing (SDay, dayFromTuple)
+import Set
 
 
 
@@ -20,47 +26,10 @@ type Msg
     | AddGenericPoll
     | AddDatePoll
     | RemovePoll Int
-    | SetPollTitle Int String
-    | SetPollDescription Int String
-    | SetGenericPollItem Int Int String
-    | AddGenericPollItem Int
-    | RemoveGenericPollItem Int Int
-    | AddDatePollItem Int DayTuple
-    | RemoveDatePollItem Int DayTuple
-    | SetCalendarMonth Int SMonth
-    | SetCalendarMonthDirect Int String
-    | SetCalendarYearDirect Int String
-    | SetHighlightedDay Int (Maybe DayTuple)
+    | EditPoll Int PollEditorMsg
     | Persist
     | ProjectCreated CreatedProjectInfo
     | NoOp
-
-
-type alias NewPoll =
-    { title : String
-    , description : String
-    , def : NewPollModel
-    }
-
-
-type alias CalendarStateModel =
-    { month : SMonth
-    , highlightedDay : Maybe DayTuple
-    , today : SDay
-    }
-
-
-type NewPollModel
-    = NewDatePollModel CalendarStateModel NewDatePollData
-    | NewGenericPollModel NewGenericPollData
-
-
-type alias NewGenericPollData =
-    { items : List String }
-
-
-type alias NewDatePollData =
-    { items : Set DayTuple }
 
 
 type alias CreatedProjectInfo =
@@ -71,7 +40,7 @@ type alias CreatedProjectInfo =
 
 type alias Model =
     { title : String
-    , polls : List NewPoll
+    , polls : List PollEditorModel
     , today : SDay
     , wait : Bool
     , created : Maybe CreatedProjectInfo
@@ -90,37 +59,37 @@ type alias Model =
 newPollsToProject : Model -> Project
 newPollsToProject { title, polls } =
     let
-        newDatePollDataToPollInfo { items } =
-            Set.toList items
+        newDatePollDataToPollInfo { addedItems } =
+            Set.toList addedItems
                 |> List.map dayFromTuple
                 |> filterNothings
-                |> List.indexedMap (\index item -> { optionId = OptionId <| 1 + index, value = item })
+                |> List.indexedMap (\index item -> { optionId = OptionId <| 1 + index, value = item, hidden = False })
 
-        newGenericPollDataToPollInfo { items } =
-            List.filter (\v -> not <| String.isEmpty <| String.trim v) items
-                |> List.indexedMap (\index item -> { optionId = OptionId <| 1 + index, value = item })
+        newGenericPollDataToPollInfo { addedItems } =
+            List.filter (\v -> not <| String.isEmpty <| String.trim v) addedItems
+                |> List.indexedMap (\index item -> { optionId = OptionId <| 1 + index, value = item, hidden = False })
 
-        newPollModelToPollInfo : NewPollModel -> PollInfo
-        newPollModelToPollInfo newPollModel =
-            case newPollModel of
-                NewDatePollModel _ newPollData ->
+        newPollModelToPollInfo : PollEditor -> PollInfo
+        newPollModelToPollInfo pollEditorModel =
+            case pollEditorModel of
+                DatePollEditor _ newPollData ->
                     DatePollInfo { items = newDatePollDataToPollInfo newPollData }
 
-                NewGenericPollModel newPollData ->
+                GenericPollEditor newPollData ->
                     GenericPollInfo { items = newGenericPollDataToPollInfo newPollData }
 
-        newPollToPoll : Int -> NewPoll -> Poll
-        newPollToPoll index newPoll =
+        pollEditorModelToPoll : Int -> PollEditorModel -> Poll
+        pollEditorModelToPoll index pollEditorModel =
             { pollId = PollId <| index + 1
-            , title = stringToMaybe newPoll.title
-            , description = stringToMaybe newPoll.description
-            , pollInfo = newPollModelToPollInfo newPoll.def
+            , title = normalizeStringMaybe pollEditorModel.changedTitle
+            , description = normalizeStringMaybe pollEditorModel.changedDescription
+            , pollInfo = newPollModelToPollInfo pollEditorModel.editor
             , personRows = []
             , lastPersonId = 0
             }
 
         finalPolls =
-            List.indexedMap newPollToPoll polls
+            List.indexedMap pollEditorModelToPoll polls
     in
     { title = stringToMaybe title
     , polls = finalPolls

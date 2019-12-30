@@ -1,4 +1,9 @@
-module Common.ListUtils exposing (changeIndex, filterNothings, removeIndex)
+module Common.ListUtils exposing
+    ( changeIndex
+    , filterNothings
+    , findFirst
+    , removeIndex
+    )
 
 
 removeIndex : Int -> List a -> List a
@@ -11,7 +16,7 @@ removeIndex index list =
             else
                 ( i + 1, a :: res )
 
-        ( len, reversed ) =
+        ( _, reversed ) =
             List.foldl fn ( 0, [] ) list
     in
     List.reverse reversed
@@ -43,3 +48,21 @@ filterNothings list =
         )
         []
         list
+
+
+findFirst : (a -> Bool) -> List a -> Maybe a
+findFirst predicate list =
+    let
+        fn curr acc =
+            case acc of
+                Nothing ->
+                    if predicate curr then
+                        Just curr
+
+                    else
+                        Nothing
+
+                Just _ ->
+                    acc
+    in
+    List.foldl fn Nothing list

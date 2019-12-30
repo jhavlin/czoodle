@@ -1,8 +1,25 @@
-port module Data.DataModel exposing (AddedComment, AddedPersonRow, ChangesInPersonRow, ChangesInPoll, ChangesInProject, Comment, CommentId(..), DateOptionItem, DayTuple, GenericOptionItem, Keys, OptionId(..), PersonId(..), PersonRow, Poll, PollId(..), PollInfo(..), Project, SelectedOption(..), commentIdInt, optionIdInt, personIdInt, pollIdInt)
+module Data.DataModel exposing
+    ( Comment
+    , CommentId(..)
+    , DateOptionItem
+    , GenericOptionItem
+    , Keys
+    , OptionId(..)
+    , PersonId(..)
+    , PersonRow
+    , Poll
+    , PollId(..)
+    , PollInfo(..)
+    , Project
+    , SelectedOption(..)
+    , commentIdInt
+    , optionIdInt
+    , personIdInt
+    , pollIdInt
+    )
 
-import Dict exposing (..)
-import SDate.SDate exposing (..)
-import Set exposing (..)
+import Dict exposing (Dict)
+import SDate.SDate exposing (SDay)
 
 
 
@@ -15,10 +32,6 @@ type alias Keys =
     { projectKey : String
     , secretKey : String
     }
-
-
-type alias DayTuple =
-    ( Int, Int, Int )
 
 
 type SelectedOption
@@ -42,12 +55,14 @@ type OptionId
 type alias DateOptionItem =
     { optionId : OptionId
     , value : SDay
+    , hidden : Bool
     }
 
 
 type alias GenericOptionItem =
     { optionId : OptionId
     , value : String
+    , hidden : Bool
     }
 
 
@@ -89,36 +104,6 @@ type alias Project =
     , lastPollId : Int
     , comments : List Comment
     , lastCommentId : Int
-    }
-
-
-type alias ChangesInProject =
-    { changesInPolls : Dict Int ChangesInPoll
-    , addedComments : List AddedComment
-    }
-
-
-type alias AddedComment =
-    { text : String
-    }
-
-
-type alias ChangesInPoll =
-    { changesInPersonRows : Dict Int ChangesInPersonRow
-    , addedPersonRows : List AddedPersonRow
-    , deletedPersonRows : Set Int
-    }
-
-
-type alias ChangesInPersonRow =
-    { changedName : Maybe String
-    , changedOptions : Dict Int SelectedOption
-    }
-
-
-type alias AddedPersonRow =
-    { name : String
-    , selectedOptions : Dict Int SelectedOption
     }
 
 

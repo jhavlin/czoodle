@@ -1,6 +1,6 @@
 module Common.CommonDecoders exposing (decodeDay)
 
-import Json.Decode exposing (Decoder, andThen, fail, field, int, map, map2, map3, string, succeed)
+import Json.Decode exposing (Decoder, field, int, map3)
 import SDate.SDate exposing (SDay, dayFromTuple)
 
 

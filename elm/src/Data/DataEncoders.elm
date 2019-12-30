@@ -1,19 +1,32 @@
 module Data.DataEncoders exposing (encodeProject, encodeProjectAndKeys, withLast)
 
 import Common.CommonEncoders exposing (encodeDayTuple)
-import Common.CommonUtils exposing (stringToMaybe)
-import Data.DataModel exposing (..)
-import Dict exposing (..)
+import Data.DataModel
+    exposing
+        ( Comment
+        , DateOptionItem
+        , GenericOptionItem
+        , Keys
+        , PersonRow
+        , Poll
+        , PollInfo(..)
+        , Project
+        , SelectedOption(..)
+        , commentIdInt
+        , optionIdInt
+        , personIdInt
+        , pollIdInt
+        )
+import Dict exposing (Dict)
 import Json.Encode as E
 import SDate.SDate exposing (dayToTuple)
-import Set exposing (..)
 
 
 {-| Map value of last item of a list.
 -}
 withLast : (a -> b) -> b -> List a -> b
 withLast fn default list =
-    List.foldl (\item acc -> fn item) default list
+    List.foldl (\item _ -> fn item) default list
 
 
 encodeProject : Project -> E.Value
@@ -22,16 +35,30 @@ encodeProject project =
         encodeGenericItem : GenericOptionItem -> E.Value
         encodeGenericItem item =
             E.object
-                [ ( "id", E.int <| optionIdInt item.optionId )
-                , ( "value", E.string item.value )
-                ]
+                ([ ( "id", E.int <| optionIdInt item.optionId )
+                 , ( "value", E.string item.value )
+                 ]
+                    ++ (if item.hidden then
+                            [ ( "hidden", E.bool True ) ]
+
+                        else
+                            []
+                       )
+                )
 
         encodeDateItem : DateOptionItem -> E.Value
         encodeDateItem item =
             E.object
-                [ ( "id", E.int <| optionIdInt item.optionId )
-                , ( "value", encodeDayTuple <| dayToTuple item.value )
-                ]
+                ([ ( "id", E.int <| optionIdInt item.optionId )
+                 , ( "value", encodeDayTuple <| dayToTuple item.value )
+                 ]
+                    ++ (if item.hidden then
+                            [ ( "hidden", E.bool True ) ]
+
+                        else
+                            []
+                       )
+                )
 
         encodePollInfo : PollInfo -> E.Value
         encodePollInfo info =

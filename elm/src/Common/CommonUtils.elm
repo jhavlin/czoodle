@@ -1,4 +1,7 @@
-module Common.CommonUtils exposing (stringToMaybe)
+module Common.CommonUtils exposing
+    ( normalizeStringMaybe
+    , stringToMaybe
+    )
 
 
 stringToMaybe : String -> Maybe String
@@ -13,3 +16,17 @@ stringToMaybe s =
 
         x ->
             Just x
+
+
+normalizeStringMaybe : Maybe String -> Maybe String
+normalizeStringMaybe strOpt =
+    strOpt
+        |> Maybe.map String.trim
+        |> Maybe.andThen
+            (\s ->
+                if String.isEmpty s then
+                    Nothing
+
+                else
+                    Just s
+            )

@@ -1,10 +1,9 @@
 module SDate.SDateTest exposing (suite)
 
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
+import Expect
 import Maybe exposing (Maybe, andThen, map)
-import SDate.SDate exposing (..)
-import Test exposing (..)
+import SDate.SDate exposing (dayFromTuple, dayToTuple, daysInMonth, monthFromTuple, weekDay, weeksInMonth)
+import Test exposing (Test, describe, test)
 
 
 

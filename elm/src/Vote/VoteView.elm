@@ -1,18 +1,86 @@
 module Vote.VoteView exposing (view)
 
-import Data.DataModel exposing (..)
-import Dict exposing (..)
-import Html exposing (Html, a, b, br, button, div, h1, h2, input, label, li, ol, option, p, select, span, table, td, text, th, tr)
-import Html.Attributes exposing (class, colspan, disabled, href, min, placeholder, selected, tabindex, title, type_, value)
-import Html.Events exposing (on, onClick, onInput, onMouseEnter, onMouseLeave)
-import SDate.SDate exposing (..)
-import Set exposing (..)
+import Common.CommonView
+    exposing
+        ( changedToClass
+        , editableToClass
+        , invisibleToClass
+        , transparentToClass
+        )
+import Data.DataModel
+    exposing
+        ( OptionId(..)
+        , PersonId(..)
+        , PersonRow
+        , Poll
+        , PollId(..)
+        , PollInfo(..)
+        , Project
+        , SelectedOption(..)
+        , optionIdInt
+        , personIdInt
+        )
+import Dict
+import EditProject.EditProjectView as EditProjectView
+import Html exposing (Html, a, button, div, h1, h2, input, span, table, td, text, th, tr)
+import Html.Attributes exposing (class, colspan, disabled, placeholder, title, type_, value)
+import Html.Events exposing (onClick, onInput)
+import SDate.SDate exposing (dayToTuple, weekDay)
+import Set
 import Svg exposing (circle, line, svg)
 import Svg.Attributes as SAttr
-import Vote.VoteModel exposing (..)
+import Vote.VoteModel
+    exposing
+        ( AddedPersonRow
+        , ChangesInPersonRow
+        , ChangesInPoll
+        , ChangesInProject
+        , Model
+        , Msg(..)
+        , ProjectState(..)
+        , ViewMode(..)
+        , ViewState
+        , ViewStates
+        , actualChanges
+        , emptyChangesInPersonRow
+        , emptyChangesInPoll
+        , emptyViewState
+        , hasChangesInVotes
+        , isInvalidAddedPersonRow
+        , isValidVotingState
+        , mergePollWithChanges
+        , pollOptionIds
+        )
 
 
+
+{- Helper type for passing state and pre-computed info between functions -}
+
+
+type alias ViewModel =
+    { project : Project
+    , changesInProject : ChangesInProject
+    , viewStates : ViewStates
+    , isValidVotingState : Bool
+    , hasChangesInVotes : Bool
+    }
+
+
+view : Model -> Html Msg
 view model =
+    let
+        viewModel project changesInProject viewStates =
+            let
+                normalizedChanges =
+                    actualChanges changesInProject project
+            in
+            { project = project
+            , changesInProject = normalizedChanges
+            , viewStates = viewStates
+            , isValidVotingState = isValidVotingState normalizedChanges
+            , hasChangesInVotes = hasChangesInVotes normalizedChanges
+            }
+    in
     case model.projectState of
         Loading ->
             div []
@@ -27,7 +95,7 @@ view model =
 
         Saving project changes states ->
             div []
-                [ viewProject project changes states
+                [ viewProject <| viewModel project changes states
                 , div [ class "vote-process-overlay" ]
                     [ div [ class "vote-process-overlay-text" ]
                         [ text "Ukládám" ]
@@ -35,17 +103,44 @@ view model =
                 ]
 
         Loaded project changes states ->
-            viewProject project changes states
+            viewProject <| viewModel project changes states
+
+        Editing project changesInProjectDefinition ->
+            EditProjectView.view project
+                changesInProjectDefinition
+                { outerMessage = EditProjectMsg
+                , switchBackMessage = SwitchToVotesEditor
+                , saveMessage = SaveProjectDefinitionChanges
+                , today = model.today
+                }
+
+        SavingDefinition project changesInProjectDefinition ->
+            div []
+                [ EditProjectView.view project
+                    changesInProjectDefinition
+                    { outerMessage = EditProjectMsg
+                    , switchBackMessage = SwitchToVotesEditor
+                    , saveMessage = SaveProjectDefinitionChanges
+                    , today = model.today
+                    }
+                , div [ class "vote-process-overlay" ]
+                    [ div [ class "vote-process-overlay-text" ]
+                        [ text "Ukládám" ]
+                    ]
+                ]
 
 
-viewProject : Project -> ChangesInProject -> ViewStates -> Html Msg
-viewProject project changes states =
+viewProject : ViewModel -> Html Msg
+viewProject viewModel =
     let
+        { project, changesInProject, viewStates, hasChangesInVotes } =
+            viewModel
+
         changesForPoll (PollId id) =
-            Maybe.withDefault emptyChangesInPoll <| Dict.get id changes.changesInPolls
+            Maybe.withDefault emptyChangesInPoll <| Dict.get id changesInProject.changesInPolls
 
         stateForPoll (PollId id) =
-            Maybe.withDefault emptyViewState <| Dict.get id states
+            Maybe.withDefault emptyViewState <| Dict.get id viewStates
 
         viewForPoll pollIndex poll =
             viewPoll pollIndex poll (changesForPoll poll.pollId) (stateForPoll poll.pollId)
@@ -53,14 +148,22 @@ viewProject project changes states =
     div [ class "vote-project" ]
         [ div [ class "vote-poll-center-outer" ]
             [ div [ class "vote-poll-center" ]
-                [ h1 [ class "vote-project-title vote-poll-preferred-width" ]
-                    [ text <| Maybe.withDefault "(nepojmenovaný projekt)" project.title
+                [ div [ class "vote-poll-preferred-width vote-project-title-line" ]
+                    [ h1 [ class "vote-project-title" ] [ text <| Maybe.withDefault "(nepojmenovaný projekt)" project.title ]
+                    , div [ class ("vote-project-edit-cell" ++ invisibleToClass hasChangesInVotes) ]
+                        [ a
+                            [ class "vote-project-edit-button"
+                            , title "Upravit projekt (Nepovolaným osobám vstup zapovězen!)"
+                            , onClick SwitchToDefinitionEditor
+                            ]
+                            [ text "✎" ]
+                        ]
                     ]
                 , legend
                 ]
             ]
         , div [ class "vote-polls" ] (List.indexedMap viewForPoll project.polls)
-        , viewSubmitRow project changes states
+        , viewSubmitRow viewModel
         ]
 
 
@@ -95,7 +198,7 @@ viewPoll pollIndex poll changes state =
 
         resultsRow =
             if pollIndex == 0 then
-                tr [] ((viewAddNewVoteCell poll changes :: resultCells) ++ [ emptyCell ])
+                tr [] ((viewAddNewVoteCell changes :: resultCells) ++ [ emptyCell ])
 
             else
                 tr [] ((emptyCell :: resultCells) ++ [ emptyCell ])
@@ -146,7 +249,7 @@ viewPoll pollIndex poll changes state =
 
 
 viewPollHeader : Poll -> ViewState -> Html Msg
-viewPollHeader poll state =
+viewPollHeader poll _ =
     let
         weekDayToString wd =
             case wd of
@@ -174,7 +277,7 @@ viewPollHeader poll state =
                 _ ->
                     "Error"
 
-        dateToString ( year, month, day ) =
+        dateToString ( _, month, day ) =
             String.join ""
                 [ String.fromInt day
                 , ". "
@@ -190,11 +293,11 @@ viewPollHeader poll state =
                     ]
                 ]
 
-        dateCell { optionId, value } =
+        dateCell { value } =
             dateTupleCell (weekDay value) (dateToString <| dayToTuple value)
 
         dateHeader items =
-            tr [] ([ th [] [] ] ++ List.map dateCell items)
+            tr [] (th [] [] :: List.map dateCell items)
 
         genericCell item =
             th []
@@ -202,18 +305,18 @@ viewPollHeader poll state =
                 ]
 
         genericHeader items =
-            tr [] ([ th [] [] ] ++ List.map genericCell items ++ [ th [] [] ])
+            tr [] (th [] [] :: List.map genericCell items ++ [ th [] [] ])
     in
     case poll.pollInfo of
         DatePollInfo { items } ->
-            dateHeader items
+            dateHeader <| List.filter (not << .hidden) items
 
         GenericPollInfo { items } ->
-            genericHeader items
+            genericHeader <| List.filter (not << .hidden) items
 
 
 viewPollResultCells : Poll -> ChangesInPoll -> ViewState -> List (Html Msg)
-viewPollResultCells poll changesInPoll state =
+viewPollResultCells poll changesInPoll _ =
     let
         merged =
             mergePollWithChanges poll changesInPoll
@@ -278,38 +381,7 @@ viewPollResultCells poll changesInPoll state =
     List.map countCell counts
 
 
-changedToClass changed =
-    if changed then
-        " changed"
-
-    else
-        ""
-
-
-editableToClass editable =
-    if editable then
-        " editable"
-
-    else
-        ""
-
-
-invisibleToClass invisible =
-    if invisible then
-        " invisible"
-
-    else
-        ""
-
-
-transparentToClass transparent =
-    if transparent then
-        " transparent"
-
-    else
-        ""
-
-
+fixTooltip : String -> String -> String
 fixTooltip info state =
     if String.isEmpty <| String.trim info then
         state
@@ -392,12 +464,7 @@ viewAddedVoteRow poll addedVoteIndex addedPersonRow =
             not <| String.isEmpty <| String.trim <| addedPersonRow.name
 
         itemIds =
-            case poll.pollInfo of
-                DatePollInfo { items } ->
-                    List.map .optionId items
-
-                GenericPollInfo { items } ->
-                    List.map .optionId items
+            pollOptionIds poll
 
         changeMessage optionId selectedOption =
             if changed then
@@ -545,8 +612,8 @@ viewExistingVoteRow poll personRow changesInPersonRow deleted editable =
         ((nameCell :: optionCells) ++ [ editCell ])
 
 
-viewAddNewVoteCell : Poll -> ChangesInPoll -> Html Msg
-viewAddNewVoteCell poll changes =
+viewAddNewVoteCell : ChangesInPoll -> Html Msg
+viewAddNewVoteCell changes =
     let
         allNamesFilled =
             List.all (\a -> not <| String.isEmpty a.name) changes.addedPersonRows
@@ -558,7 +625,7 @@ viewAddNewVoteCell poll changes =
             if allNamesFilled then
                 a
                     [ class "vote-poll-edit-link"
-                    , onClick (AddAnotherPersonRow poll.pollId)
+                    , onClick AddAnotherPersonRow
                     , title "Přidej nového hlasujícího do všech hlasování"
                     ]
                     [ text "+ Přidej člověka"
@@ -581,42 +648,14 @@ viewAddNewVoteCell poll changes =
         ]
 
 
-viewSubmitRow : Project -> ChangesInProject -> ViewStates -> Html Msg
-viewSubmitRow project changesInProject viewState =
+viewSubmitRow : ViewModel -> Html Msg
+viewSubmitRow viewModel =
     let
-        actChanges =
-            actualChanges changesInProject project
-
-        hasAddedRow changesItem =
-            List.any (\av -> not <| String.isEmpty <| String.trim av.name) changesItem.addedPersonRows
-
-        hasDeletedRow changesItem =
-            not <| Set.isEmpty changesItem.deletedPersonRows
-
-        hasModifiedRow changesItem =
-            not <| Dict.isEmpty changesItem.changesInPersonRows
-
-        pollHasChange _ changesItem prev =
-            prev || hasAddedRow changesItem || hasDeletedRow changesItem || hasModifiedRow changesItem
-
-        hasAddedComments =
-            not <| List.isEmpty actChanges.addedComments
-
-        hasChanges =
-            Dict.foldl pollHasChange False actChanges.changesInPolls || hasAddedComments
-
-        isInvalid =
-            containsInvalidChange actChanges
+        { isValidVotingState, hasChangesInVotes } =
+            viewModel
 
         enabled =
-            hasChanges && not isInvalid
-
-        boolToString s =
-            if s then
-                "true"
-
-            else
-                "false"
+            isValidVotingState && hasChangesInVotes
     in
     div [ class "vote-poll-center-outer" ]
         [ div [ class "vote-poll-center" ]

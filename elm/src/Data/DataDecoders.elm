@@ -1,11 +1,31 @@
-module Data.DataDecoders exposing (decodeComment, decodePersonRow, decodePoll, decodePollInfo, decodeProject, decodeSelectedOption)
+module Data.DataDecoders exposing
+    ( decodeComment
+    , decodePersonRow
+    , decodePoll
+    , decodePollInfo
+    , decodeProject
+    , decodeSelectedOption
+    )
 
 import Common.CommonDecoders exposing (decodeDay)
 import Common.CommonUtils exposing (stringToMaybe)
-import Data.DataModel exposing (..)
-import Dict exposing (..)
+import Data.DataModel
+    exposing
+        ( Comment
+        , CommentId(..)
+        , DateOptionItem
+        , GenericOptionItem
+        , OptionId(..)
+        , PersonId(..)
+        , PersonRow
+        , Poll
+        , PollId(..)
+        , PollInfo(..)
+        , Project
+        , SelectedOption(..)
+        )
+import Dict exposing (Dict)
 import Json.Decode as D
-import Set exposing (..)
 
 
 decodePollInfo : D.Decoder PollInfo
@@ -24,14 +44,16 @@ decodePollInfo =
             D.andThen beStrict decodeDay
 
         decodeDayItem =
-            D.map2 DateOptionItem
+            D.map3 DateOptionItem
                 (D.map OptionId <| D.field "id" D.int)
                 (D.field "value" strictDayDecoder)
+                (D.map (Maybe.withDefault False) <| (D.maybe <| D.field "hidden" D.bool))
 
         decodeStringItem =
-            D.map2 GenericOptionItem
+            D.map3 GenericOptionItem
                 (D.map OptionId <| D.field "id" D.int)
                 (D.field "value" D.string)
+                (D.map (Maybe.withDefault False) <| (D.maybe <| D.field "hidden" D.bool))
 
         datePollInfoDecoder =
             D.map (\l -> DatePollInfo { items = l }) <|
@@ -81,12 +103,7 @@ decodePersonRow =
 
         foldFn : ( String, SelectedOption ) -> Maybe (Dict Int SelectedOption) -> Maybe (Dict Int SelectedOption)
         foldFn ( strKey, value ) acc =
-            case String.toInt strKey of
-                Nothing ->
-                    Nothing
-
-                Just i ->
-                    Maybe.map (\d -> Dict.insert i value d) acc
+            Maybe.map2 (\int dict -> Dict.insert int value dict) (String.toInt strKey) acc
 
         pairsToDict : List ( String, SelectedOption ) -> D.Decoder (Dict Int SelectedOption)
         pairsToDict pairs =

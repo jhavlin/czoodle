@@ -1,16 +1,57 @@
-module Vote.VoteModel exposing (Model, Msg(..), ProjectState(..), ViewMode(..), ViewState, ViewStates, actualChanges, applyPersonRowChanges, containsInvalidChange, emptyChangesInPersonRow, emptyChangesInPoll, emptyViewState, isInvalidAddedPersonRow, mergePollWithChanges, mergeWithChanges, pollOptionIds)
+module Vote.VoteModel exposing
+    ( AddedPersonRow
+    , ChangesInPersonRow
+    , ChangesInPoll
+    , ChangesInProject
+    , Model
+    , Msg(..)
+    , ProjectState(..)
+    , ViewMode(..)
+    , ViewState
+    , ViewStates
+    , actualChanges
+    , applyPersonRowChanges
+    , containsInvalidChange
+    , emptyChangesInPersonRow
+    , emptyChangesInPoll
+    , emptyChangesInProject
+    , emptyViewState
+    , hasChangesInVotes
+    , isInvalidAddedPersonRow
+    , isValidVotingState
+    , mergePollWithChanges
+    , mergeWithChanges
+    , pollOptionIds
+    )
 
-import Data.DataModel exposing (..)
-import Dict exposing (..)
+import Data.DataModel
+    exposing
+        ( CommentId(..)
+        , Keys
+        , OptionId(..)
+        , PersonId(..)
+        , PersonRow
+        , Poll
+        , PollId(..)
+        , PollInfo(..)
+        , Project
+        , SelectedOption(..)
+        , personIdInt
+        , pollIdInt
+        )
+import Dict exposing (Dict)
+import EditProject.EditProjectModel exposing (ChangesInProjectDefinition)
 import Json.Decode as D
 import SDate.SDate exposing (SDay)
-import Set exposing (..)
+import Set exposing (Set)
 
 
 
-------------------------------------------------------------
----- Types -------------------------------------------------
-------------------------------------------------------------
+{-
+   ------------------------------------------------------------------
+   Types
+   ------------------------------------------------------------------
+-}
 
 
 type Msg
@@ -24,13 +65,17 @@ type Msg
     | SetAddedPersonRowName PollId Int String
     | DeleteAddedPersonRow PollId Int
     | DeleteAllEmptyPersonRows
-    | AddAnotherPersonRow PollId
+    | AddAnotherPersonRow
     | SetExistingPersonRowOption PollId PersonId OptionId SelectedOption
     | SetExistingPersonRowName PollId PersonId String
     | DeleteExistingPersonRow PollId PersonId
     | UndeleteExistingPersonRow PollId PersonId
     | SaveChanges
     | RetrySaveChanges D.Value
+    | SwitchToDefinitionEditor
+    | SwitchToVotesEditor Bool
+    | SaveProjectDefinitionChanges
+    | EditProjectMsg EditProject.EditProjectModel.Msg
 
 
 type ViewMode
@@ -51,20 +96,56 @@ type alias ViewStates =
 type ProjectState
     = Loading
     | Loaded Project ChangesInProject ViewStates
+    | Editing Project ChangesInProjectDefinition
     | Error String
     | Saving Project ChangesInProject ViewStates
+    | SavingDefinition Project ChangesInProjectDefinition
 
 
 type alias Model =
     { keys : Keys
     , projectState : ProjectState
+    , today : SDay
+    }
+
+
+type alias ChangesInProject =
+    { changesInPolls : Dict Int ChangesInPoll
+    , addedComments : List AddedComment
+    }
+
+
+type alias AddedComment =
+    { text : String
+    , author : String
+    }
+
+
+type alias ChangesInPoll =
+    { changesInPersonRows : Dict Int ChangesInPersonRow
+    , addedPersonRows : List AddedPersonRow
+    , deletedPersonRows : Set Int
+    }
+
+
+type alias ChangesInPersonRow =
+    { changedName : Maybe String
+    , changedOptions : Dict Int SelectedOption
+    }
+
+
+type alias AddedPersonRow =
+    { name : String
+    , selectedOptions : Dict Int SelectedOption
     }
 
 
 
-------------------------------------------------------------
----- Functions ---------------------------------------------
-------------------------------------------------------------
+{-
+   ------------------------------------------------------------------
+   Functions
+   ------------------------------------------------------------------
+-}
 
 
 emptyChangesInPoll : ChangesInPoll
@@ -82,6 +163,24 @@ emptyChangesInPersonRow =
     { changedName = Nothing
     , changedOptions = Dict.empty
     }
+
+
+emptyChangesInProject : Project -> ChangesInProject
+emptyChangesInProject project =
+    let
+        changesForPoll =
+            { changesInPersonRows = Dict.empty
+            , addedPersonRows = [ { name = "", selectedOptions = Dict.empty } ]
+            , deletedPersonRows = Set.empty
+            }
+
+        pollId (PollId id) =
+            id
+
+        changes =
+            List.foldl (\curr acc -> Dict.insert (pollId curr.pollId) changesForPoll acc) Dict.empty project.polls
+    in
+    { changesInPolls = changes, addedComments = [] }
 
 
 applyPersonRowChanges : ChangesInPoll -> PersonRow -> PersonRow
@@ -179,10 +278,10 @@ pollOptionIds : Poll -> List OptionId
 pollOptionIds poll =
     case poll.pollInfo of
         DatePollInfo { items } ->
-            List.map .optionId items
+            List.map .optionId <| List.filter (not << .hidden) items
 
         GenericPollInfo { items } ->
-            List.map .optionId items
+            List.map .optionId <| List.filter (not << .hidden) items
 
 
 isInvalidAddedPersonRow : AddedPersonRow -> Bool
@@ -192,7 +291,7 @@ isInvalidAddedPersonRow addedPersonRow =
             String.isEmpty <| String.trim addedPersonRow.name
 
         hasPositiveVote =
-            not <| Dict.isEmpty <| Dict.filter (\k v -> v /= No) addedPersonRow.selectedOptions
+            not <| Dict.isEmpty <| Dict.filter (\_ v -> v /= No) addedPersonRow.selectedOptions
     in
     hasEmptyName && hasPositiveVote
 
@@ -275,3 +374,39 @@ actualChanges changesInProject project =
     { changesInPolls = List.foldl fixChangesInPoll Dict.empty project.polls
     , addedComments = changesInProject.addedComments
     }
+
+
+hasChangesInVotes : ChangesInProject -> Bool
+hasChangesInVotes normalizedChanges =
+    let
+        hasAddedRow changesItem =
+            List.any (\av -> not <| String.isEmpty <| String.trim av.name) changesItem.addedPersonRows
+
+        hasDeletedRow changesItem =
+            not <| Set.isEmpty changesItem.deletedPersonRows
+
+        hasModifiedRow changesItem =
+            not <| Dict.isEmpty changesItem.changesInPersonRows
+
+        pollHasChange _ changesItem prev =
+            prev || hasAddedRow changesItem || hasDeletedRow changesItem || hasModifiedRow changesItem
+
+        hasAddedComments =
+            not <| List.isEmpty normalizedChanges.addedComments
+
+        hasChanges =
+            Dict.foldl pollHasChange False normalizedChanges.changesInPolls || hasAddedComments
+    in
+    hasChanges
+
+
+isValidVotingState : ChangesInProject -> Bool
+isValidVotingState normalizedChanges =
+    let
+        hasChanges =
+            hasChangesInVotes normalizedChanges
+
+        isInvalid =
+            hasChanges && containsInvalidChange normalizedChanges
+    in
+    not hasChanges || (hasChanges && not isInvalid)
