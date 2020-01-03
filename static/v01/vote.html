@@ -7,9 +7,9 @@
     <title>Czoodle.cz - hlasování</title>
     <link rel="icon" href="../favicon.ico" type="image/x-icon"/>
     <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon"/>
-    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/main.css?v02">
     <script src="../js/encryptionutils.js"></script>
-    <script src="js/vote.elm.js"></script>
+    <script src="js/vote.elm.js?v02"></script>
     <meta property="og:title" content="Czoodle.cz"/>
     <meta property="og:image" content="https://czoodle.cz/og/czoodle_og_image.png"/>
     <meta property="og:site_name" content="Czoodle.cz"/>
@@ -33,23 +33,34 @@
     </footer>
     <script type="text/javascript">
         const date = new Date();
-        let app = Elm.Vote.init({
+        const today = {
+            year: date.getFullYear(),
+            month: date.getMonth() + 1,
+            day: date.getDate(),
+        }
+        let app = Elm.VotePage.init({
             node: document.getElementById('elm-root'),
-            flags: { urlHash: location.hash },
+            flags: { urlHash: location.hash, today, languages: navigator.languages },
         });
         let version;
+        let evidence;
         app.ports.load.subscribe(async function (data) {
             const result = await get('/data/v01/get/' + data.projectKey);
             const json = await decryptJson(result.encryptedData, result.iv, data.secretKey);
             version = result.version;
+            evidence = json.evidence;
+            if (json.title) {
+                document.title = 'Czoodle.cz: ' + json.title;
+            }
             app.ports.loaded.send(json);
         });
         app.ports.modify.subscribe(async function(data) {
+            data.project.evidence = evidence;
             const { encryptedData, iv } = await encryptJson(data.project, data.secretKey);
             const toSend = {
                 encryptedData,
                 iv,
-                evidence: data.project.evidence,
+                evidence,
                 previousVersion: version,
                 projectKey: data.projectKey,
                 version,

@@ -9,14 +9,16 @@ module SDate.SDate exposing
     , monthFromDay
     , monthFromTuple
     , monthToTuple
+    , nextDay
     , nextMonth
+    , prevDay
     , prevMonth
     , weekDay
     , weeksInMonth
     , yearFromInt
     )
 
-import Array exposing (..)
+import Array exposing (Array)
 
 
 type SYear

@@ -1,6 +1,7 @@
 body {
     margin: 0 0;
     padding: 0 0;
+    overflow: auto scroll;
 }
 header {
     padding: 50px 0;
@@ -50,6 +51,7 @@ h1.header > .le {
     max-width: 600px;
     margin: 0 auto;
     padding: 0.5rem;
+    position: relative;
 }
 @media (min-width: 600px) {
     .width {
@@ -145,6 +147,10 @@ h1.header > .le {
     visibility: hidden;
 }
 
+.relative {
+    position: relative;
+}
+
 /* Colors */
 
 .colors-add {
@@ -191,6 +197,38 @@ h1.header > .le {
     }
 }
 
+.translation-base-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.translation-list {
+    position: absolute;
+    bottom: -1px;
+    right: 1em;
+    box-sizing: border-box;
+}
+
+.translation-item {
+    display: inline-block;
+    color: #959595;
+    margin: 0 0.25em 0 0.25em;
+    border-bottom: 1px transparent solid;
+    box-sizing: border-box;
+    font-size: 18px;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+}
+.translation-item-selected {
+    border-bottom-color: #959595;
+}
+.translation-item:hover {
+    border-bottom-color: #555555;
+}
+
 .project {
     background: linear-gradient(#e6e6e6, #f8f8f8 70px, #f8f8f8);
     padding-bottom: 1rem;
@@ -211,14 +249,14 @@ h1.header > .le {
     border: none;
 }
 
-.polls-empty-info {
-    padding: 1rem;
+.box-info {
+    margin: 1rem;
     display: flex;
     justify-content: start;
     align-items: center;
 }
 
-.polls-empty-info-icon {
+.box-info-icon {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
@@ -233,7 +271,7 @@ h1.header > .le {
     margin-right: 1rem;
 }
 
-.polls-empty-info-text {
+.box-info-text {
     font-size: 120%;
 }
 
@@ -276,7 +314,6 @@ h1.header > .le {
 
 .poll {
     margin: 1rem 0;
-    /*background: rgb(252, 239, 216);*/
     background: rgb(237, 244, 255);
     border: 1px rgb(34, 133, 151) solid;
     border-bottom-right-radius: 10px;
@@ -345,6 +382,11 @@ h1.header > .le {
     margin: 0.5rem;
 }
 
+.poll-option-generic-input.poll-option-hidden {
+    opacity: 0.4;
+    text-decoration: line-through;
+}
+
 .poll-options-list {
     padding-left: 25px;
 }
@@ -388,8 +430,12 @@ h1.header > .le {
 }
 
 .calendar-cell.calendar-cell-active {
-    color: black;
+    color: #a7a6a6;
     background: rgba(255,255, 255, 0.7);
+}
+
+.calendar-cell.calendar-cell-active.calendar-cell-future {
+    color: black;
 }
 
 .calendar-cell.calendar-cell-selected {
@@ -397,8 +443,9 @@ h1.header > .le {
     color: white;
     font-weight: bold;
 }
-.calendar-cell.calendar-cell-selected.calendar-cell-active {
+.calendar-cell.calendar-cell-selected.calendar-cell-active.calendar-cell-future {
     background-color: rgb(34, 133, 151);
+    color: white;
 }
 
 .calendar-cell.calendar-cell-active:hover {
@@ -450,6 +497,7 @@ input.calendar-controls-year {
     margin-top: 1rem;
     border-top: 1px gray solid;
     padding-top: 1rem;
+    max-width: 700px;
 }
 
 .poll-date-tag {
@@ -479,6 +527,11 @@ input.calendar-controls-year {
     text-decoration: underline;
 }
 
+.poll-date-tag-name.poll-date-tag-name-hidden {
+    background-color: gray;
+    text-decoration: line-through;
+}
+
 .poll-date-tag-delete {
     display: inline-block;
     background: rgb(34, 133, 151);
@@ -487,9 +540,16 @@ input.calendar-controls-year {
     padding: 0 3px;
     border-radius: 0 3px 3px 0;
     cursor: pointer;
+    user-select: none;
 }
 .poll-date-tag-delete:hover {
     background-color: rgb(172, 0, 0);
+}
+.poll-date-tag-delete.poll-date-tag-delete-hidden {
+    background: gray;
+}
+.poll-date-tag-delete.poll-date-tag-delete-hidden:hover {
+    background: rgb(34, 133, 151);
 }
 
 .poll-date-tag-info {
@@ -523,7 +583,7 @@ input.calendar-controls-year {
 }
 
 .project-created-title {
-    border-left: 7px orange solid;
+    border-left: 7px #48CD0E solid;
     padding: 7px 7px 7px 20px;
     font-size: 150%;
     margin: 30px 0;
@@ -533,18 +593,22 @@ input.calendar-controls-year {
     font-weight: bold;
 }
 
-.project-created-link {
+.project-created-link-box {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: auto;
     border: 1px white solid;
     background: white;
     border-radius: 2px;
     display: block;
-    padding: 10px 5px;
-    font-weight: bold;
+    padding: 10px 0;
     text-align: center;
+}
+
+.project-created-link {
+    font-weight: bold;
     word-break: break-all;
-    overflow: auto;
-    max-width: 100%;
-    white-space: nowrap;
+    margin: 0 5px;
 }
 
 .project-created-link-secret {
@@ -556,9 +620,43 @@ input.calendar-controls-year {
     padding: 0.5rem;
 }
 
+.vote-project-title-line {
+    display: flex;
+}
+
 .vote-project-title {
     font-family: sans-serif;
+    font-weight: bold;
     font-size: 22px;
+    flex: 1;
+}
+h1.vote-project-title {
+    margin: 0.7em 0;
+}
+input.vote-project-title {
+    padding: 0.2em;
+    width: 100%;
+}
+
+.vote-project-edit-cell {
+    flex: 0;
+    padding: 9px 4px;
+    user-select: none;
+}
+.vote-project-edit-button {
+    color: #bbbbbb;
+    font-size: 32px;
+    padding: 0 6px;
+    display: block;
+    min-width: 1.5em;
+    min-height: 1.2em;
+    box-sizing: border-box;
+    text-align: center;
+    cursor: pointer;
+}
+.vote-project-edit-button:hover {
+    background: white;
+    border-radius: 3px;
 }
 
 .vote-process-overlay {
@@ -629,17 +727,21 @@ input.calendar-controls-year {
 
 .vote-poll-table {
     border-spacing: 0px 1px;
+    height: 100%; /* to make relative heights in cells work */
+    box-sizing: border-box;
+    padding-bottom: 0.5rem;
 }
-.vote-poll-table.margin-bottom {
-    margin-bottom: 1.5rem;
+.vote-poll-table.padding-bottom {
+    padding-bottom: 1.5rem;
+}
+.vote-poll-table > tr {
+    height: 100%;
 }
 
 .vote-poll-table th {
     padding: 2px;
     height: 100%;
-    min-height: 1px;
     box-sizing: border-box;
-    vertical-align: bottom;
 }
 
 .vote-poll-header-cell {
@@ -647,7 +749,7 @@ input.calendar-controls-year {
     color: white;
     background: rgb(102, 106, 102);
     border-radius: 2px;
-    min-width: 4rem;
+    min-width: 4.5em;
     height: 100%;
     box-sizing: border-box;
 }

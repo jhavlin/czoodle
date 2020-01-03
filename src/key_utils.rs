@@ -53,7 +53,7 @@ pub fn key_to_path(project_key: &str) -> String {
     let d = u32::from_str_radix(&d, 36).unwrap();
     let s = u32::from_str_radix(&s, 36).unwrap();
 
-    format!("{}/{}/{}/{}.dat", y, m, d, s)
+    format!("{}/{:02}/{:02}/{}.dat", y, m, d, s)
 }
 
 /**

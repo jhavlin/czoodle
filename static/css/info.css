@@ -22,6 +22,9 @@
     background: #333333;
     color: #eeeeee;
 }
+.info-dark a, .info-dark a:visited, .info-dark a:active {
+    color: white;
+}
 
 .info-light {
     background: #dddddd;
@@ -68,4 +71,9 @@
 
 .info-box-content-big {
     font-size: 60px;
+}
+
+.info-question {
+    font-style: italic;
+    margin-top: 3rem;
 }
