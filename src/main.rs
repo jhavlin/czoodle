@@ -210,6 +210,8 @@ fn get(req: &HttpRequest) -> Result<Json<GetOutputData>> {
 }
 
 fn main() {
+    let host = env::var("CZOODLE_HOST").unwrap_or("127.0.0.1".to_string());
+    let port = env::var("CZOODLE_PORT").unwrap_or("8088".to_string());
     let path = env::current_dir().expect("Cannot read current working directory.");
     println!("Starting Czoodle server at working directory {}", path.display());
 
@@ -226,7 +228,7 @@ fn main() {
             .handler("/", static_files_handler)
     };
     server::new(app)
-        .bind("127.0.0.1:8088")
+        .bind(host + ":" + &port)
         .unwrap()
         .workers(1)
         .run();

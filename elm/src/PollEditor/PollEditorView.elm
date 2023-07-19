@@ -289,7 +289,7 @@ viewDateCalendarControls state viewConfig =
                 [ class "common-input common-group-last calendar-controls-year"
                 , type_ "number"
                 , value (String.fromInt year)
-                , min "1970"
+                , Html.Attributes.min "1970"
                 , CommonView.onChange (viewConfig.outerMessage << SetCalendarYearDirect)
                 ]
                 []

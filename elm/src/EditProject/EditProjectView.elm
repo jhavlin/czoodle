@@ -60,12 +60,14 @@ view project changesInProjectDefinition viewConfig =
         [ div [ class "vote-poll-center-outer" ]
             [ div [ class "vote-poll-center" ]
                 [ div [ class "vote-poll-preferred-width vote-project-title-line" ]
-                    [ input
-                        [ class "vote-project-title"
-                        , value <| Maybe.withDefault (Maybe.withDefault "" project.title) changesInProjectDefinition.changedTitle
-                        , onInput <| wrap ChangeTitle
+                    [ div [ class "vote-project-title-cell" ]
+                        [ input
+                            [ class "vote-project-title"
+                            , value <| Maybe.withDefault (Maybe.withDefault "" project.title) changesInProjectDefinition.changedTitle
+                            , onInput <| wrap ChangeTitle
+                            ]
+                            []
                         ]
-                        []
                     , if hasChanges then
                         div [ class "vote-project-edit-cell" ]
                             [ a

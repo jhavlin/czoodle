@@ -170,7 +170,9 @@ viewProject viewModel =
         [ div [ class "vote-poll-center-outer" ]
             [ div [ class "vote-poll-center" ]
                 [ div [ class "vote-poll-preferred-width vote-project-title-line" ]
-                    [ h1 [ class "vote-project-title" ] [ text <| Maybe.withDefault viewModel.translation.common.untitled project.title ]
+                    [ div [ class "vote-project-title-cell" ]
+                        [ h1 [ class "vote-project-title" ] [ text <| Maybe.withDefault viewModel.translation.common.untitled project.title ]
+                        ]
                     , div [ class ("vote-project-edit-cell" ++ invisibleToClass hasChangesInVotes) ]
                         [ a
                             [ class "vote-project-edit-button"
