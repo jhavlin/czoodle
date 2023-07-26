@@ -1,12 +1,13 @@
 extern crate serde;
 extern crate serde_json;
 extern crate actix_web;
+extern crate actix_files;
 extern crate chrono;
 extern crate sha2;
 
 mod key_utils;
 
-use actix_web::{server, App, HttpRequest, Json, Result, http, fs};
+use actix_web::{HttpServer, App, web, web::Json, Result};
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
@@ -91,7 +92,7 @@ struct NextKeyInfo {
 }
 
 fn next_key_info() -> NextKeyInfo {
-    let today = Local::today();
+    let today = Local::now();
     let year = today.year();
     let month = today.month();
     let day = today.day();
@@ -113,19 +114,19 @@ fn next_key_info() -> NextKeyInfo {
     }
 }
 
-fn sha256(str: String) -> String {
-    let mut hash_helper = Sha256::new();
+fn sha256(str: &str) -> String {
+    let mut hasher = Sha256::new();
     // write input message
-    hash_helper.input(str.as_bytes());
+    hasher.update(str.as_bytes());
     // read hash digest and consume hash helper
-    let result = hash_helper.result();
+    let result = hasher.finalize();
     let strings: Vec<String> = result.iter()
         .map(|b| format!("{:02x}", b))
         .collect();
     strings.join("")
 }
 
-fn request_project_key(_req: &HttpRequest) -> Result<Json<RequestProjectKeyOutputData>> {
+async fn request_project_key() -> Result<Json<RequestProjectKeyOutputData>> {
     let NextKeyInfo { next: _, key, path_str: _ } = next_key_info();
     Ok(Json(RequestProjectKeyOutputData {
         project_key: key,
@@ -133,12 +134,12 @@ fn request_project_key(_req: &HttpRequest) -> Result<Json<RequestProjectKeyOutpu
     }))
 }
 
-fn create(info: Json<CreateInputData>) -> Result<Json<CreateOutputData>> {
+async fn create(info: Json<CreateInputData>) -> Result<Json<CreateOutputData>> {
     let NextKeyInfo { next, key, path_str } = next_key_info();
     if key != info.project_key {
         return Ok(Json(CreateOutputData { result: "key_used".to_string(), project_key: key }))
     }
-    if !sha256(format!("{}{}", info.project_key, info.key_verification)).starts_with(REQUIRED_HASH_PREFIX) {
+    if !sha256(&format!("{}{}", info.project_key, info.key_verification)).starts_with(REQUIRED_HASH_PREFIX) {
         return Ok(Json(CreateOutputData { result: "verification_failed".to_string(), project_key: "".to_string() }))
     }
 
@@ -154,7 +155,7 @@ fn create(info: Json<CreateInputData>) -> Result<Json<CreateOutputData>> {
     Ok(Json(CreateOutputData { result: "created".to_string(), project_key: key }))
 }
 
-fn update(input: Json<UpdateInputData>) -> Result<Json<UpdateOutputData>> {
+async fn update(input: Json<UpdateInputData>) -> Result<Json<UpdateOutputData>> {
     let path = key_utils::key_to_path(&input.project_key);
     let path = format!("./data/{}/{}", CURRENT_VERSION, path);
     let data = std::fs::read_to_string(&path).expect("Cannot read file");
@@ -195,8 +196,7 @@ fn update(input: Json<UpdateInputData>) -> Result<Json<UpdateOutputData>> {
     }
 }
 
-fn get(req: &HttpRequest) -> Result<Json<GetOutputData>> {
-    let project_key = req.match_info().get("project_key").unwrap();
+async fn get(project_key: web::Path<String>) -> Result<Json<GetOutputData>> {
     let path = key_utils::key_to_path(&project_key);
     let path = format!("./data/{}/{}", CURRENT_VERSION, path);
     let data = std::fs::read_to_string(&path).expect("Cannot read file");
@@ -209,27 +209,27 @@ fn get(req: &HttpRequest) -> Result<Json<GetOutputData>> {
     }))
 }
 
-fn main() {
+#[actix_web::main]
+async fn main() -> Result<(), std::io::Error> {
     let host = env::var("CZOODLE_HOST").unwrap_or("127.0.0.1".to_string());
     let port = env::var("CZOODLE_PORT").unwrap_or("8088".to_string());
     let path = env::current_dir().expect("Cannot read current working directory.");
     println!("Starting Czoodle server at working directory {}", path.display());
 
     let app = || {
-        let static_files_handler = fs::StaticFiles::new("./static")
-            .unwrap()
+        let static_files_handler = actix_files::Files::new("/", "./static")
             .show_files_listing()
             .index_file("index.html");
         App::new()
-            .resource("/data/v01/requestProjectKey", |r| r.f(request_project_key))  // <- use `with` extractor)
-            .resource("/data/v01/create", |r| r.method(http::Method::POST).with(create))  // <- use `with` extractor)
-            .resource("/data/v01/get/{project_key}", |r| r.f(get))
-            .resource("/data/v01/update", |r| r.method(http::Method::POST).with(update))
-            .handler("/", static_files_handler)
+            .route("/data/v01/requestProjectKey", web::get().to(request_project_key))  // <- use `with` extractor)
+            .route("/data/v01/create", web::post().to(create))  // <- use `with` extractor)
+            .route("/data/v01/get/{project_key}", web::get().to(get))
+            .route("/data/v01/update", web::post().to(update))
+            .service(static_files_handler)
     };
-    server::new(app)
-        .bind(host + ":" + &port)
-        .unwrap()
+    HttpServer::new(app)
+        .bind(host + ":" + &port)?
         .workers(1)
-        .run();
+        .run()
+        .await
 }
