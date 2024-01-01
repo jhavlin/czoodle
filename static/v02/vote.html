@@ -8,7 +8,7 @@
     <title>Czoodle.cz - hlasování</title>
     <link rel="icon" href="../favicon.ico" type="image/x-icon"/>
     <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon"/>
-    <link rel="stylesheet" href="css/main.v02.css">
+    <link rel="stylesheet" href="../css/main.css?v03">
     <script src="../js/encryptionutils.js"></script>
     <script src="js/vote.elm.js?v03"></script>
     <meta property="og:title" content="Czoodle.cz"/>
@@ -54,7 +54,7 @@
         let version;
         let evidence;
         app.ports.load.subscribe(async function (data) {
-            const result = await get('/data/v01/get/' + data.projectKey);
+            const result = await get('/data/v02/get/' + data.projectKey);
             const json = await decryptJson(result.encryptedData, result.iv, data.secretKey);
             version = result.version;
             evidence = json.evidence;
@@ -74,7 +74,7 @@
                 projectKey: data.projectKey,
                 version,
             }
-            const result = await post('/data/v01/update', toSend);
+            const result = await post('/data/v02/update', toSend);
             if (result.success) {
                 version = result.version;
                 app.ports.loaded.send(data.project);

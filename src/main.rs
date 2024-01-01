@@ -8,6 +8,7 @@ extern crate sha2;
 mod common;
 mod key_utils;
 mod v01;
+mod v02;
 
 use actix_web::{App, HttpServer, Result};
 use std::env;
@@ -28,6 +29,7 @@ async fn main() -> Result<(), std::io::Error> {
             .index_file("index.html");
         App::new()
             .service(v01::scope())
+            .service(v02::scope())
             .service(static_files_handler)
     };
     HttpServer::new(app)
