@@ -26,29 +26,29 @@ h1.header > .cz-start, h1.header > .cz-end {
     box-shadow: -0.2rem 0.2rem 4px rgb(44, 44, 44);
 }
 h1.header > .oo {
-    background: #0057B7;
+    background: #e4fcdf;
     font-size: 80%;
-    color: #4f91cd;
+    color: #48cd0e;
     padding: 0.1rem;
-    border: 1px #4f91cd solid;
+    border: 1px #48cd0e solid;
     border-radius: 4px;
     box-shadow: -0.2rem 0.2rem 4px rgb(44, 44, 44);
 }
 h1.header > .d {
-    background: #FFD700;
+    background: #ffffd9;
     font-size: 110%;
-    color: #fff7c8;
+    color: #ffc800;
     padding: 0.5rem;
-    border: 1px #fff7c8 solid;
+    border: 1px #ffc800 solid;
     border-radius: 4px;
     box-shadow: -0.2rem 0.2rem 4px rgb(44, 44, 44);
 }
 h1.header > .le {
     background: white;
     font-size: 60%;
-    color: #cccccc;
+    color: #ffb4b4;
     padding: 0.5rem;
-    border: 1px #cccccc solid;
+    border: 1px #ffb4b4 solid;
     border-radius: 4px;
     box-shadow: -0.2rem 0.2rem 4px rgb(44, 44, 44);
 }
@@ -857,7 +857,7 @@ input.vote-project-title {
 
 .vote-poll-count-yes {
     font-size: 90%;
-    color: #0057B7;
+    color: #48cd0e;
 }
 
 .vote-poll-new-name-input, .vote-poll-existing-name-input {
@@ -904,44 +904,44 @@ input.vote-project-title {
 }
 
 .vote-poll-select-cell-yes {
-    background: #0057B7;
-    border-color: #0057B7;
+    background: #e4fcdf;
+    border-color: #2f8609;
 }
 .editable .vote-poll-select-cell-yes:hover {
-    background: #003874;
+    background: #b8ffa8;
 }
 
 .vote-poll-select-cell-svg-yes {
-    fill: #4f91cd;
-    stroke: #4f91cd;
+    fill: #48cd0e;
+    stroke: #48cd0e;
     stroke-width: 3;
 }
 
 .vote-poll-select-cell-no {
     background: white;
-    border-color: #d1d1d1;
+    border-color: #ffb4b4;
 }
 .editable .vote-poll-select-cell-no:hover {
-    background: #f0f0f0;
+    background: #ffeeee;
 }
 
 .vote-poll-select-cell-svg-no {
     fill: transparent;
-    stroke: #cccccc;
+    stroke: #ffcccc;
     stroke-width: 2;
 }
 
 .vote-poll-select-cell-ifneeded {
-    background: #FFD700;
-    border-color: #FFD700;
+    background: #ffffd9;
+    border-color: #be9501;
 }
 .editable .vote-poll-select-cell-ifneeded:hover {
-    background: #e9c600;
+    background: #fbfbb0;
 }
 
 .vote-poll-select-cell-svg-ifneeded {
     fill: transparent;
-    stroke: #fff7c8;
+    stroke: #ffc800;
     stroke-width: 3;
 }
 
