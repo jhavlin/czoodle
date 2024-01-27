@@ -1,3 +1,17 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CreatePage</title>
+  <style>body { padding: 0; margin: 0; }</style>
+</head>
+
+<body>
+
+<pre id="elm"></pre>
+
+<script>
+try {
 (function(scope){
 'use strict';
 
@@ -77,7 +91,7 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
   return fun.a === 9 ? fun.f(a, b, c, d, e, f, g, h, i) : fun(a)(b)(c)(d)(e)(f)(g)(h)(i);
 }
 
-
+console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
 
 
 // EQUALITY
@@ -96,12 +110,6 @@ function _Utils_eq(x, y)
 
 function _Utils_eqHelp(x, y, depth, stack)
 {
-	if (depth > 100)
-	{
-		stack.push(_Utils_Tuple2(x,y));
-		return true;
-	}
-
 	if (x === y)
 	{
 		return true;
@@ -113,7 +121,13 @@ function _Utils_eqHelp(x, y, depth, stack)
 		return false;
 	}
 
-	/**_UNUSED/
+	if (depth > 100)
+	{
+		stack.push(_Utils_Tuple2(x,y));
+		return true;
+	}
+
+	/**/
 	if (x.$ === 'Set_elm_builtin')
 	{
 		x = $elm$core$Set$toList(x);
@@ -126,7 +140,7 @@ function _Utils_eqHelp(x, y, depth, stack)
 	}
 	//*/
 
-	/**/
+	/**_UNUSED/
 	if (x.$ < 0)
 	{
 		x = $elm$core$Dict$toList(x);
@@ -161,7 +175,7 @@ function _Utils_cmp(x, y, ord)
 		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
 	}
 
-	/**_UNUSED/
+	/**/
 	if (x instanceof String)
 	{
 		var a = x.valueOf();
@@ -170,10 +184,10 @@ function _Utils_cmp(x, y, ord)
 	}
 	//*/
 
-	/**/
+	/**_UNUSED/
 	if (typeof x.$ === 'undefined')
 	//*/
-	/**_UNUSED/
+	/**/
 	if (x.$[0] === '#')
 	//*/
 	{
@@ -203,17 +217,17 @@ var _Utils_compare = F2(function(x, y)
 
 // COMMON VALUES
 
-var _Utils_Tuple0 = 0;
-var _Utils_Tuple0_UNUSED = { $: '#0' };
+var _Utils_Tuple0_UNUSED = 0;
+var _Utils_Tuple0 = { $: '#0' };
 
-function _Utils_Tuple2(a, b) { return { a: a, b: b }; }
-function _Utils_Tuple2_UNUSED(a, b) { return { $: '#2', a: a, b: b }; }
+function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
 
-function _Utils_Tuple3(a, b, c) { return { a: a, b: b, c: c }; }
-function _Utils_Tuple3_UNUSED(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
+function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
 
-function _Utils_chr(c) { return c; }
-function _Utils_chr_UNUSED(c) { return new String(c); }
+function _Utils_chr_UNUSED(c) { return c; }
+function _Utils_chr(c) { return new String(c); }
 
 
 // RECORDS
@@ -264,11 +278,11 @@ function _Utils_ap(xs, ys)
 
 
 
-var _List_Nil = { $: 0 };
-var _List_Nil_UNUSED = { $: '[]' };
+var _List_Nil_UNUSED = { $: 0 };
+var _List_Nil = { $: '[]' };
 
-function _List_Cons(hd, tl) { return { $: 1, a: hd, b: tl }; }
-function _List_Cons_UNUSED(hd, tl) { return { $: '::', a: hd, b: tl }; }
+function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
 
 
 var _List_cons = F2(_List_Cons);
@@ -499,12 +513,12 @@ var _JsArray_appendN = F3(function(n, dest, source)
 
 // LOG
 
-var _Debug_log = F2(function(tag, value)
+var _Debug_log_UNUSED = F2(function(tag, value)
 {
 	return value;
 });
 
-var _Debug_log_UNUSED = F2(function(tag, value)
+var _Debug_log = F2(function(tag, value)
 {
 	console.log(tag + ': ' + _Debug_toString(value));
 	return value;
@@ -530,12 +544,12 @@ function _Debug_todoCase(moduleName, region, value)
 
 // TO STRING
 
-function _Debug_toString(value)
+function _Debug_toString_UNUSED(value)
 {
 	return '<internals>';
 }
 
-function _Debug_toString_UNUSED(value)
+function _Debug_toString(value)
 {
 	return _Debug_toAnsiString(false, value);
 }
@@ -638,7 +652,7 @@ function _Debug_toAnsiString(ansi, value)
 		return _Debug_stringColor(ansi, '<' + value.byteLength + ' bytes>');
 	}
 
-	if (typeof File === 'function' && value instanceof File)
+	if (typeof File !== 'undefined' && value instanceof File)
 	{
 		return _Debug_internalColor(ansi, '<' + value.name + '>');
 	}
@@ -708,7 +722,7 @@ function _Debug_fadeColor(ansi, string)
 
 function _Debug_internalColor(ansi, string)
 {
-	return ansi ? '\x1b[94m' + string + '\x1b[0m' : string;
+	return ansi ? '\x1b[36m' + string + '\x1b[0m' : string;
 }
 
 function _Debug_toHexDigit(n)
@@ -720,13 +734,13 @@ function _Debug_toHexDigit(n)
 // CRASH
 
 
-function _Debug_crash(identifier)
+function _Debug_crash_UNUSED(identifier)
 {
 	throw new Error('https://github.com/elm/core/blob/1.0.0/hints/' + identifier + '.md');
 }
 
 
-function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
+function _Debug_crash(identifier, fact1, fact2, fact3, fact4)
 {
 	switch(identifier)
 	{
@@ -784,11 +798,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.ab.H === region.al.H)
+	if (region.start.line === region.end.line)
 	{
-		return 'on line ' + region.ab.H;
+		return 'on line ' + region.start.line;
 	}
-	return 'on lines ' + region.ab.H + ' through ' + region.al.H;
+	return 'on lines ' + region.start.line + ' through ' + region.end.line;
 }
 
 
@@ -861,7 +875,7 @@ var _String_cons = F2(function(chr, str)
 function _String_uncons(string)
 {
 	var word = string.charCodeAt(0);
-	return word
+	return !isNaN(word)
 		? $elm$core$Maybe$Just(
 			0xD800 <= word && word <= 0xDBFF
 				? _Utils_Tuple2(_Utils_chr(string[0] + string[1]), string.slice(2))
@@ -1212,7 +1226,7 @@ function _Char_toLocaleLower(char)
 
 
 
-/**_UNUSED/
+/**/
 function _Json_errorToString(error)
 {
 	return $elm$json$Json$Decode$errorToString(error);
@@ -1616,11 +1630,11 @@ var _Json_encode = F2(function(indentLevel, value)
 	return JSON.stringify(_Json_unwrap(value), null, indentLevel) + '';
 });
 
-function _Json_wrap_UNUSED(value) { return { $: 0, a: value }; }
-function _Json_unwrap_UNUSED(value) { return value.a; }
+function _Json_wrap(value) { return { $: 0, a: value }; }
+function _Json_unwrap(value) { return value.a; }
 
-function _Json_wrap(value) { return value; }
-function _Json_unwrap(value) { return value; }
+function _Json_wrap_UNUSED(value) { return value; }
+function _Json_unwrap_UNUSED(value) { return value; }
 
 function _Json_emptyArray() { return []; }
 function _Json_emptyObject() { return {}; }
@@ -1857,9 +1871,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.bL,
-		impl.cT,
-		impl.cK,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function() { return function() {} }
 	);
 });
@@ -1872,21 +1886,21 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 function _Platform_initialize(flagDecoder, args, init, update, subscriptions, stepperBuilder)
 {
 	var result = A2(_Json_run, flagDecoder, _Json_wrap(args ? args['flags'] : undefined));
-	$elm$core$Result$isOk(result) || _Debug_crash(2 /**_UNUSED/, _Json_errorToString(result.a) /**/);
+	$elm$core$Result$isOk(result) || _Debug_crash(2 /**/, _Json_errorToString(result.a) /**/);
 	var managers = {};
-	result = init(result.a);
-	var model = result.a;
+	var initPair = init(result.a);
+	var model = initPair.a;
 	var stepper = stepperBuilder(sendToApp, model);
 	var ports = _Platform_setupEffects(managers, sendToApp);
 
 	function sendToApp(msg, viewMetadata)
 	{
-		result = A2(update, msg, model);
-		stepper(model = result.a, viewMetadata);
-		_Platform_dispatchEffects(managers, result.b, subscriptions(model));
+		var pair = A2(update, msg, model);
+		stepper(model = pair.a, viewMetadata);
+		_Platform_enqueueEffects(managers, pair.b, subscriptions(model));
 	}
 
-	_Platform_dispatchEffects(managers, result.b, subscriptions(model));
+	_Platform_enqueueEffects(managers, initPair.b, subscriptions(model));
 
 	return ports ? { ports: ports } : {};
 }
@@ -2044,6 +2058,51 @@ var _Platform_map = F2(function(tagger, bag)
 
 
 // PIPE BAGS INTO EFFECT MANAGERS
+//
+// Effects must be queued!
+//
+// Say your init contains a synchronous command, like Time.now or Time.here
+//
+//   - This will produce a batch of effects (FX_1)
+//   - The synchronous task triggers the subsequent `update` call
+//   - This will produce a batch of effects (FX_2)
+//
+// If we just start dispatching FX_2, subscriptions from FX_2 can be processed
+// before subscriptions from FX_1. No good! Earlier versions of this code had
+// this problem, leading to these reports:
+//
+//   https://github.com/elm/core/issues/980
+//   https://github.com/elm/core/pull/981
+//   https://github.com/elm/compiler/issues/1776
+//
+// The queue is necessary to avoid ordering issues for synchronous commands.
+
+
+// Why use true/false here? Why not just check the length of the queue?
+// The goal is to detect "are we currently dispatching effects?" If we
+// are, we need to bail and let the ongoing while loop handle things.
+//
+// Now say the queue has 1 element. When we dequeue the final element,
+// the queue will be empty, but we are still actively dispatching effects.
+// So you could get queue jumping in a really tricky category of cases.
+//
+var _Platform_effectsQueue = [];
+var _Platform_effectsActive = false;
+
+
+function _Platform_enqueueEffects(managers, cmdBag, subBag)
+{
+	_Platform_effectsQueue.push({ p: managers, q: cmdBag, r: subBag });
+
+	if (_Platform_effectsActive) return;
+
+	_Platform_effectsActive = true;
+	for (var fx; fx = _Platform_effectsQueue.shift(); )
+	{
+		_Platform_dispatchEffects(fx.p, fx.q, fx.r);
+	}
+	_Platform_effectsActive = false;
+}
 
 
 function _Platform_dispatchEffects(managers, cmdBag, subBag)
@@ -2081,8 +2140,8 @@ function _Platform_gatherEffects(isCmd, bag, effectsDict, taggers)
 
 		case 3:
 			_Platform_gatherEffects(isCmd, bag.o, effectsDict, {
-				p: bag.n,
-				q: taggers
+				s: bag.n,
+				t: taggers
 			});
 			return;
 	}
@@ -2093,9 +2152,9 @@ function _Platform_toEffect(isCmd, home, taggers, value)
 {
 	function applyTaggers(x)
 	{
-		for (var temp = taggers; temp; temp = temp.q)
+		for (var temp = taggers; temp; temp = temp.t)
 		{
-			x = temp.p(x);
+			x = temp.s(x);
 		}
 		return x;
 	}
@@ -2142,7 +2201,7 @@ function _Platform_outgoingPort(name, converter)
 	_Platform_checkPortName(name);
 	_Platform_effectManagers[name] = {
 		e: _Platform_outgoingPortMap,
-		r: converter,
+		u: converter,
 		a: _Platform_setupOutgoingPort
 	};
 	return _Platform_leaf(name);
@@ -2155,7 +2214,7 @@ var _Platform_outgoingPortMap = F2(function(tagger, value) { return value; });
 function _Platform_setupOutgoingPort(name)
 {
 	var subs = [];
-	var converter = _Platform_effectManagers[name].r;
+	var converter = _Platform_effectManagers[name].u;
 
 	// CREATE MANAGER
 
@@ -2212,7 +2271,7 @@ function _Platform_incomingPort(name, converter)
 	_Platform_checkPortName(name);
 	_Platform_effectManagers[name] = {
 		f: _Platform_incomingPortMap,
-		r: converter,
+		u: converter,
 		a: _Platform_setupIncomingPort
 	};
 	return _Platform_leaf(name);
@@ -2231,7 +2290,7 @@ var _Platform_incomingPortMap = F2(function(tagger, finalTagger)
 function _Platform_setupIncomingPort(name, sendToApp)
 {
 	var subs = _List_Nil;
-	var converter = _Platform_effectManagers[name].r;
+	var converter = _Platform_effectManagers[name].u;
 
 	// CREATE MANAGER
 
@@ -2271,7 +2330,7 @@ function _Platform_setupIncomingPort(name, sendToApp)
 //
 
 
-function _Platform_export(exports)
+function _Platform_export_UNUSED(exports)
 {
 	scope['Elm']
 		? _Platform_mergeExportsProd(scope['Elm'], exports)
@@ -2292,7 +2351,7 @@ function _Platform_mergeExportsProd(obj, exports)
 }
 
 
-function _Platform_export_UNUSED(exports)
+function _Platform_export(exports)
 {
 	scope['Elm']
 		? _Platform_mergeExportsDebug('Elm', scope['Elm'], exports)
@@ -2332,10 +2391,10 @@ var _VirtualDom_init = F4(function(virtualNode, flagDecoder, debugMetadata, args
 {
 	// NOTE: this function needs _Platform_export available to work
 
-	/**/
+	/**_UNUSED/
 	var node = args['node'];
 	//*/
-	/**_UNUSED/
+	/**/
 	var node = args && args['node'] ? args['node'] : _Debug_crash(0);
 	//*/
 
@@ -2573,16 +2632,33 @@ var _VirtualDom_attributeNS = F3(function(namespace, key, value)
 
 
 // XSS ATTACK VECTOR CHECKS
+//
+// For some reason, tabs can appear in href protocols and it still works.
+// So '\tjava\tSCRIPT:alert("!!!")' and 'javascript:alert("!!!")' are the same
+// in practice. That is why _VirtualDom_RE_js and _VirtualDom_RE_js_html look
+// so freaky.
+//
+// Pulling the regular expressions out to the top level gives a slight speed
+// boost in small benchmarks (4-10%) but hoisting values to reduce allocation
+// can be unpredictable in large programs where JIT may have a harder time with
+// functions are not fully self-contained. The benefit is more that the js and
+// js_html ones are so weird that I prefer to see them near each other.
+
+
+var _VirtualDom_RE_script = /^script$/i;
+var _VirtualDom_RE_on_formAction = /^(on|formAction$)/i;
+var _VirtualDom_RE_js = /^\s*j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:/i;
+var _VirtualDom_RE_js_html = /^\s*(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:|d\s*a\s*t\s*a\s*:\s*t\s*e\s*x\s*t\s*\/\s*h\s*t\s*m\s*l\s*(,|;))/i;
 
 
 function _VirtualDom_noScript(tag)
 {
-	return tag == 'script' ? 'p' : tag;
+	return _VirtualDom_RE_script.test(tag) ? 'p' : tag;
 }
 
 function _VirtualDom_noOnOrFormAction(key)
 {
-	return /^(on|formAction$)/i.test(key) ? 'data-' + key : key;
+	return _VirtualDom_RE_on_formAction.test(key) ? 'data-' + key : key;
 }
 
 function _VirtualDom_noInnerHtmlOrFormAction(key)
@@ -2592,26 +2668,24 @@ function _VirtualDom_noInnerHtmlOrFormAction(key)
 
 function _VirtualDom_noJavaScriptUri(value)
 {
-	return /^javascript:/i.test(value.replace(/\s/g,'')) ? '' : value;
-}
-
-function _VirtualDom_noJavaScriptUri_UNUSED(value)
-{
-	return /^javascript:/i.test(value.replace(/\s/g,''))
-		? 'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'
+	return _VirtualDom_RE_js.test(value)
+		? /**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
 		: value;
 }
 
 function _VirtualDom_noJavaScriptOrHtmlUri(value)
 {
-	return /^\s*(javascript:|data:text\/html)/i.test(value) ? '' : value;
+	return _VirtualDom_RE_js_html.test(value)
+		? /**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
+		: value;
 }
 
-function _VirtualDom_noJavaScriptOrHtmlUri_UNUSED(value)
+function _VirtualDom_noJavaScriptOrHtmlJson(value)
 {
-	return /^\s*(javascript:|data:text\/html)/i.test(value)
-		? 'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'
-		: value;
+	return (typeof _Json_unwrap(value) === 'string' && _VirtualDom_RE_js_html.test(_Json_unwrap(value)))
+		? _Json_wrap(
+			/**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
+		) : value;
 }
 
 
@@ -2659,9 +2733,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		s: func(record.s),
-		ac: record.ac,
-		_: record._
+		message: func(record.message),
+		stopPropagation: record.stopPropagation,
+		preventDefault: record.preventDefault
 	}
 });
 
@@ -2929,11 +3003,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.s;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.ac;
+		var message = !tag ? value : tag < 3 ? value.a : value.message;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.stopPropagation;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value._) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.preventDefault) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3883,15 +3957,15 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.bL,
-		impl.cT,
-		impl.cK,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function(sendToApp, initialModel) {
-			var view = impl.cU;
-			/**/
+			var view = impl.view;
+			/**_UNUSED/
 			var domNode = args['node'];
 			//*/
-			/**_UNUSED/
+			/**/
 			var domNode = args && args['node'] ? args['node'] : _Debug_crash(0);
 			//*/
 			var currNode = _VirtualDom_virtualize(domNode);
@@ -3919,12 +3993,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.bL,
-		impl.cT,
-		impl.cK,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.aa && impl.aa(sendToApp)
-			var view = impl.cU;
+			var divertHrefToApp = impl.setup && impl.setup(sendToApp)
+			var view = impl.view;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3932,12 +4006,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.a9);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.body);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.S) && (_VirtualDom_doc.title = title = doc.S);
+				(title !== doc.title) && (_VirtualDom_doc.title = title = doc.title);
 			});
 		}
 	);
@@ -3993,12 +4067,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.b5;
-	var onUrlRequest = impl.b6;
+	var onUrlChange = impl.onUrlChange;
+	var onUrlRequest = impl.onUrlRequest;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		aa: function(sendToApp)
+		setup: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4014,9 +4088,9 @@ function _Browser_application(impl)
 					var next = $elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.aN === next.aN
-							&& curr.as === next.as
-							&& curr.aK.a === next.aK.a
+							&& curr.protocol === next.protocol
+							&& curr.host === next.host
+							&& curr.port_.a === next.port_.a
 						)
 							? $elm$browser$Browser$Internal(next)
 							: $elm$browser$Browser$External(href)
@@ -4024,13 +4098,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		bL: function(flags)
+		init: function(flags)
 		{
-			return A3(impl.bL, flags, _Browser_getUrl(), key);
+			return A3(impl.init, flags, _Browser_getUrl(), key);
 		},
-		cU: impl.cU,
-		cT: impl.cT,
-		cK: impl.cK
+		view: impl.view,
+		update: impl.update,
+		subscriptions: impl.subscriptions
 	});
 }
 
@@ -4096,17 +4170,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { aq: 'hidden', bc: 'visibilitychange' }
+		? { hidden: 'hidden', change: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { aq: 'mozHidden', bc: 'mozvisibilitychange' }
+		? { hidden: 'mozHidden', change: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { aq: 'msHidden', bc: 'msvisibilitychange' }
+		? { hidden: 'msHidden', change: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { aq: 'webkitHidden', bc: 'webkitvisibilitychange' }
-		: { aq: 'hidden', bc: 'visibilitychange' };
+		? { hidden: 'webkitHidden', change: 'webkitvisibilitychange' }
+		: { hidden: 'hidden', change: 'visibilitychange' };
 }
 
 
@@ -4187,12 +4261,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		aT: _Browser_getScene(),
-		cV: {
-			T: _Browser_window.pageXOffset,
-			c_: _Browser_window.pageYOffset,
-			F: _Browser_doc.documentElement.clientWidth,
-			A: _Browser_doc.documentElement.clientHeight
+		scene: _Browser_getScene(),
+		viewport: {
+			x: _Browser_window.pageXOffset,
+			y: _Browser_window.pageYOffset,
+			width: _Browser_doc.documentElement.clientWidth,
+			height: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4202,8 +4276,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		F: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		A: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		width: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		height: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4226,15 +4300,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			aT: {
-				F: node.scrollWidth,
-				A: node.scrollHeight
+			scene: {
+				width: node.scrollWidth,
+				height: node.scrollHeight
 			},
-			cV: {
-				T: node.scrollLeft,
-				c_: node.scrollTop,
-				F: node.clientWidth,
-				A: node.clientHeight
+			viewport: {
+				x: node.scrollLeft,
+				y: node.scrollTop,
+				width: node.clientWidth,
+				height: node.clientHeight
 			}
 		};
 	});
@@ -4264,18 +4338,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			aT: _Browser_getScene(),
-			cV: {
-				T: x,
-				c_: y,
-				F: _Browser_doc.documentElement.clientWidth,
-				A: _Browser_doc.documentElement.clientHeight
+			scene: _Browser_getScene(),
+			viewport: {
+				x: x,
+				y: y,
+				width: _Browser_doc.documentElement.clientWidth,
+				height: _Browser_doc.documentElement.clientHeight
 			},
-			bw: {
-				T: x + rect.left,
-				c_: y + rect.top,
-				F: rect.width,
-				A: rect.height
+			element: {
+				x: x + rect.left,
+				y: y + rect.top,
+				width: rect.width,
+				height: rect.height
 			}
 		};
 	});
@@ -4347,15 +4421,15 @@ var _Bitwise_shiftRightZfBy = F2(function(offset, a)
 {
 	return a >>> offset;
 });
-var $elm$core$Basics$EQ = 1;
-var $elm$core$Basics$GT = 2;
-var $elm$core$Basics$LT = 0;
+var $elm$core$Basics$EQ = {$: 'EQ'};
+var $elm$core$Basics$GT = {$: 'GT'};
+var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$List$cons = _List_cons;
 var $elm$core$Dict$foldr = F3(
 	function (func, acc, t) {
 		foldr:
 		while (true) {
-			if (t.$ === -2) {
+			if (t.$ === 'RBEmpty_elm_builtin') {
 				return acc;
 			} else {
 				var key = t.b;
@@ -4400,7 +4474,7 @@ var $elm$core$Dict$keys = function (dict) {
 		dict);
 };
 var $elm$core$Set$toList = function (_v0) {
-	var dict = _v0;
+	var dict = _v0.a;
 	return $elm$core$Dict$keys(dict);
 };
 var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
@@ -4410,7 +4484,7 @@ var $elm$core$Array$foldr = F3(
 		var tail = _v0.d;
 		var helper = F2(
 			function (node, acc) {
-				if (!node.$) {
+				if (node.$ === 'SubTree') {
 					var subTree = node.a;
 					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
 				} else {
@@ -4428,32 +4502,32 @@ var $elm$core$Array$toList = function (array) {
 	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
 };
 var $elm$core$Result$Err = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Err', a: a};
 };
 var $elm$json$Json$Decode$Failure = F2(
 	function (a, b) {
-		return {$: 3, a: a, b: b};
+		return {$: 'Failure', a: a, b: b};
 	});
 var $elm$json$Json$Decode$Field = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'Field', a: a, b: b};
 	});
 var $elm$json$Json$Decode$Index = F2(
 	function (a, b) {
-		return {$: 1, a: a, b: b};
+		return {$: 'Index', a: a, b: b};
 	});
 var $elm$core$Result$Ok = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Ok', a: a};
 };
 var $elm$json$Json$Decode$OneOf = function (a) {
-	return {$: 2, a: a};
+	return {$: 'OneOf', a: a};
 };
-var $elm$core$Basics$False = 1;
+var $elm$core$Basics$False = {$: 'False'};
 var $elm$core$Basics$add = _Basics_add;
 var $elm$core$Maybe$Just = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Just', a: a};
 };
-var $elm$core$Maybe$Nothing = {$: 1};
+var $elm$core$Maybe$Nothing = {$: 'Nothing'};
 var $elm$core$String$all = _String_all;
 var $elm$core$Basics$and = _Basics_and;
 var $elm$core$Basics$append = _Utils_append;
@@ -4578,12 +4652,12 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 		errorToStringHelp:
 		while (true) {
 			switch (error.$) {
-				case 0:
+				case 'Field':
 					var f = error.a;
 					var err = error.b;
 					var isSimple = function () {
 						var _v1 = $elm$core$String$uncons(f);
-						if (_v1.$ === 1) {
+						if (_v1.$ === 'Nothing') {
 							return false;
 						} else {
 							var _v2 = _v1.a;
@@ -4598,7 +4672,7 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 					error = $temp$error;
 					context = $temp$context;
 					continue errorToStringHelp;
-				case 1:
+				case 'Index':
 					var i = error.a;
 					var err = error.b;
 					var indexName = '[' + ($elm$core$String$fromInt(i) + ']');
@@ -4607,7 +4681,7 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 					error = $temp$error;
 					context = $temp$context;
 					continue errorToStringHelp;
-				case 2:
+				case 'OneOf':
 					var errors = error.a;
 					if (!errors.b) {
 						return 'Ran into a Json.Decode.oneOf with no possibilities' + function () {
@@ -4671,7 +4745,7 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 var $elm$core$Array$branchFactor = 32;
 var $elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
-		return {$: 0, a: a, b: b, c: c, d: d};
+		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
 	});
 var $elm$core$Elm$JsArray$empty = _JsArray_empty;
 var $elm$core$Basics$ceiling = _Basics_ceiling;
@@ -4686,7 +4760,7 @@ var $elm$core$Array$shiftStep = $elm$core$Basics$ceiling(
 var $elm$core$Array$empty = A4($elm$core$Array$Array_elm_builtin, 0, $elm$core$Array$shiftStep, $elm$core$Elm$JsArray$empty, $elm$core$Elm$JsArray$empty);
 var $elm$core$Elm$JsArray$initialize = _JsArray_initialize;
 var $elm$core$Array$Leaf = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Leaf', a: a};
 };
 var $elm$core$Basics$apL = F2(
 	function (f, x) {
@@ -4706,7 +4780,7 @@ var $elm$core$Basics$max = F2(
 	});
 var $elm$core$Basics$mul = _Basics_mul;
 var $elm$core$Array$SubTree = function (a) {
-	return {$: 0, a: a};
+	return {$: 'SubTree', a: a};
 };
 var $elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
 var $elm$core$Array$compressNodes = F2(
@@ -4753,25 +4827,25 @@ var $elm$core$Array$treeFromBuilder = F2(
 	});
 var $elm$core$Array$builderToArray = F2(
 	function (reverseNodeList, builder) {
-		if (!builder.b) {
+		if (!builder.nodeListSize) {
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.d),
+				$elm$core$Elm$JsArray$length(builder.tail),
 				$elm$core$Array$shiftStep,
 				$elm$core$Elm$JsArray$empty,
-				builder.d);
+				builder.tail);
 		} else {
-			var treeLen = builder.b * $elm$core$Array$branchFactor;
+			var treeLen = builder.nodeListSize * $elm$core$Array$branchFactor;
 			var depth = $elm$core$Basics$floor(
 				A2($elm$core$Basics$logBase, $elm$core$Array$branchFactor, treeLen - 1));
-			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.e) : builder.e;
-			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.b);
+			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.nodeList) : builder.nodeList;
+			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.nodeListSize);
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.d) + treeLen,
+				$elm$core$Elm$JsArray$length(builder.tail) + treeLen,
 				A2($elm$core$Basics$max, 5, depth * $elm$core$Array$shiftStep),
 				tree,
-				builder.d);
+				builder.tail);
 		}
 	});
 var $elm$core$Basics$idiv = _Basics_idiv;
@@ -4784,7 +4858,7 @@ var $elm$core$Array$initializeHelp = F5(
 				return A2(
 					$elm$core$Array$builderToArray,
 					false,
-					{e: nodeList, b: (len / $elm$core$Array$branchFactor) | 0, d: tail});
+					{nodeList: nodeList, nodeListSize: (len / $elm$core$Array$branchFactor) | 0, tail: tail});
 			} else {
 				var leaf = $elm$core$Array$Leaf(
 					A3($elm$core$Elm$JsArray$initialize, $elm$core$Array$branchFactor, fromIndex, fn));
@@ -4814,9 +4888,9 @@ var $elm$core$Array$initialize = F2(
 			return A5($elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
-var $elm$core$Basics$True = 0;
+var $elm$core$Basics$True = {$: 'True'};
 var $elm$core$Result$isOk = function (result) {
-	if (!result.$) {
+	if (result.$ === 'Ok') {
 		return true;
 	} else {
 		return false;
@@ -4827,31 +4901,33 @@ var $elm$json$Json$Decode$map2 = _Json_map2;
 var $elm$json$Json$Decode$succeed = _Json_succeed;
 var $elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
-		case 0:
+		case 'Normal':
 			return 0;
-		case 1:
+		case 'MayStopPropagation':
 			return 1;
-		case 2:
+		case 'MayPreventDefault':
 			return 2;
 		default:
 			return 3;
 	}
 };
 var $elm$browser$Browser$External = function (a) {
-	return {$: 1, a: a};
+	return {$: 'External', a: a};
 };
 var $elm$browser$Browser$Internal = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Internal', a: a};
 };
 var $elm$core$Basics$identity = function (x) {
 	return x;
 };
-var $elm$browser$Browser$Dom$NotFound = $elm$core$Basics$identity;
-var $elm$url$Url$Http = 0;
-var $elm$url$Url$Https = 1;
+var $elm$browser$Browser$Dom$NotFound = function (a) {
+	return {$: 'NotFound', a: a};
+};
+var $elm$url$Url$Http = {$: 'Http'};
+var $elm$url$Url$Https = {$: 'Https'};
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {an: fragment, as: host, aD: path, aK: port_, aN: protocol, aO: query};
+		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -4887,7 +4963,7 @@ var $elm$url$Url$chompBeforePath = F5(
 					var i = _v0.a;
 					var _v1 = $elm$core$String$toInt(
 						A2($elm$core$String$dropLeft, i + 1, str));
-					if (_v1.$ === 1) {
+					if (_v1.$ === 'Nothing') {
 						return $elm$core$Maybe$Nothing;
 					} else {
 						var port_ = _v1;
@@ -4970,24 +5046,26 @@ var $elm$core$String$startsWith = _String_startsWith;
 var $elm$url$Url$fromString = function (str) {
 	return A2($elm$core$String$startsWith, 'http://', str) ? A2(
 		$elm$url$Url$chompAfterProtocol,
-		0,
+		$elm$url$Url$Http,
 		A2($elm$core$String$dropLeft, 7, str)) : (A2($elm$core$String$startsWith, 'https://', str) ? A2(
 		$elm$url$Url$chompAfterProtocol,
-		1,
+		$elm$url$Url$Https,
 		A2($elm$core$String$dropLeft, 8, str)) : $elm$core$Maybe$Nothing);
 };
 var $elm$core$Basics$never = function (_v0) {
 	never:
 	while (true) {
-		var nvr = _v0;
+		var nvr = _v0.a;
 		var $temp$_v0 = nvr;
 		_v0 = $temp$_v0;
 		continue never;
 	}
 };
-var $elm$core$Task$Perform = $elm$core$Basics$identity;
+var $elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
 var $elm$core$Task$succeed = _Scheduler_succeed;
-var $elm$core$Task$init = $elm$core$Task$succeed(0);
+var $elm$core$Task$init = $elm$core$Task$succeed(_Utils_Tuple0);
 var $elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
 		if (!ls.b) {
@@ -5093,7 +5171,7 @@ var $elm$core$Task$sequence = function (tasks) {
 var $elm$core$Platform$sendToApp = _Platform_sendToApp;
 var $elm$core$Task$spawnCmd = F2(
 	function (router, _v0) {
-		var task = _v0;
+		var task = _v0.a;
 		return _Scheduler_spawn(
 			A2(
 				$elm$core$Task$andThen,
@@ -5105,7 +5183,7 @@ var $elm$core$Task$onEffects = F3(
 		return A2(
 			$elm$core$Task$map,
 			function (_v0) {
-				return 0;
+				return _Utils_Tuple0;
 			},
 			$elm$core$Task$sequence(
 				A2(
@@ -5115,29 +5193,31 @@ var $elm$core$Task$onEffects = F3(
 	});
 var $elm$core$Task$onSelfMsg = F3(
 	function (_v0, _v1, _v2) {
-		return $elm$core$Task$succeed(0);
+		return $elm$core$Task$succeed(_Utils_Tuple0);
 	});
 var $elm$core$Task$cmdMap = F2(
 	function (tagger, _v0) {
-		var task = _v0;
-		return A2($elm$core$Task$map, tagger, task);
+		var task = _v0.a;
+		return $elm$core$Task$Perform(
+			A2($elm$core$Task$map, tagger, task));
 	});
 _Platform_effectManagers['Task'] = _Platform_createManager($elm$core$Task$init, $elm$core$Task$onEffects, $elm$core$Task$onSelfMsg, $elm$core$Task$cmdMap);
 var $elm$core$Task$command = _Platform_leaf('Task');
 var $elm$core$Task$perform = F2(
 	function (toMessage, task) {
 		return $elm$core$Task$command(
-			A2($elm$core$Task$map, toMessage, task));
+			$elm$core$Task$Perform(
+				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
 var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $author$project$SDate$SDate$SDay = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'SDay', a: a, b: b};
 	});
 var $elm$core$Maybe$andThen = F2(
 	function (callback, maybeValue) {
-		if (!maybeValue.$) {
+		if (maybeValue.$ === 'Just') {
 			var value = maybeValue.a;
 			return callback(value);
 		} else {
@@ -5157,7 +5237,7 @@ var $elm$core$Array$fromListHelp = F3(
 				return A2(
 					$elm$core$Array$builderToArray,
 					true,
-					{e: nodeList, b: nodeListSize, d: jsArray});
+					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
 			} else {
 				var $temp$list = remainingItems,
 					$temp$nodeList = A2(
@@ -5203,7 +5283,7 @@ var $elm$core$Array$getHelp = F3(
 		while (true) {
 			var pos = $elm$core$Array$bitMask & (index >>> shift);
 			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-			if (!_v0.$) {
+			if (_v0.$ === 'SubTree') {
 				var subTree = _v0.a;
 				var $temp$shift = shift - $elm$core$Array$shiftStep,
 					$temp$index = index,
@@ -5236,7 +5316,7 @@ var $elm$core$Array$get = F2(
 	});
 var $elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
-		if (!maybe.$) {
+		if (maybe.$ === 'Just') {
 			var value = maybe.a;
 			return value;
 		} else {
@@ -5244,7 +5324,7 @@ var $elm$core$Maybe$withDefault = F2(
 		}
 	});
 var $author$project$SDate$SDate$daysInMonth = function (_v0) {
-	var year = _v0.a;
+	var year = _v0.a.a;
 	var month = _v0.b;
 	var res = A2(
 		$elm$core$Array$get,
@@ -5254,17 +5334,20 @@ var $author$project$SDate$SDate$daysInMonth = function (_v0) {
 };
 var $author$project$SDate$SDate$SMonth = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'SMonth', a: a, b: b};
 	});
 var $author$project$SDate$SDate$monthInYear = F2(
 	function (year, month) {
 		return ((month < 1) || (month > 12)) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
 			A2($author$project$SDate$SDate$SMonth, year, month));
 	});
-var $author$project$SDate$SDate$SYear = $elm$core$Basics$identity;
+var $author$project$SDate$SDate$SYear = function (a) {
+	return {$: 'SYear', a: a};
+};
 var $author$project$SDate$SDate$minYear = 1900;
 var $author$project$SDate$SDate$yearFromInt = function (year) {
-	return (_Utils_cmp(year, $author$project$SDate$SDate$minYear) > -1) ? $elm$core$Maybe$Just(year) : $elm$core$Maybe$Nothing;
+	return (_Utils_cmp(year, $author$project$SDate$SDate$minYear) > -1) ? $elm$core$Maybe$Just(
+		$author$project$SDate$SDate$SYear(year)) : $elm$core$Maybe$Nothing;
 };
 var $author$project$SDate$SDate$monthFromTuple = function (_v0) {
 	var year = _v0.a;
@@ -5326,127 +5409,127 @@ var $elm$core$List$any = F2(
 		}
 	});
 var $author$project$Translations$TranslationEn$translationEn = {
-	bi: 'EN',
-	r: {
-		bb: 'Cancel',
-		bn: _List_fromArray(
+	code: 'EN',
+	common: {
+		cancel: 'Cancel',
+		dayNamesShort: _List_fromArray(
 			['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']),
-		by: 'Error',
-		bT: _List_fromArray(
+		error: 'Error',
+		monthNames: _List_fromArray(
 			['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']),
-		aF: 'Description:',
-		cl: 'Options:',
-		aH: 'Name:',
-		aI: 'Date',
-		aJ: 'General',
-		cs: 'Title:',
-		ct: 'e.g. Teambuilding, gift for aunt, or reunion of ballet dancers',
-		cv: 'Remove',
-		cF: 'Save changes',
-		cP: 'Today',
-		cS: '(no name)',
-		cY: 'Wait, please.'
+		pollDescriptionLabel: 'Description:',
+		pollOptionsLabel: 'Options:',
+		pollTitleLabel: 'Name:',
+		pollTypeDate: 'Date',
+		pollTypeGeneric: 'General',
+		projectTitleLabel: 'Title:',
+		projectTitlePlaceholder: 'e.g. Teambuilding, gift for aunt, or reunion of ballet dancers',
+		remove: 'Remove',
+		saveChanges: 'Save changes',
+		today: 'Today',
+		untitled: '(no name)',
+		waitPlease: 'Wait, please.'
 	},
-	n: {
-		a2: 'poll',
-		a3: 'Add ',
-		a4: ' for: ',
-		bl: function (n) {
+	create: {
+		addPollBoldPart: 'poll',
+		addPollFirstPart: 'Add ',
+		addPollLastPart: ' for: ',
+		createProjectWithNPolls: function (n) {
 			return 'Create project (' + ($elm$core$String$fromInt(n) + ' polls)');
 		},
-		bJ: 'A project contains one or more polls of various types.',
-		bX: 'New Project',
-		cg: 'To decide a\u00A0question about WHEN.',
-		ch: 'To decide a\u00A0question about WHAT, WHO, HOW or WHERE.',
-		co: 'The link contains a decryption key. If you loose it, you won\'t be able to access your project.',
-		cp: 'Only encrypted data are sent to the server. Without decryption key, they are pretty useless. So keep the link in a safe place ;-)',
-		cq: 'Congratulations. Your project has been created. Please distribute the link below to the people that should vote.'
+		infoText: 'A project contains one or more polls of various types.',
+		newProjectHeader: 'New Project',
+		pollDescriptionDate: 'To decide a\u00A0question about WHEN.',
+		pollDescriptionGeneric: 'To decide a\u00A0question about WHAT, WHO, HOW or WHERE.',
+		projectCreatedInfo1: 'The link contains a decryption key. If you loose it, you won\'t be able to access your project.',
+		projectCreatedInfo2: 'Only encrypted data are sent to the server. Without decryption key, they are pretty useless. So keep the link in a safe place ;-)',
+		projectCreatedText: 'Congratulations. Your project has been created. Please distribute the link below to the people that should vote.'
 	},
-	bq: {bJ: 'Only authorized personnel should edit project definition.', bK: 'Consider informing voters about the changes.', cH: 'Scroll down and save or cancel', cL: 'Switch back to voting'},
-	bU: 'Controls in English',
-	h: {
-		a1: 'Add option',
-		bu: function (i) {
+	editProject: {infoText: 'Only authorized personnel should edit project definition.', informAdviceText: 'Consider informing voters about the changes.', scrollDownButtonTitle: 'Scroll down and save or cancel', switchBackButtonTitle: 'Switch back to voting'},
+	name: 'Controls in English',
+	pollEditor: {
+		addOption: 'Add option',
+		editorTitleDate: function (i) {
 			return 'Poll ' + ($elm$core$String$fromInt(i) + ': Date');
 		},
-		bv: function (i) {
+		editorTitleGeneric: function (i) {
 			return 'Poll ' + ($elm$core$String$fromInt(i) + ': General');
 		},
-		bE: ' (hidden)',
-		bF: 'Hide',
-		b4: 'nothing selected :-(',
-		b9: 'Mark available options in the calendar.',
-		ca: 'Enter list of available options.',
-		cb: 'Overview of options:',
-		aG: 'Here you can enter more detailed information about the poll if you want.',
-		cm: 'e.g. When will we meet?',
-		cn: 'e.g. What gift? or Which pub?',
-		cw: 'Remove poll',
-		cR: 'Unhide'
+		hiddenSuffix: ' (hidden)',
+		hide: 'Hide',
+		nothingSelected: 'nothing selected :-(',
+		optionsInstructionsDate: 'Mark available options in the calendar.',
+		optionsInstructionsGeneric: 'Enter list of available options.',
+		optionsOverview: 'Overview of options:',
+		pollDescriptionPlaceholder: 'Here you can enter more detailed information about the poll if you want.',
+		pollTitlePlaceholderDate: 'e.g. When will we meet?',
+		pollTitlePlaceholderGeneric: 'e.g. What gift? or Which pub?',
+		removePoll: 'Remove poll',
+		unhide: 'Unhide'
 	},
-	cW: {a5: '+ Add person', a6: 'Add another person to all polls', bg: 'Clear empty rows', bh: 'Remove all rows with no entered name from all polls', br: 'Edit project (Authorized personnel only!)', bs: 'Edit this row. Please remember that changing votes of others without consent is not nice!', bx: 'Enter name!', bH: 'If needed', bP: 'Legend', bQ: 'Loading', bW: '(new person)', bY: 'No', cf: 'Poll', cA: 'Revert changes in this row.', cB: 'Delete', cC: 'Delete this row in this poll', cD: 'Revert', cE: 'To be deleted.', cG: 'Saving', c$: 'Yes'}
+	vote: {addRow: '+ Add person', addRowTitle: 'Add another person to all polls', clearEmptyRows: 'Clear empty rows', clearEmptyRowsTitle: 'Remove all rows with no entered name from all polls', editProjectTitle: 'Edit project (Authorized personnel only!)', editRowButtonTitle: 'Edit this row. Please remember that changing votes of others without consent is not nice!', enterName: 'Enter name!', ifNeeded: 'If needed', legend: 'Legend', loading: 'Loading', newPerson: '(new person)', no: 'No', poll: 'Poll', revertRowButtonTitle: 'Revert changes in this row.', rowActionDelete: 'Delete', rowActionDeleteTitle: 'Delete this row in this poll', rowActionRevert: 'Revert', rowForDeletion: 'To be deleted.', saving: 'Saving', yes: 'Yes'}
 };
 var $author$project$Translations$Translations$default = $author$project$Translations$TranslationEn$translationEn;
 var $author$project$Translations$TranslationCz$translationCz = {
-	bi: 'CZ',
-	r: {
-		bb: 'Zrušit',
-		bn: _List_fromArray(
+	code: 'CZ',
+	common: {
+		cancel: 'Zrušit',
+		dayNamesShort: _List_fromArray(
 			['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne']),
-		by: 'Chyba',
-		bT: _List_fromArray(
+		error: 'Chyba',
+		monthNames: _List_fromArray(
 			['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec']),
-		aF: 'Popis:',
-		cl: 'Možnosti:',
-		aH: 'Nadpis:',
-		aI: 'Datum',
-		aJ: 'Obecné',
-		cs: 'Název:',
-		ct: 'např. Teambuilding, dárek pro tetu, nebo třeba sraz baletek',
-		cv: 'Odstranit',
-		cF: 'Uložit změny',
-		cP: 'Dnes',
-		cS: '(bez názvu)',
-		cY: 'Čekejte, prosím.'
+		pollDescriptionLabel: 'Popis:',
+		pollOptionsLabel: 'Možnosti:',
+		pollTitleLabel: 'Nadpis:',
+		pollTypeDate: 'Datum',
+		pollTypeGeneric: 'Obecné',
+		projectTitleLabel: 'Název:',
+		projectTitlePlaceholder: 'např. Teambuilding, dárek pro tetu, nebo třeba sraz baletek',
+		remove: 'Odstranit',
+		saveChanges: 'Uložit změny',
+		today: 'Dnes',
+		untitled: '(bez názvu)',
+		waitPlease: 'Čekejte, prosím.'
 	},
-	n: {
-		a2: 'hlasování',
-		a3: 'Přidat ',
-		a4: ' pro: ',
-		bl: function (n) {
+	create: {
+		addPollBoldPart: 'hlasování',
+		addPollFirstPart: 'Přidat ',
+		addPollLastPart: ' pro: ',
+		createProjectWithNPolls: function (n) {
 			return 'Vytvořit projekt (' + ($elm$core$String$fromInt(n) + ' hlasování)');
 		},
-		bJ: 'Projekt obsahuje jedno či více hlasování různých typů.',
-		bX: 'Nový projekt',
-		cg: 'Když se rozhoduje o\u00A0tom KDY.',
-		ch: 'Když se rozhoduje o\u00A0tom CO, KDO, KAM nebo KDE.',
-		co: 'Odkaz obsahuje dešifrovací klíč. Pokud o něj přijdete, nebudete moci k hlasování přistupovat.',
-		cp: 'Na server se posílají pouze zašifrovaná data. Bez dešifrovacího klíče jsou bezcenná. Tak ho neztraťte ;-)',
-		cq: 'Hurá. Projekt byl vytvořen. Tento odkaz si zkopírujte a pošlete všem hlasujícím!'
+		infoText: 'Projekt obsahuje jedno či více hlasování různých typů.',
+		newProjectHeader: 'Nový projekt',
+		pollDescriptionDate: 'Když se rozhoduje o\u00A0tom KDY.',
+		pollDescriptionGeneric: 'Když se rozhoduje o\u00A0tom CO, KDO, KAM nebo KDE.',
+		projectCreatedInfo1: 'Odkaz obsahuje dešifrovací klíč. Pokud o něj přijdete, nebudete moci k hlasování přistupovat.',
+		projectCreatedInfo2: 'Na server se posílají pouze zašifrovaná data. Bez dešifrovacího klíče jsou bezcenná. Tak ho neztraťte ;-)',
+		projectCreatedText: 'Hurá. Projekt byl vytvořen. Tento odkaz si zkopírujte a pošlete všem hlasujícím!'
 	},
-	bq: {bJ: 'Změny by měly provádět pouze oprávněné osoby.', bK: 'Zvažte, jestli byste neměli o změnách uvědomit hlasující.', cH: 'Přejít dolů a uložit nebo zrušit', cL: 'Přepnout zpět na hlasování'},
-	bU: 'Ovládání v češtině',
-	h: {
-		a1: 'Přidat možnost',
-		bu: function (i) {
+	editProject: {infoText: 'Změny by měly provádět pouze oprávněné osoby.', informAdviceText: 'Zvažte, jestli byste neměli o změnách uvědomit hlasující.', scrollDownButtonTitle: 'Přejít dolů a uložit nebo zrušit', switchBackButtonTitle: 'Přepnout zpět na hlasování'},
+	name: 'Ovládání v češtině',
+	pollEditor: {
+		addOption: 'Přidat možnost',
+		editorTitleDate: function (i) {
 			return 'Hlasování ' + ($elm$core$String$fromInt(i) + ': Datum');
 		},
-		bv: function (i) {
+		editorTitleGeneric: function (i) {
 			return 'Hlasování ' + ($elm$core$String$fromInt(i) + ': Obecné');
 		},
-		bE: ' (skryté)',
-		bF: 'Skrýt',
-		b4: 'nic nevybráno :-(',
-		b9: 'Označte v kalendáři termíny, o kterých se bude hlasovat.',
-		ca: 'Zadejte možnosti, o kterých se bude hlasovat.',
-		cb: 'Přehled možností:',
-		aG: 'Sem můžete napsat podrobnější informace o hlasování, ale nemusíte.',
-		cm: 'např. Kdy se sejdeme?',
-		cn: 'např. Co za dárek? nebo Jaká hospoda?',
-		cw: 'Odstranit hlasování',
-		cR: 'Odkrýt'
+		hiddenSuffix: ' (skryté)',
+		hide: 'Skrýt',
+		nothingSelected: 'nic nevybráno :-(',
+		optionsInstructionsDate: 'Označte v kalendáři termíny, o kterých se bude hlasovat.',
+		optionsInstructionsGeneric: 'Zadejte možnosti, o kterých se bude hlasovat.',
+		optionsOverview: 'Přehled možností:',
+		pollDescriptionPlaceholder: 'Sem můžete napsat podrobnější informace o hlasování, ale nemusíte.',
+		pollTitlePlaceholderDate: 'např. Kdy se sejdeme?',
+		pollTitlePlaceholderGeneric: 'např. Co za dárek? nebo Jaká hospoda?',
+		removePoll: 'Odstranit hlasování',
+		unhide: 'Odkrýt'
 	},
-	cW: {a5: '+ Přidej člověka', a6: 'Přidej nového hlasujícího do všech hlasování', bg: 'Odeber nevyplněné', bh: 'Odebrat řádky s nevyplněným jménem ze všech hlasování', br: 'Upravit projekt (Nepovolaným osobám vstup zapovězen!)', bs: 'Uprav tento řádek. Pamatujte, prosím, že měnit hlasování ostatních bez dovolení není hezké!', bx: 'Vyplňte jméno!', bH: 'V nouzi', bP: 'Legenda', bQ: 'Nahrávám', bW: '(nový hlasující)', bY: 'Ne', cf: 'Hlasování', cA: 'Zapomeň a zruš úpravy v tomto řádku.', cB: 'Smaž', cC: 'Smaž řádek pouze v tomto hlasování', cD: 'Vrať', cE: 'Ke smazání', cG: 'Ukládám', c$: 'Ano'}
+	vote: {addRow: '+ Přidej člověka', addRowTitle: 'Přidej nového hlasujícího do všech hlasování', clearEmptyRows: 'Odeber nevyplněné', clearEmptyRowsTitle: 'Odebrat řádky s nevyplněným jménem ze všech hlasování', editProjectTitle: 'Upravit projekt (Nepovolaným osobám vstup zapovězen!)', editRowButtonTitle: 'Uprav tento řádek. Pamatujte, prosím, že měnit hlasování ostatních bez dovolení není hezké!', enterName: 'Vyplňte jméno!', ifNeeded: 'V nouzi', legend: 'Legenda', loading: 'Nahrávám', newPerson: '(nový hlasující)', no: 'Ne', poll: 'Hlasování', revertRowButtonTitle: 'Zapomeň a zruš úpravy v tomto řádku.', rowActionDelete: 'Smaž', rowActionDeleteTitle: 'Smaž řádek pouze v tomto hlasování', rowActionRevert: 'Vrať', rowForDeletion: 'Ke smazání', saving: 'Ukládám', yes: 'Ano'}
 };
 var $author$project$Translations$Translations$available = _List_fromArray(
 	[$author$project$Translations$TranslationCz$translationCz, $author$project$Translations$TranslationEn$translationEn]);
@@ -5454,7 +5537,7 @@ var $author$project$Common$ListUtils$findFirst = F2(
 	function (predicate, list) {
 		var fn = F2(
 			function (curr, acc) {
-				if (acc.$ === 1) {
+				if (acc.$ === 'Nothing') {
 					return predicate(curr) ? $elm$core$Maybe$Just(curr) : $elm$core$Maybe$Nothing;
 				} else {
 					return acc;
@@ -5469,7 +5552,7 @@ var $author$project$Translations$Translations$get = function (code) {
 		A2(
 			$author$project$Common$ListUtils$findFirst,
 			function (i) {
-				return _Utils_eq(i.bi, code);
+				return _Utils_eq(i.code, code);
 			},
 			$author$project$Translations$Translations$available));
 };
@@ -5493,10 +5576,10 @@ var $author$project$Create$CreateDecoders$decodeCreateFlags = function () {
 	var topDecoder = A2($elm$json$Json$Decode$field, 'today', $author$project$Common$CommonDecoders$decodeDay);
 	var mapper = F3(
 		function (sDay, baseUrl, translation) {
-			return {a8: baseUrl, cP: sDay, cQ: translation};
+			return {baseUrl: baseUrl, today: sDay, translation: translation};
 		});
 	var checker = function (maybeSDay) {
-		if (!maybeSDay.$) {
+		if (maybeSDay.$ === 'Just') {
 			var sDay = maybeSDay.a;
 			return $elm$json$Json$Decode$succeed(sDay);
 		} else {
@@ -5514,13 +5597,16 @@ var $author$project$Create$CreateDecoders$decodeCreateFlags = function () {
 var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $author$project$SDate$SDate$defaultDay = A2(
 	$author$project$SDate$SDate$SDay,
-	A2($author$project$SDate$SDate$SMonth, 1970, 1),
+	A2(
+		$author$project$SDate$SDate$SMonth,
+		$author$project$SDate$SDate$SYear(1970),
+		1),
 	1);
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$core$Result$withDefault = F2(
 	function (def, result) {
-		if (!result.$) {
+		if (result.$ === 'Ok') {
 			var a = result.a;
 			return a;
 		} else {
@@ -5531,21 +5617,21 @@ var $author$project$Create$CreateUpdate$init = function (jsonFlags) {
 	var flagsResult = A2($elm$json$Json$Decode$decodeValue, $author$project$Create$CreateDecoders$decodeCreateFlags, jsonFlags);
 	var _v0 = A2(
 		$elm$core$Result$withDefault,
-		{a8: '', cP: $author$project$SDate$SDate$defaultDay, cQ: $author$project$Translations$Translations$default},
+		{baseUrl: '', today: $author$project$SDate$SDate$defaultDay, translation: $author$project$Translations$Translations$default},
 		flagsResult);
-	var today = _v0.cP;
-	var baseUrl = _v0.a8;
-	var translation = _v0.cQ;
+	var today = _v0.today;
+	var baseUrl = _v0.baseUrl;
+	var translation = _v0.translation;
 	return _Utils_Tuple2(
-		{a8: baseUrl, bm: $elm$core$Maybe$Nothing, Z: _List_Nil, S: '', cP: today, cQ: translation, cX: false},
+		{baseUrl: baseUrl, created: $elm$core$Maybe$Nothing, polls: _List_Nil, title: '', today: today, translation: translation, wait: false},
 		$elm$core$Platform$Cmd$none);
 };
 var $author$project$Create$CreateModel$CreatedProjectInfo = F2(
 	function (projectKey, secretKey) {
-		return {cr: projectKey, cI: secretKey};
+		return {projectKey: projectKey, secretKey: secretKey};
 	});
 var $author$project$Create$CreateModel$ProjectCreated = function (a) {
-	return {$: 6, a: a};
+	return {$: 'ProjectCreated', a: a};
 };
 var $elm$json$Json$Decode$value = _Json_decodeValue;
 var $author$project$Create$CreateUpdate$createdProjectInfo = _Platform_incomingPort('createdProjectInfo', $elm$json$Json$Decode$value);
@@ -5560,11 +5646,11 @@ var $author$project$Create$CreateUpdate$subscriptions = function (_v0) {
 	};
 	var decoderResult = function (v) {
 		var _v1 = decodeCreatedProjectInfo(v);
-		if (!_v1.$) {
+		if (_v1.$ === 'Ok') {
 			var value = _v1.a;
 			return value;
 		} else {
-			return {cr: 'error', cI: 'error'};
+			return {projectKey: 'error', secretKey: 'error'};
 		}
 	};
 	return $author$project$Create$CreateUpdate$createdProjectInfo(
@@ -5573,7 +5659,7 @@ var $author$project$Create$CreateUpdate$subscriptions = function (_v0) {
 				decoderResult(v));
 		});
 };
-var $author$project$Create$CreateModel$NoOp = {$: 8};
+var $author$project$Create$CreateModel$NoOp = {$: 'NoOp'};
 var $elm$core$Basics$composeL = F3(
 	function (g, f, x) {
 		return g(
@@ -5583,19 +5669,20 @@ var $elm$core$Task$onError = _Scheduler_onError;
 var $elm$core$Task$attempt = F2(
 	function (resultToMessage, task) {
 		return $elm$core$Task$command(
-			A2(
-				$elm$core$Task$onError,
+			$elm$core$Task$Perform(
 				A2(
-					$elm$core$Basics$composeL,
-					A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
-					$elm$core$Result$Err),
-				A2(
-					$elm$core$Task$andThen,
+					$elm$core$Task$onError,
 					A2(
 						$elm$core$Basics$composeL,
 						A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
-						$elm$core$Result$Ok),
-					task)));
+						$elm$core$Result$Err),
+					A2(
+						$elm$core$Task$andThen,
+						A2(
+							$elm$core$Basics$composeL,
+							A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+							$elm$core$Result$Ok),
+						task))));
 	});
 var $author$project$Common$ListUtils$changeIndex = F3(
 	function (fn, index, list) {
@@ -5607,51 +5694,53 @@ var $author$project$Common$ListUtils$changeIndex = F3(
 	});
 var $author$project$PollEditor$PollEditorModel$DatePollEditor = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'DatePollEditor', a: a, b: b};
 	});
-var $elm$core$Set$Set_elm_builtin = $elm$core$Basics$identity;
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
+var $elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $elm$core$Set$empty = $elm$core$Dict$empty;
+var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
 var $author$project$SDate$SDate$monthFromDay = function (_v0) {
 	var sMonth = _v0.a;
 	return sMonth;
 };
 var $author$project$Create$CreateUpdate$emptyDatePoll = function (today) {
 	var state = {
-		bG: $elm$core$Maybe$Nothing,
-		bS: $author$project$SDate$SDate$monthFromDay(today),
-		cP: today
+		highlightedDay: $elm$core$Maybe$Nothing,
+		month: $author$project$SDate$SDate$monthFromDay(today),
+		today: today
 	};
 	var editor = A2(
 		$author$project$PollEditor$PollEditorModel$DatePollEditor,
 		state,
-		{af: $elm$core$Set$empty, ar: $elm$core$Set$empty, aB: _List_Nil, aZ: $elm$core$Set$empty});
-	return {bd: $elm$core$Maybe$Nothing, be: $elm$core$Maybe$Nothing, bt: editor, aA: '', aC: ''};
+		{addedItems: $elm$core$Set$empty, hiddenItems: $elm$core$Set$empty, originalItems: _List_Nil, unhiddenItems: $elm$core$Set$empty});
+	return {changedDescription: $elm$core$Maybe$Nothing, changedTitle: $elm$core$Maybe$Nothing, editor: editor, originalDescription: '', originalTitle: ''};
 };
 var $author$project$PollEditor$PollEditorModel$GenericPollEditor = function (a) {
-	return {$: 1, a: a};
+	return {$: 'GenericPollEditor', a: a};
 };
 var $author$project$Create$CreateUpdate$emptyGenericPoll = function () {
 	var editor = $author$project$PollEditor$PollEditorModel$GenericPollEditor(
 		{
-			af: _List_fromArray(
+			addedItems: _List_fromArray(
 				['', '']),
-			ar: $elm$core$Set$empty,
-			aB: _List_Nil,
-			cy: $elm$core$Dict$empty,
-			aZ: $elm$core$Set$empty
+			hiddenItems: $elm$core$Set$empty,
+			originalItems: _List_Nil,
+			renamedItems: $elm$core$Dict$empty,
+			unhiddenItems: $elm$core$Set$empty
 		});
-	return {bd: $elm$core$Maybe$Nothing, be: $elm$core$Maybe$Nothing, bt: editor, aA: '', aC: ''};
+	return {changedDescription: $elm$core$Maybe$Nothing, changedTitle: $elm$core$Maybe$Nothing, editor: editor, originalDescription: '', originalTitle: ''};
 }();
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $author$project$Data$DataModel$commentIdInt = function (_v0) {
-	var id = _v0;
+	var id = _v0.a;
 	return id;
 };
 var $author$project$SDate$SDate$dayToTuple = function (_v0) {
 	var _v1 = _v0.a;
-	var year = _v1.a;
+	var year = _v1.a.a;
 	var month = _v1.b;
 	var day = _v0.b;
 	return _Utils_Tuple3(year, month, day);
@@ -5660,7 +5749,7 @@ var $elm$core$Dict$foldl = F3(
 	function (func, acc, dict) {
 		foldl:
 		while (true) {
-			if (dict.$ === -2) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
 				return acc;
 			} else {
 				var key = dict.b;
@@ -5694,7 +5783,7 @@ var $elm$json$Json$Encode$dict = F3(
 							toValue(value),
 							obj);
 					}),
-				_Json_emptyObject(0),
+				_Json_emptyObject(_Utils_Tuple0),
 				dictionary));
 	});
 var $elm$json$Json$Encode$int = _Json_wrap;
@@ -5708,7 +5797,7 @@ var $elm$json$Json$Encode$object = function (pairs) {
 					var v = _v0.b;
 					return A3(_Json_addField, k, v, obj);
 				}),
-			_Json_emptyObject(0),
+			_Json_emptyObject(_Utils_Tuple0),
 			pairs));
 };
 var $author$project$Common$CommonEncoders$encodeDayTuple = function (_v0) {
@@ -5735,19 +5824,19 @@ var $elm$json$Json$Encode$list = F2(
 			A3(
 				$elm$core$List$foldl,
 				_Json_addEntry(func),
-				_Json_emptyArray(0),
+				_Json_emptyArray(_Utils_Tuple0),
 				entries));
 	});
 var $author$project$Data$DataModel$optionIdInt = function (_v0) {
-	var id = _v0;
+	var id = _v0.a;
 	return id;
 };
 var $author$project$Data$DataModel$personIdInt = function (_v0) {
-	var id = _v0;
+	var id = _v0.a;
 	return id;
 };
 var $author$project$Data$DataModel$pollIdInt = function (_v0) {
-	var id = _v0;
+	var id = _v0.a;
 	return id;
 };
 var $elm$json$Json$Encode$string = _Json_wrap;
@@ -5764,10 +5853,10 @@ var $author$project$Data$DataEncoders$withLast = F3(
 	});
 var $author$project$Data$DataEncoders$encodeProject = function (project) {
 	var selectedOptionToString = function (selectedOption) {
-		switch (selectedOption) {
-			case 0:
+		switch (selectedOption.$) {
+			case 'Yes':
 				return 'yes';
-			case 1:
+			case 'No':
 				return 'no';
 			default:
 				return 'ifNeeded';
@@ -5790,13 +5879,13 @@ var $author$project$Data$DataEncoders$encodeProject = function (project) {
 					_Utils_Tuple2(
 					'id',
 					$elm$json$Json$Encode$int(
-						$author$project$Data$DataModel$personIdInt(personRow.cd))),
+						$author$project$Data$DataModel$personIdInt(personRow.personId))),
 					_Utils_Tuple2(
 					'name',
-					$elm$json$Json$Encode$string(personRow.bU)),
+					$elm$json$Json$Encode$string(personRow.name)),
 					_Utils_Tuple2(
 					'options',
-					encodeSelectedOptions(personRow.cJ))
+					encodeSelectedOptions(personRow.selectedOptions))
 				]));
 	};
 	var encodeGenericItem = function (item) {
@@ -5807,12 +5896,12 @@ var $author$project$Data$DataEncoders$encodeProject = function (project) {
 						_Utils_Tuple2(
 						'id',
 						$elm$json$Json$Encode$int(
-							$author$project$Data$DataModel$optionIdInt(item.az))),
+							$author$project$Data$DataModel$optionIdInt(item.optionId))),
 						_Utils_Tuple2(
 						'value',
-						$elm$json$Json$Encode$string(item.a_))
+						$elm$json$Json$Encode$string(item.value))
 					]),
-				item.aq ? _List_fromArray(
+				item.hidden ? _List_fromArray(
 					[
 						_Utils_Tuple2(
 						'hidden',
@@ -5827,13 +5916,13 @@ var $author$project$Data$DataEncoders$encodeProject = function (project) {
 						_Utils_Tuple2(
 						'id',
 						$elm$json$Json$Encode$int(
-							$author$project$Data$DataModel$optionIdInt(item.az))),
+							$author$project$Data$DataModel$optionIdInt(item.optionId))),
 						_Utils_Tuple2(
 						'value',
 						$author$project$Common$CommonEncoders$encodeDayTuple(
-							$author$project$SDate$SDate$dayToTuple(item.a_)))
+							$author$project$SDate$SDate$dayToTuple(item.value)))
 					]),
-				item.aq ? _List_fromArray(
+				item.hidden ? _List_fromArray(
 					[
 						_Utils_Tuple2(
 						'hidden',
@@ -5841,8 +5930,8 @@ var $author$project$Data$DataEncoders$encodeProject = function (project) {
 					]) : _List_Nil));
 	};
 	var encodePollInfo = function (info) {
-		if (info.$ === 1) {
-			var items = info.a.at;
+		if (info.$ === 'GenericPollInfo') {
+			var items = info.a.items;
 			return $elm$json$Json$Encode$object(
 				_List_fromArray(
 					[
@@ -5858,13 +5947,13 @@ var $author$project$Data$DataEncoders$encodeProject = function (project) {
 							A3(
 								$author$project$Data$DataEncoders$withLast,
 								function (i) {
-									return $author$project$Data$DataModel$optionIdInt(i.az);
+									return $author$project$Data$DataModel$optionIdInt(i.optionId);
 								},
 								0,
 								items)))
 					]));
 		} else {
-			var items = info.a.at;
+			var items = info.a.items;
 			return $elm$json$Json$Encode$object(
 				_List_fromArray(
 					[
@@ -5880,7 +5969,7 @@ var $author$project$Data$DataEncoders$encodeProject = function (project) {
 							A3(
 								$author$project$Data$DataEncoders$withLast,
 								function (i) {
-									return $author$project$Data$DataModel$optionIdInt(i.az);
+									return $author$project$Data$DataModel$optionIdInt(i.optionId);
 								},
 								0,
 								items)))
@@ -5894,14 +5983,14 @@ var $author$project$Data$DataEncoders$encodeProject = function (project) {
 					_Utils_Tuple2(
 					'id',
 					$elm$json$Json$Encode$int(
-						$author$project$Data$DataModel$commentIdInt(comment.bj))),
+						$author$project$Data$DataModel$commentIdInt(comment.commentId))),
 					_Utils_Tuple2(
 					'text',
-					$elm$json$Json$Encode$string(comment.cO))
+					$elm$json$Json$Encode$string(comment.text))
 				]));
 	};
 	var descriptionToFieldEncoder = function (description) {
-		if (description.$ === 1) {
+		if (description.$ === 'Nothing') {
 			return _List_Nil;
 		} else {
 			var desc = description.a;
@@ -5914,12 +6003,12 @@ var $author$project$Data$DataEncoders$encodeProject = function (project) {
 		}
 	};
 	var encodePoll = function (_v0) {
-		var pollId = _v0.ci;
-		var title = _v0.S;
-		var description = _v0.bp;
-		var pollInfo = _v0.cj;
-		var personRows = _v0.ce;
-		var lastPersonId = _v0.bN;
+		var pollId = _v0.pollId;
+		var title = _v0.title;
+		var description = _v0.description;
+		var pollInfo = _v0.pollInfo;
+		var personRows = _v0.personRows;
+		var lastPersonId = _v0.lastPersonId;
 		return $elm$json$Json$Encode$object(
 			_Utils_ap(
 				_List_fromArray(
@@ -5950,30 +6039,34 @@ var $author$project$Data$DataEncoders$encodeProject = function (project) {
 				_Utils_Tuple2(
 				'title',
 				$elm$json$Json$Encode$string(
-					A2($elm$core$Maybe$withDefault, '', project.S))),
+					A2($elm$core$Maybe$withDefault, '', project.title))),
 				_Utils_Tuple2(
 				'polls',
-				A2($elm$json$Json$Encode$list, encodePoll, project.Z)),
+				A2($elm$json$Json$Encode$list, encodePoll, project.polls)),
 				_Utils_Tuple2(
 				'lastPollId',
-				$elm$json$Json$Encode$int(project.bO)),
+				$elm$json$Json$Encode$int(project.lastPollId)),
 				_Utils_Tuple2(
 				'comments',
-				A2($elm$json$Json$Encode$list, encodeComment, project.bk)),
+				A2($elm$json$Json$Encode$list, encodeComment, project.comments)),
 				_Utils_Tuple2(
 				'lastCommentId',
-				$elm$json$Json$Encode$int(project.bM))
+				$elm$json$Json$Encode$int(project.lastCommentId))
 			]));
 };
 var $elm$browser$Browser$Dom$getViewportOf = _Browser_getViewportOf;
 var $author$project$Data$DataModel$DatePollInfo = function (a) {
-	return {$: 0, a: a};
+	return {$: 'DatePollInfo', a: a};
 };
 var $author$project$Data$DataModel$GenericPollInfo = function (a) {
-	return {$: 1, a: a};
+	return {$: 'GenericPollInfo', a: a};
 };
-var $author$project$Data$DataModel$OptionId = $elm$core$Basics$identity;
-var $author$project$Data$DataModel$PollId = $elm$core$Basics$identity;
+var $author$project$Data$DataModel$OptionId = function (a) {
+	return {$: 'OptionId', a: a};
+};
+var $author$project$Data$DataModel$PollId = function (a) {
+	return {$: 'PollId', a: a};
+};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -5990,7 +6083,7 @@ var $author$project$Common$ListUtils$filterNothings = function (list) {
 		$elm$core$List$foldr,
 		F2(
 			function (curr, acc) {
-				if (!curr.$) {
+				if (curr.$ === 'Just') {
 					var a = curr.a;
 					return A2($elm$core$List$cons, a, acc);
 				} else {
@@ -6002,7 +6095,7 @@ var $author$project$Common$ListUtils$filterNothings = function (list) {
 };
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
-		if (!maybe.$) {
+		if (maybe.$ === 'Just') {
 			var value = maybe.a;
 			return $elm$core$Maybe$Just(
 				f(value));
@@ -6030,15 +6123,19 @@ var $author$project$Common$CommonUtils$stringToMaybe = function (s) {
 	}
 };
 var $author$project$Create$CreateModel$newPollsToProject = function (_v0) {
-	var title = _v0.S;
-	var polls = _v0.Z;
+	var title = _v0.title;
+	var polls = _v0.polls;
 	var newGenericPollDataToPollInfo = function (_v3) {
-		var addedItems = _v3.af;
+		var addedItems = _v3.addedItems;
 		return A2(
 			$elm$core$List$indexedMap,
 			F2(
 				function (index, item) {
-					return {aq: false, az: 1 + index, a_: item};
+					return {
+						hidden: false,
+						optionId: $author$project$Data$DataModel$OptionId(1 + index),
+						value: item
+					};
 				}),
 			A2(
 				$elm$core$List$filter,
@@ -6049,12 +6146,16 @@ var $author$project$Create$CreateModel$newPollsToProject = function (_v0) {
 				addedItems));
 	};
 	var newDatePollDataToPollInfo = function (_v2) {
-		var addedItems = _v2.af;
+		var addedItems = _v2.addedItems;
 		return A2(
 			$elm$core$List$indexedMap,
 			F2(
 				function (index, item) {
-					return {aq: false, az: 1 + index, a_: item};
+					return {
+						hidden: false,
+						optionId: $author$project$Data$DataModel$OptionId(1 + index),
+						value: item
+					};
 				}),
 			$author$project$Common$ListUtils$filterNothings(
 				A2(
@@ -6063,38 +6164,38 @@ var $author$project$Create$CreateModel$newPollsToProject = function (_v0) {
 					$elm$core$Set$toList(addedItems))));
 	};
 	var newPollModelToPollInfo = function (pollEditorModel) {
-		if (!pollEditorModel.$) {
+		if (pollEditorModel.$ === 'DatePollEditor') {
 			var newPollData = pollEditorModel.b;
 			return $author$project$Data$DataModel$DatePollInfo(
 				{
-					at: newDatePollDataToPollInfo(newPollData)
+					items: newDatePollDataToPollInfo(newPollData)
 				});
 		} else {
 			var newPollData = pollEditorModel.a;
 			return $author$project$Data$DataModel$GenericPollInfo(
 				{
-					at: newGenericPollDataToPollInfo(newPollData)
+					items: newGenericPollDataToPollInfo(newPollData)
 				});
 		}
 	};
 	var pollEditorModelToPoll = F2(
 		function (index, pollEditorModel) {
 			return {
-				bp: $author$project$Common$CommonUtils$normalizeStringMaybe(pollEditorModel.bd),
-				bN: 0,
-				ce: _List_Nil,
-				ci: index + 1,
-				cj: newPollModelToPollInfo(pollEditorModel.bt),
-				S: $author$project$Common$CommonUtils$normalizeStringMaybe(pollEditorModel.be)
+				description: $author$project$Common$CommonUtils$normalizeStringMaybe(pollEditorModel.changedDescription),
+				lastPersonId: 0,
+				personRows: _List_Nil,
+				pollId: $author$project$Data$DataModel$PollId(index + 1),
+				pollInfo: newPollModelToPollInfo(pollEditorModel.editor),
+				title: $author$project$Common$CommonUtils$normalizeStringMaybe(pollEditorModel.changedTitle)
 			};
 		});
 	var finalPolls = A2($elm$core$List$indexedMap, pollEditorModelToPoll, polls);
 	return {
-		bk: _List_Nil,
-		bM: 0,
-		bO: 1 + $elm$core$List$length(finalPolls),
-		Z: finalPolls,
-		S: $author$project$Common$CommonUtils$stringToMaybe(title)
+		comments: _List_Nil,
+		lastCommentId: 0,
+		lastPollId: 1 + $elm$core$List$length(finalPolls),
+		polls: finalPolls,
+		title: $author$project$Common$CommonUtils$stringToMaybe(title)
 	};
 };
 var $author$project$Create$CreateUpdate$persist = _Platform_outgoingPort('persist', $elm$core$Basics$identity);
@@ -6121,27 +6222,27 @@ var $author$project$PollEditor$PollEditorUpdate$addGenericItem = function (data)
 	return _Utils_update(
 		data,
 		{
-			af: _Utils_ap(
-				data.af,
+			addedItems: _Utils_ap(
+				data.addedItems,
 				_List_fromArray(
 					['']))
 		});
 };
-var $elm$core$Dict$Black = 1;
+var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
-		return {$: -1, a: a, b: b, c: c, d: d, e: e};
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
 	});
-var $elm$core$Dict$Red = 0;
+var $elm$core$Dict$Red = {$: 'Red'};
 var $elm$core$Dict$balance = F5(
 	function (color, key, value, left, right) {
-		if ((right.$ === -1) && (!right.a)) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
 			var _v1 = right.a;
 			var rK = right.b;
 			var rV = right.c;
 			var rLeft = right.d;
 			var rRight = right.e;
-			if ((left.$ === -1) && (!left.a)) {
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
 				var _v3 = left.a;
 				var lK = left.b;
 				var lV = left.c;
@@ -6149,22 +6250,22 @@ var $elm$core$Dict$balance = F5(
 				var lRight = left.e;
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					0,
+					$elm$core$Dict$Red,
 					key,
 					value,
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, rK, rV, rLeft, rRight));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
 			} else {
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
 					color,
 					rK,
 					rV,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, left, rLeft),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
 					rRight);
 			}
 		} else {
-			if ((((left.$ === -1) && (!left.a)) && (left.d.$ === -1)) && (!left.d.a)) {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
 				var _v5 = left.a;
 				var lK = left.b;
 				var lV = left.c;
@@ -6177,11 +6278,11 @@ var $elm$core$Dict$balance = F5(
 				var lRight = left.e;
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					0,
+					$elm$core$Dict$Red,
 					lK,
 					lV,
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, llK, llV, llLeft, llRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, key, value, lRight, right));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
 			} else {
 				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
 			}
@@ -6190,8 +6291,8 @@ var $elm$core$Dict$balance = F5(
 var $elm$core$Basics$compare = _Utils_compare;
 var $elm$core$Dict$insertHelp = F3(
 	function (key, value, dict) {
-		if (dict.$ === -2) {
-			return A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
 		} else {
 			var nColor = dict.a;
 			var nKey = dict.b;
@@ -6199,8 +6300,8 @@ var $elm$core$Dict$insertHelp = F3(
 			var nLeft = dict.d;
 			var nRight = dict.e;
 			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1) {
-				case 0:
+			switch (_v1.$) {
+				case 'LT':
 					return A5(
 						$elm$core$Dict$balance,
 						nColor,
@@ -6208,7 +6309,7 @@ var $elm$core$Dict$insertHelp = F3(
 						nValue,
 						A3($elm$core$Dict$insertHelp, key, value, nLeft),
 						nRight);
-				case 1:
+				case 'EQ':
 					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
 				default:
 					return A5(
@@ -6224,13 +6325,13 @@ var $elm$core$Dict$insertHelp = F3(
 var $elm$core$Dict$insert = F3(
 	function (key, value, dict) {
 		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === -1) && (!_v0.a)) {
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
 			var _v1 = _v0.a;
 			var k = _v0.b;
 			var v = _v0.c;
 			var l = _v0.d;
 			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, 1, k, v, l, r);
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
 		} else {
 			var x = _v0;
 			return x;
@@ -6238,13 +6339,14 @@ var $elm$core$Dict$insert = F3(
 	});
 var $elm$core$Set$insert = F2(
 	function (key, _v0) {
-		var dict = _v0;
-		return A3($elm$core$Dict$insert, key, 0, dict);
+		var dict = _v0.a;
+		return $elm$core$Set$Set_elm_builtin(
+			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
 	});
 var $elm$core$Dict$getMin = function (dict) {
 	getMin:
 	while (true) {
-		if ((dict.$ === -1) && (dict.d.$ === -1)) {
+		if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
 			var left = dict.d;
 			var $temp$dict = left;
 			dict = $temp$dict;
@@ -6255,8 +6357,8 @@ var $elm$core$Dict$getMin = function (dict) {
 	}
 };
 var $elm$core$Dict$moveRedLeft = function (dict) {
-	if (((dict.$ === -1) && (dict.d.$ === -1)) && (dict.e.$ === -1)) {
-		if ((dict.e.d.$ === -1) && (!dict.e.d.a)) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.e.d.$ === 'RBNode_elm_builtin') && (dict.e.d.a.$ === 'Red')) {
 			var clr = dict.a;
 			var k = dict.b;
 			var v = dict.c;
@@ -6279,17 +6381,17 @@ var $elm$core$Dict$moveRedLeft = function (dict) {
 			var rRight = _v2.e;
 			return A5(
 				$elm$core$Dict$RBNode_elm_builtin,
-				0,
+				$elm$core$Dict$Red,
 				rlK,
 				rlV,
 				A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
 					rlL),
-				A5($elm$core$Dict$RBNode_elm_builtin, 1, rK, rV, rlR, rRight));
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rlR, rRight));
 		} else {
 			var clr = dict.a;
 			var k = dict.b;
@@ -6306,22 +6408,22 @@ var $elm$core$Dict$moveRedLeft = function (dict) {
 			var rV = _v5.c;
 			var rLeft = _v5.d;
 			var rRight = _v5.e;
-			if (clr === 1) {
+			if (clr.$ === 'Black') {
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, rK, rV, rLeft, rRight));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
 			} else {
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, rK, rV, rLeft, rRight));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
 			}
 		}
 	} else {
@@ -6329,8 +6431,8 @@ var $elm$core$Dict$moveRedLeft = function (dict) {
 	}
 };
 var $elm$core$Dict$moveRedRight = function (dict) {
-	if (((dict.$ === -1) && (dict.d.$ === -1)) && (dict.e.$ === -1)) {
-		if ((dict.d.d.$ === -1) && (!dict.d.d.a)) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.d.d.$ === 'RBNode_elm_builtin') && (dict.d.d.a.$ === 'Red')) {
 			var clr = dict.a;
 			var k = dict.b;
 			var v = dict.c;
@@ -6353,17 +6455,17 @@ var $elm$core$Dict$moveRedRight = function (dict) {
 			var rRight = _v4.e;
 			return A5(
 				$elm$core$Dict$RBNode_elm_builtin,
-				0,
+				$elm$core$Dict$Red,
 				lK,
 				lV,
-				A5($elm$core$Dict$RBNode_elm_builtin, 1, llK, llV, llLeft, llRight),
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
 				A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
 					lRight,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, rK, rV, rLeft, rRight)));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight)));
 		} else {
 			var clr = dict.a;
 			var k = dict.b;
@@ -6380,22 +6482,22 @@ var $elm$core$Dict$moveRedRight = function (dict) {
 			var rV = _v6.c;
 			var rLeft = _v6.d;
 			var rRight = _v6.e;
-			if (clr === 1) {
+			if (clr.$ === 'Black') {
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, rK, rV, rLeft, rRight));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
 			} else {
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, rK, rV, rLeft, rRight));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
 			}
 		}
 	} else {
@@ -6404,7 +6506,7 @@ var $elm$core$Dict$moveRedRight = function (dict) {
 };
 var $elm$core$Dict$removeHelpPrepEQGT = F7(
 	function (targetKey, dict, color, key, value, left, right) {
-		if ((left.$ === -1) && (!left.a)) {
+		if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
 			var _v1 = left.a;
 			var lK = left.b;
 			var lV = left.c;
@@ -6416,13 +6518,13 @@ var $elm$core$Dict$removeHelpPrepEQGT = F7(
 				lK,
 				lV,
 				lLeft,
-				A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, lRight, right));
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, lRight, right));
 		} else {
 			_v2$2:
 			while (true) {
-				if ((right.$ === -1) && (right.a === 1)) {
-					if (right.d.$ === -1) {
-						if (right.d.a === 1) {
+				if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Black')) {
+					if (right.d.$ === 'RBNode_elm_builtin') {
+						if (right.d.a.$ === 'Black') {
 							var _v3 = right.a;
 							var _v4 = right.d;
 							var _v5 = _v4.a;
@@ -6443,7 +6545,7 @@ var $elm$core$Dict$removeHelpPrepEQGT = F7(
 		}
 	});
 var $elm$core$Dict$removeMin = function (dict) {
-	if ((dict.$ === -1) && (dict.d.$ === -1)) {
+	if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
 		var color = dict.a;
 		var key = dict.b;
 		var value = dict.c;
@@ -6451,8 +6553,8 @@ var $elm$core$Dict$removeMin = function (dict) {
 		var lColor = left.a;
 		var lLeft = left.d;
 		var right = dict.e;
-		if (lColor === 1) {
-			if ((lLeft.$ === -1) && (!lLeft.a)) {
+		if (lColor.$ === 'Black') {
+			if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
 				var _v3 = lLeft.a;
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
@@ -6463,7 +6565,7 @@ var $elm$core$Dict$removeMin = function (dict) {
 					right);
 			} else {
 				var _v4 = $elm$core$Dict$moveRedLeft(dict);
-				if (_v4.$ === -1) {
+				if (_v4.$ === 'RBNode_elm_builtin') {
 					var nColor = _v4.a;
 					var nKey = _v4.b;
 					var nValue = _v4.c;
@@ -6495,7 +6597,7 @@ var $elm$core$Dict$removeMin = function (dict) {
 };
 var $elm$core$Dict$removeHelp = F2(
 	function (targetKey, dict) {
-		if (dict.$ === -2) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
 			return $elm$core$Dict$RBEmpty_elm_builtin;
 		} else {
 			var color = dict.a;
@@ -6504,10 +6606,10 @@ var $elm$core$Dict$removeHelp = F2(
 			var left = dict.d;
 			var right = dict.e;
 			if (_Utils_cmp(targetKey, key) < 0) {
-				if ((left.$ === -1) && (left.a === 1)) {
+				if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Black')) {
 					var _v4 = left.a;
 					var lLeft = left.d;
-					if ((lLeft.$ === -1) && (!lLeft.a)) {
+					if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
 						var _v6 = lLeft.a;
 						return A5(
 							$elm$core$Dict$RBNode_elm_builtin,
@@ -6518,7 +6620,7 @@ var $elm$core$Dict$removeHelp = F2(
 							right);
 					} else {
 						var _v7 = $elm$core$Dict$moveRedLeft(dict);
-						if (_v7.$ === -1) {
+						if (_v7.$ === 'RBNode_elm_builtin') {
 							var nColor = _v7.a;
 							var nKey = _v7.b;
 							var nValue = _v7.c;
@@ -6554,7 +6656,7 @@ var $elm$core$Dict$removeHelp = F2(
 	});
 var $elm$core$Dict$removeHelpEQGT = F2(
 	function (targetKey, dict) {
-		if (dict.$ === -1) {
+		if (dict.$ === 'RBNode_elm_builtin') {
 			var color = dict.a;
 			var key = dict.b;
 			var value = dict.c;
@@ -6562,7 +6664,7 @@ var $elm$core$Dict$removeHelpEQGT = F2(
 			var right = dict.e;
 			if (_Utils_eq(targetKey, key)) {
 				var _v1 = $elm$core$Dict$getMin(right);
-				if (_v1.$ === -1) {
+				if (_v1.$ === 'RBNode_elm_builtin') {
 					var minKey = _v1.b;
 					var minValue = _v1.c;
 					return A5(
@@ -6591,13 +6693,13 @@ var $elm$core$Dict$removeHelpEQGT = F2(
 var $elm$core$Dict$remove = F2(
 	function (key, dict) {
 		var _v0 = A2($elm$core$Dict$removeHelp, key, dict);
-		if ((_v0.$ === -1) && (!_v0.a)) {
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
 			var _v1 = _v0.a;
 			var k = _v0.b;
 			var v = _v0.c;
 			var l = _v0.d;
 			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, 1, k, v, l, r);
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
 		} else {
 			var x = _v0;
 			return x;
@@ -6605,8 +6707,9 @@ var $elm$core$Dict$remove = F2(
 	});
 var $elm$core$Set$remove = F2(
 	function (key, _v0) {
-		var dict = _v0;
-		return A2($elm$core$Dict$remove, key, dict);
+		var dict = _v0.a;
+		return $elm$core$Set$Set_elm_builtin(
+			A2($elm$core$Dict$remove, key, dict));
 	});
 var $author$project$PollEditor$PollEditorUpdate$deselectDate = F2(
 	function (dayTuple, data) {
@@ -6617,38 +6720,38 @@ var $author$project$PollEditor$PollEditorUpdate$deselectDate = F2(
 				return A2(
 					$author$project$Common$ListUtils$findFirst,
 					function (i) {
-						return _Utils_eq(i.a_, sDay);
+						return _Utils_eq(i.value, sDay);
 					},
-					data.aB);
+					data.originalItems);
 			},
 			sDayOpt);
 		var res = function () {
-			if (!originalDateOptionItem.$) {
+			if (originalDateOptionItem.$ === 'Just') {
 				var optionItem = originalDateOptionItem.a;
-				return optionItem.aq ? _Utils_update(
+				return optionItem.hidden ? _Utils_update(
 					data,
 					{
-						aZ: A2(
+						unhiddenItems: A2(
 							$elm$core$Set$remove,
-							$author$project$Data$DataModel$optionIdInt(optionItem.az),
-							data.aZ)
+							$author$project$Data$DataModel$optionIdInt(optionItem.optionId),
+							data.unhiddenItems)
 					}) : _Utils_update(
 					data,
 					{
-						ar: A2(
+						hiddenItems: A2(
 							$elm$core$Set$insert,
-							$author$project$Data$DataModel$optionIdInt(optionItem.az),
-							data.ar)
+							$author$project$Data$DataModel$optionIdInt(optionItem.optionId),
+							data.hiddenItems)
 					});
 			} else {
 				return _Utils_update(
 					data,
 					{
-						af: A2($elm$core$Set$remove, dayTuple, data.af)
+						addedItems: A2($elm$core$Set$remove, dayTuple, data.addedItems)
 					});
 			}
 		}();
-		if (!sDayOpt.$) {
+		if (sDayOpt.$ === 'Just') {
 			return res;
 		} else {
 			return data;
@@ -6656,14 +6759,14 @@ var $author$project$PollEditor$PollEditorUpdate$deselectDate = F2(
 	});
 var $author$project$PollEditor$PollEditorUpdate$doWithDatePoll = F2(
 	function (fn, model) {
-		var _v0 = model.bt;
-		if (!_v0.$) {
+		var _v0 = model.editor;
+		if (_v0.$ === 'DatePollEditor') {
 			var state = _v0.a;
 			var datePollData = _v0.b;
 			return _Utils_update(
 				model,
 				{
-					bt: A2(
+					editor: A2(
 						$author$project$PollEditor$PollEditorModel$DatePollEditor,
 						state,
 						fn(datePollData))
@@ -6674,14 +6777,14 @@ var $author$project$PollEditor$PollEditorUpdate$doWithDatePoll = F2(
 	});
 var $author$project$PollEditor$PollEditorUpdate$doWithDatePollState = F2(
 	function (fn, model) {
-		var _v0 = model.bt;
-		if (!_v0.$) {
+		var _v0 = model.editor;
+		if (_v0.$ === 'DatePollEditor') {
 			var state = _v0.a;
 			var datePollData = _v0.b;
 			return _Utils_update(
 				model,
 				{
-					bt: A2(
+					editor: A2(
 						$author$project$PollEditor$PollEditorModel$DatePollEditor,
 						fn(state),
 						datePollData)
@@ -6692,13 +6795,13 @@ var $author$project$PollEditor$PollEditorUpdate$doWithDatePollState = F2(
 	});
 var $author$project$PollEditor$PollEditorUpdate$doWithGenericPoll = F2(
 	function (fn, model) {
-		var _v0 = model.bt;
-		if (_v0.$ === 1) {
+		var _v0 = model.editor;
+		if (_v0.$ === 'GenericPollEditor') {
 			var genericPollData = _v0.a;
 			return _Utils_update(
 				model,
 				{
-					bt: $author$project$PollEditor$PollEditorModel$GenericPollEditor(
+					editor: $author$project$PollEditor$PollEditorModel$GenericPollEditor(
 						fn(genericPollData))
 				});
 		} else {
@@ -6713,28 +6816,28 @@ var $author$project$PollEditor$PollEditorUpdate$hideGenericItem = F2(
 			A2(
 				$elm$core$Maybe$map,
 				function ($) {
-					return $.aq;
+					return $.hidden;
 				},
 				A2(
 					$author$project$Common$ListUtils$findFirst,
 					function (i) {
-						return _Utils_eq(i.az, optionId);
+						return _Utils_eq(i.optionId, optionId);
 					},
-					pollData.aB)));
+					pollData.originalItems)));
 		return originallyHidden ? _Utils_update(
 			pollData,
 			{
-				aZ: A2(
+				unhiddenItems: A2(
 					$elm$core$Set$remove,
 					$author$project$Data$DataModel$optionIdInt(optionId),
-					pollData.aZ)
+					pollData.unhiddenItems)
 			}) : _Utils_update(
 			pollData,
 			{
-				ar: A2(
+				hiddenItems: A2(
 					$elm$core$Set$insert,
 					$author$project$Data$DataModel$optionIdInt(optionId),
-					pollData.ar)
+					pollData.hiddenItems)
 			});
 	});
 var $elm$core$List$isEmpty = function (xs) {
@@ -6746,43 +6849,43 @@ var $elm$core$List$isEmpty = function (xs) {
 };
 var $author$project$PollEditor$PollEditorUpdate$removeGenericItem = F2(
 	function (itemNumber, data) {
-		var newItems = (($elm$core$List$length(data.af) > 1) || (!$elm$core$List$isEmpty(data.aB))) ? A2($author$project$Common$ListUtils$removeIndex, itemNumber, data.af) : A3(
+		var newItems = (($elm$core$List$length(data.addedItems) > 1) || (!$elm$core$List$isEmpty(data.originalItems))) ? A2($author$project$Common$ListUtils$removeIndex, itemNumber, data.addedItems) : A3(
 			$author$project$Common$ListUtils$changeIndex,
 			function (_v0) {
 				return '';
 			},
 			itemNumber,
-			data.af);
+			data.addedItems);
 		return _Utils_update(
 			data,
-			{af: newItems});
+			{addedItems: newItems});
 	});
 var $author$project$PollEditor$PollEditorUpdate$renameGenericItem = F3(
 	function (optionId, value, pollData) {
 		var valueOpt = A2(
 			$elm$core$Maybe$map,
 			function ($) {
-				return $.a_;
+				return $.value;
 			},
 			A2(
 				$author$project$Common$ListUtils$findFirst,
 				function (i) {
-					return _Utils_eq(i.az, optionId);
+					return _Utils_eq(i.optionId, optionId);
 				},
-				pollData.aB));
+				pollData.originalItems));
 		var newRenamedItems = _Utils_eq(
 			$elm$core$Maybe$Just(value),
 			valueOpt) ? A2(
 			$elm$core$Dict$remove,
 			$author$project$Data$DataModel$optionIdInt(optionId),
-			pollData.cy) : A3(
+			pollData.renamedItems) : A3(
 			$elm$core$Dict$insert,
 			$author$project$Data$DataModel$optionIdInt(optionId),
 			value,
-			pollData.cy);
+			pollData.renamedItems);
 		return _Utils_update(
 			pollData,
-			{cy: newRenamedItems});
+			{renamedItems: newRenamedItems});
 	});
 var $author$project$PollEditor$PollEditorUpdate$selectDate = F2(
 	function (dayTuple, data) {
@@ -6793,52 +6896,52 @@ var $author$project$PollEditor$PollEditorUpdate$selectDate = F2(
 				return A2(
 					$author$project$Common$ListUtils$findFirst,
 					function (i) {
-						return _Utils_eq(i.a_, sDay);
+						return _Utils_eq(i.value, sDay);
 					},
-					data.aB);
+					data.originalItems);
 			},
 			sDayOpt);
 		var res = function () {
-			if (!originalDateOptionItem.$) {
+			if (originalDateOptionItem.$ === 'Just') {
 				var optionItem = originalDateOptionItem.a;
-				return optionItem.aq ? _Utils_update(
+				return optionItem.hidden ? _Utils_update(
 					data,
 					{
-						aZ: A2(
+						unhiddenItems: A2(
 							$elm$core$Set$insert,
-							$author$project$Data$DataModel$optionIdInt(optionItem.az),
-							data.aZ)
+							$author$project$Data$DataModel$optionIdInt(optionItem.optionId),
+							data.unhiddenItems)
 					}) : _Utils_update(
 					data,
 					{
-						ar: A2(
+						hiddenItems: A2(
 							$elm$core$Set$remove,
-							$author$project$Data$DataModel$optionIdInt(optionItem.az),
-							data.ar)
+							$author$project$Data$DataModel$optionIdInt(optionItem.optionId),
+							data.hiddenItems)
 					});
 			} else {
 				return _Utils_update(
 					data,
 					{
-						af: A2($elm$core$Set$insert, dayTuple, data.af)
+						addedItems: A2($elm$core$Set$insert, dayTuple, data.addedItems)
 					});
 			}
 		}();
-		if (!sDayOpt.$) {
+		if (sDayOpt.$ === 'Just') {
 			return res;
 		} else {
 			return data;
 		}
 	});
 var $author$project$SDate$SDate$monthToTuple = function (_v0) {
-	var year = _v0.a;
+	var year = _v0.a.a;
 	var month = _v0.b;
 	return _Utils_Tuple2(year, month);
 };
 var $author$project$PollEditor$PollEditorUpdate$setCalendarMonthDirect = F2(
 	function (str, data) {
 		var monthOpt = $elm$core$String$toInt(str);
-		var _v0 = $author$project$SDate$SDate$monthToTuple(data.bS);
+		var _v0 = $author$project$SDate$SDate$monthToTuple(data.month);
 		var year = _v0.a;
 		var newMonthOpt = A2(
 			$elm$core$Maybe$andThen,
@@ -6847,11 +6950,11 @@ var $author$project$PollEditor$PollEditorUpdate$setCalendarMonthDirect = F2(
 					_Utils_Tuple2(year, m));
 			},
 			monthOpt);
-		if (!newMonthOpt.$) {
+		if (newMonthOpt.$ === 'Just') {
 			var sMonth = newMonthOpt.a;
 			return _Utils_update(
 				data,
-				{bS: sMonth});
+				{month: sMonth});
 		} else {
 			return data;
 		}
@@ -6859,7 +6962,7 @@ var $author$project$PollEditor$PollEditorUpdate$setCalendarMonthDirect = F2(
 var $author$project$PollEditor$PollEditorUpdate$setCalendarYearDirect = F2(
 	function (str, data) {
 		var yearOpt = $elm$core$String$toInt(str);
-		var _v0 = $author$project$SDate$SDate$monthToTuple(data.bS);
+		var _v0 = $author$project$SDate$SDate$monthToTuple(data.month);
 		var month = _v0.b;
 		var newYearOpt = A2(
 			$elm$core$Maybe$andThen,
@@ -6868,11 +6971,11 @@ var $author$project$PollEditor$PollEditorUpdate$setCalendarYearDirect = F2(
 					_Utils_Tuple2(y, month));
 			},
 			yearOpt);
-		if (!newYearOpt.$) {
+		if (newYearOpt.$ === 'Just') {
 			var sMonth = newYearOpt.a;
 			return _Utils_update(
 				data,
-				{bS: sMonth});
+				{month: sMonth});
 		} else {
 			return data;
 		}
@@ -6882,28 +6985,28 @@ var $author$project$PollEditor$PollEditorUpdate$setNewGenericItem = F3(
 		return _Utils_update(
 			data,
 			{
-				af: A3(
+				addedItems: A3(
 					$author$project$Common$ListUtils$changeIndex,
 					function (_v0) {
 						return newValue;
 					},
 					itemNumber,
-					data.af)
+					data.addedItems)
 			});
 	});
 var $author$project$PollEditor$PollEditorUpdate$setPollDescription = F2(
 	function (newDescription, model) {
-		var newChangedDescription = _Utils_eq(newDescription, model.aA) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(newDescription);
+		var newChangedDescription = _Utils_eq(newDescription, model.originalDescription) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(newDescription);
 		return _Utils_update(
 			model,
-			{bd: newChangedDescription});
+			{changedDescription: newChangedDescription});
 	});
 var $author$project$PollEditor$PollEditorUpdate$setPollTitle = F2(
 	function (newTitle, model) {
-		var newChangedTitle = _Utils_eq(newTitle, model.aC) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(newTitle);
+		var newChangedTitle = _Utils_eq(newTitle, model.originalTitle) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(newTitle);
 		return _Utils_update(
 			model,
-			{be: newChangedTitle});
+			{changedTitle: newChangedTitle});
 	});
 var $author$project$PollEditor$PollEditorUpdate$unhideGenericItem = F2(
 	function (optionId, pollData) {
@@ -6913,115 +7016,115 @@ var $author$project$PollEditor$PollEditorUpdate$unhideGenericItem = F2(
 			A2(
 				$elm$core$Maybe$map,
 				function ($) {
-					return $.aq;
+					return $.hidden;
 				},
 				A2(
 					$author$project$Common$ListUtils$findFirst,
 					function (i) {
-						return _Utils_eq(i.az, optionId);
+						return _Utils_eq(i.optionId, optionId);
 					},
-					pollData.aB)));
+					pollData.originalItems)));
 		return originallyHidden ? _Utils_update(
 			pollData,
 			{
-				aZ: A2(
+				unhiddenItems: A2(
 					$elm$core$Set$insert,
 					$author$project$Data$DataModel$optionIdInt(optionId),
-					pollData.aZ)
+					pollData.unhiddenItems)
 			}) : _Utils_update(
 			pollData,
 			{
-				ar: A2(
+				hiddenItems: A2(
 					$elm$core$Set$remove,
 					$author$project$Data$DataModel$optionIdInt(optionId),
-					pollData.ar)
+					pollData.hiddenItems)
 			});
 	});
 var $author$project$PollEditor$PollEditorUpdate$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 0:
+			case 'SetPollTitle':
 				var title = msg.a;
 				return A2($author$project$PollEditor$PollEditorUpdate$setPollTitle, title, model);
-			case 1:
+			case 'SetPollDescription':
 				var description = msg.a;
 				return A2($author$project$PollEditor$PollEditorUpdate$setPollDescription, description, model);
-			case 2:
+			case 'SetNewGenericPollItem':
 				var itemNumber = msg.a;
 				var itemVal = msg.b;
 				return A2(
 					$author$project$PollEditor$PollEditorUpdate$doWithGenericPoll,
 					A2($author$project$PollEditor$PollEditorUpdate$setNewGenericItem, itemNumber, itemVal),
 					model);
-			case 3:
+			case 'AddGenericPollItem':
 				return A2($author$project$PollEditor$PollEditorUpdate$doWithGenericPoll, $author$project$PollEditor$PollEditorUpdate$addGenericItem, model);
-			case 4:
+			case 'RemoveGenericPollItem':
 				var itemNumber = msg.a;
 				return A2(
 					$author$project$PollEditor$PollEditorUpdate$doWithGenericPoll,
 					$author$project$PollEditor$PollEditorUpdate$removeGenericItem(itemNumber),
 					model);
-			case 5:
+			case 'RenameGenericPollItem':
 				var optionId = msg.a;
 				var value = msg.b;
 				return A2(
 					$author$project$PollEditor$PollEditorUpdate$doWithGenericPoll,
 					A2($author$project$PollEditor$PollEditorUpdate$renameGenericItem, optionId, value),
 					model);
-			case 6:
+			case 'HideGenericPollItem':
 				var optionId = msg.a;
 				return A2(
 					$author$project$PollEditor$PollEditorUpdate$doWithGenericPoll,
 					$author$project$PollEditor$PollEditorUpdate$hideGenericItem(optionId),
 					model);
-			case 7:
+			case 'UnhideGenericPollItem':
 				var optionId = msg.a;
 				return A2(
 					$author$project$PollEditor$PollEditorUpdate$doWithGenericPoll,
 					$author$project$PollEditor$PollEditorUpdate$unhideGenericItem(optionId),
 					model);
-			case 8:
+			case 'AddDatePollItem':
 				var dayTuple = msg.a;
 				return A2(
 					$author$project$PollEditor$PollEditorUpdate$doWithDatePoll,
 					$author$project$PollEditor$PollEditorUpdate$selectDate(dayTuple),
 					model);
-			case 9:
+			case 'RemoveDatePollItem':
 				var dayTuple = msg.a;
 				return A2(
 					$author$project$PollEditor$PollEditorUpdate$doWithDatePoll,
 					$author$project$PollEditor$PollEditorUpdate$deselectDate(dayTuple),
 					model);
-			case 10:
+			case 'SetCalendarMonth':
 				var sMonth = msg.a;
 				return A2(
 					$author$project$PollEditor$PollEditorUpdate$doWithDatePollState,
 					function (state) {
 						return _Utils_update(
 							state,
-							{bS: sMonth});
+							{month: sMonth});
 					},
 					model);
-			case 11:
+			case 'SetCalendarMonthDirect':
 				var str = msg.a;
 				return A2(
 					$author$project$PollEditor$PollEditorUpdate$doWithDatePollState,
 					$author$project$PollEditor$PollEditorUpdate$setCalendarMonthDirect(str),
 					model);
-			case 12:
+			case 'SetCalendarYearDirect':
 				var str = msg.a;
 				return A2(
 					$author$project$PollEditor$PollEditorUpdate$doWithDatePollState,
 					$author$project$PollEditor$PollEditorUpdate$setCalendarYearDirect(str),
 					model);
-			case 13:
+			case 'SetHighlightedDay':
 				var maybeTuple = msg.a;
 				return A2(
 					$author$project$PollEditor$PollEditorUpdate$doWithDatePollState,
 					function (state) {
 						return _Utils_update(
 							state,
-							{bG: maybeTuple});
+							{highlightedDay: maybeTuple});
 					},
 					model);
 			default:
@@ -7031,71 +7134,71 @@ var $author$project$PollEditor$PollEditorUpdate$update = F2(
 var $author$project$Create$CreateUpdate$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 8:
+			case 'NoOp':
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-			case 0:
+			case 'SetTitle':
 				var newTitle = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{S: newTitle}),
+						{title: newTitle}),
 					$elm$core$Platform$Cmd$none);
-			case 1:
+			case 'AddGenericPoll':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							Z: _Utils_ap(
-								model.Z,
+							polls: _Utils_ap(
+								model.polls,
 								_List_fromArray(
 									[$author$project$Create$CreateUpdate$emptyGenericPoll]))
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 2:
+			case 'AddDatePoll':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							Z: _Utils_ap(
-								model.Z,
+							polls: _Utils_ap(
+								model.polls,
 								_List_fromArray(
 									[
-										$author$project$Create$CreateUpdate$emptyDatePoll(model.cP)
+										$author$project$Create$CreateUpdate$emptyDatePoll(model.today)
 									]))
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 3:
+			case 'RemovePoll':
 				var num = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							Z: A2($author$project$Common$ListUtils$removeIndex, num, model.Z)
+							polls: A2($author$project$Common$ListUtils$removeIndex, num, model.polls)
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 4:
+			case 'EditPoll':
 				var num = msg.a;
 				var pollEditorMsg = msg.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							Z: A3(
+							polls: A3(
 								$author$project$Common$ListUtils$changeIndex,
 								$author$project$PollEditor$PollEditorUpdate$update(pollEditorMsg),
 								num,
-								model.Z)
+								model.polls)
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 5:
+			case 'Persist':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{cX: true}),
+						{wait: true}),
 					$author$project$Create$CreateUpdate$persist(
 						$author$project$Data$DataEncoders$encodeProject(
 							$author$project$Create$CreateModel$newPollsToProject(model))));
-			case 6:
+			case 'ProjectCreated':
 				var projectInfo = msg.a;
 				var scroll = function (id) {
 					return A2(
@@ -7106,7 +7209,7 @@ var $author$project$Create$CreateUpdate$update = F2(
 						A2(
 							$elm$core$Task$andThen,
 							function (info) {
-								return A2($elm$browser$Browser$Dom$setViewport, 0, info.cV.c_);
+								return A2($elm$browser$Browser$Dom$setViewport, 0, info.viewport.y);
 							},
 							$elm$browser$Browser$Dom$getViewportOf(id)));
 				};
@@ -7114,7 +7217,7 @@ var $author$project$Create$CreateUpdate$update = F2(
 					_Utils_update(
 						model,
 						{
-							bm: $elm$core$Maybe$Just(projectInfo)
+							created: $elm$core$Maybe$Just(projectInfo)
 						}),
 					scroll('project'));
 			default:
@@ -7123,7 +7226,7 @@ var $author$project$Create$CreateUpdate$update = F2(
 					_Utils_update(
 						model,
 						{
-							cQ: $author$project$Translations$Translations$get(code)
+							translation: $author$project$Translations$Translations$get(code)
 						}),
 					$elm$core$Platform$Cmd$none);
 		}
@@ -7153,11 +7256,11 @@ var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Create$CreateView$viewCreated = F2(
 	function (_v0, model) {
-		var projectKey = _v0.cr;
-		var secretKey = _v0.cI;
+		var projectKey = _v0.projectKey;
+		var secretKey = _v0.secretKey;
 		var urlBase = $elm$core$String$concat(
 			_List_fromArray(
-				[model.a8, '/v01/vote.html#', projectKey, '/']));
+				[model.baseUrl, '/v01/vote.html#', projectKey, '/']));
 		var url = $elm$core$String$concat(
 			_List_fromArray(
 				[urlBase, secretKey]));
@@ -7176,7 +7279,7 @@ var $author$project$Create$CreateView$viewCreated = F2(
 						[
 							$elm$html$Html$text(
 							$elm$core$String$isEmpty(
-								$elm$core$String$trim(model.S)) ? model.cQ.r.cS : model.S)
+								$elm$core$String$trim(model.title)) ? model.translation.common.untitled : model.title)
 						])),
 					A2(
 					$elm$html$Html$div,
@@ -7196,21 +7299,21 @@ var $author$project$Create$CreateView$viewCreated = F2(
 										]),
 									_List_fromArray(
 										[
-											$elm$html$Html$text(model.cQ.n.cq)
+											$elm$html$Html$text(model.translation.create.projectCreatedText)
 										])),
 									A2(
 									$elm$html$Html$p,
 									_List_Nil,
 									_List_fromArray(
 										[
-											$elm$html$Html$text(model.cQ.n.co)
+											$elm$html$Html$text(model.translation.create.projectCreatedInfo1)
 										])),
 									A2(
 									$elm$html$Html$p,
 									_List_Nil,
 									_List_fromArray(
 										[
-											$elm$html$Html$text(model.cQ.n.cp)
+											$elm$html$Html$text(model.translation.create.projectCreatedInfo2)
 										]))
 								])),
 							A2(
@@ -7252,20 +7355,20 @@ var $author$project$Create$CreateView$viewCreated = F2(
 						]))
 				]));
 	});
-var $author$project$Create$CreateModel$AddDatePoll = {$: 2};
-var $author$project$Create$CreateModel$AddGenericPoll = {$: 1};
+var $author$project$Create$CreateModel$AddDatePoll = {$: 'AddDatePoll'};
+var $author$project$Create$CreateModel$AddGenericPoll = {$: 'AddGenericPoll'};
 var $author$project$Create$CreateModel$EditPoll = F2(
 	function (a, b) {
-		return {$: 4, a: a, b: b};
+		return {$: 'EditPoll', a: a, b: b};
 	});
 var $author$project$Create$CreateModel$RemovePoll = function (a) {
-	return {$: 3, a: a};
+	return {$: 'RemovePoll', a: a};
 };
 var $author$project$Create$CreateModel$SetTitle = function (a) {
-	return {$: 0, a: a};
+	return {$: 'SetTitle', a: a};
 };
 var $author$project$Create$CreateModel$SetTranslation = function (a) {
-	return {$: 7, a: a};
+	return {$: 'SetTranslation', a: a};
 };
 var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$button = _VirtualDom_node('button');
@@ -7273,7 +7376,7 @@ var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$html$Html$label = _VirtualDom_node('label');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Normal', a: a};
 };
 var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
 var $elm$html$Html$Events$on = F2(
@@ -7293,7 +7396,7 @@ var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
 var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 1, a: a};
+	return {$: 'MayStopPropagation', a: a};
 };
 var $elm$html$Html$Events$stopPropagationOn = F2(
 	function (event, decoder) {
@@ -7321,7 +7424,7 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
-var $author$project$Create$CreateModel$Persist = {$: 5};
+var $author$project$Create$CreateModel$Persist = {$: 'Persist'};
 var $elm$core$List$all = F2(
 	function (isOkay, list) {
 		return !A2(
@@ -7338,14 +7441,14 @@ var $elm$html$Html$Attributes$boolProperty = F2(
 	});
 var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $elm$core$Dict$isEmpty = function (dict) {
-	if (dict.$ === -2) {
+	if (dict.$ === 'RBEmpty_elm_builtin') {
 		return true;
 	} else {
 		return false;
 	}
 };
 var $elm$core$Set$isEmpty = function (_v0) {
-	var dict = _v0;
+	var dict = _v0.a;
 	return $elm$core$Dict$isEmpty(dict);
 };
 var $author$project$Create$CreateView$submitButton = function (model) {
@@ -7359,27 +7462,27 @@ var $author$project$Create$CreateView$submitButton = function (model) {
 			items);
 	};
 	var pollValid = function (_v1) {
-		var editor = _v1.bt;
-		if (!editor.$) {
-			var addedItems = editor.b.af;
+		var editor = _v1.editor;
+		if (editor.$ === 'DatePollEditor') {
+			var addedItems = editor.b.addedItems;
 			return !$elm$core$Set$isEmpty(addedItems);
 		} else {
-			var addedItems = editor.a.af;
+			var addedItems = editor.a.addedItems;
 			return (!$elm$core$List$isEmpty(addedItems)) && genericPollValid(addedItems);
 		}
 	};
-	var empty = $elm$core$List$isEmpty(model.Z);
-	var buttonText = model.cX ? _List_fromArray(
+	var empty = $elm$core$List$isEmpty(model.polls);
+	var buttonText = model.wait ? _List_fromArray(
 		[
-			$elm$html$Html$text(model.cQ.r.cY)
+			$elm$html$Html$text(model.translation.common.waitPlease)
 		]) : _List_fromArray(
 		[
 			$elm$html$Html$text(
-			model.cQ.n.bl(
-				$elm$core$List$length(model.Z)))
+			model.translation.create.createProjectWithNPolls(
+				$elm$core$List$length(model.polls)))
 		]);
-	var allValid = A2($elm$core$List$all, pollValid, model.Z);
-	var disabledVal = empty || ((!allValid) || model.cX);
+	var allValid = A2($elm$core$List$all, pollValid, model.polls);
+	var disabledVal = empty || ((!allValid) || model.wait);
 	return A2(
 		$elm$html$Html$button,
 		_List_fromArray(
@@ -7394,7 +7497,7 @@ var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('
 var $author$project$Translations$TranslationsView$translationsView = F2(
 	function (current, message) {
 		var currentClass = function (translation) {
-			return _Utils_eq(translation.bi, current.bi) ? ' translation-item-selected' : '';
+			return _Utils_eq(translation.code, current.code) ? ' translation-item-selected' : '';
 		};
 		var translationToItem = function (translation) {
 			return A2(
@@ -7403,13 +7506,13 @@ var $author$project$Translations$TranslationsView$translationsView = F2(
 					[
 						$elm$html$Html$Attributes$class(
 						'translation-item' + currentClass(translation)),
-						$elm$html$Html$Attributes$title(translation.bU),
+						$elm$html$Html$Attributes$title(translation.name),
 						$elm$html$Html$Events$onClick(
-						message(translation.bi))
+						message(translation.code))
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text(translation.bi)
+						$elm$html$Html$text(translation.code)
 					]));
 		};
 		var items = A2($elm$core$List$map, translationToItem, $author$project$Translations$Translations$available);
@@ -7493,7 +7596,7 @@ var $author$project$Create$CreateView$viewChooseFirstPoll = function (translatio
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text('+ ' + translation.r.aI)
+								$elm$html$Html$text('+ ' + translation.common.pollTypeDate)
 							])),
 						A2(
 						$elm$html$Html$div,
@@ -7503,7 +7606,7 @@ var $author$project$Create$CreateView$viewChooseFirstPoll = function (translatio
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(translation.n.cg)
+								$elm$html$Html$text(translation.create.pollDescriptionDate)
 							]))
 					])),
 				A2(
@@ -7524,7 +7627,7 @@ var $author$project$Create$CreateView$viewChooseFirstPoll = function (translatio
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text('+ ' + translation.r.aJ)
+								$elm$html$Html$text('+ ' + translation.common.pollTypeGeneric)
 							])),
 						A2(
 						$elm$html$Html$div,
@@ -7534,32 +7637,32 @@ var $author$project$Create$CreateView$viewChooseFirstPoll = function (translatio
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(translation.n.ch)
+								$elm$html$Html$text(translation.create.pollDescriptionGeneric)
 							]))
 					]))
 			]));
 };
 var $author$project$PollEditor$PollEditorModel$SetPollDescription = function (a) {
-	return {$: 1, a: a};
+	return {$: 'SetPollDescription', a: a};
 };
 var $author$project$PollEditor$PollEditorModel$SetPollTitle = function (a) {
-	return {$: 0, a: a};
+	return {$: 'SetPollTitle', a: a};
 };
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $author$project$PollEditor$PollEditorModel$AddDatePollItem = function (a) {
-	return {$: 8, a: a};
+	return {$: 'AddDatePollItem', a: a};
 };
 var $author$project$PollEditor$PollEditorModel$RemoveDatePollItem = function (a) {
-	return {$: 9, a: a};
+	return {$: 'RemoveDatePollItem', a: a};
 };
 var $author$project$PollEditor$PollEditorModel$SetHighlightedDay = function (a) {
-	return {$: 13, a: a};
+	return {$: 'SetHighlightedDay', a: a};
 };
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
 		while (true) {
-			if (dict.$ === -2) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
 				return $elm$core$Maybe$Nothing;
 			} else {
 				var key = dict.b;
@@ -7567,14 +7670,14 @@ var $elm$core$Dict$get = F2(
 				var left = dict.d;
 				var right = dict.e;
 				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
-				switch (_v1) {
-					case 0:
+				switch (_v1.$) {
+					case 'LT':
 						var $temp$targetKey = targetKey,
 							$temp$dict = left;
 						targetKey = $temp$targetKey;
 						dict = $temp$dict;
 						continue get;
-					case 1:
+					case 'EQ':
 						return $elm$core$Maybe$Just(value);
 					default:
 						var $temp$targetKey = targetKey,
@@ -7589,7 +7692,7 @@ var $elm$core$Dict$get = F2(
 var $elm$core$Dict$member = F2(
 	function (key, dict) {
 		var _v0 = A2($elm$core$Dict$get, key, dict);
-		if (!_v0.$) {
+		if (_v0.$ === 'Just') {
 			return true;
 		} else {
 			return false;
@@ -7597,7 +7700,7 @@ var $elm$core$Dict$member = F2(
 	});
 var $elm$core$Set$member = F2(
 	function (key, _v0) {
-		var dict = _v0;
+		var dict = _v0.a;
 		return A2($elm$core$Dict$member, key, dict);
 	});
 var $elm$html$Html$Events$onMouseEnter = function (msg) {
@@ -7621,16 +7724,16 @@ var $author$project$PollEditor$PollEditorView$viewDateCalendarCell = F4(
 		var originalDateOptionItem = A2(
 			$author$project$Common$ListUtils$findFirst,
 			function (i) {
-				return _Utils_eq(i.a_, sDay);
+				return _Utils_eq(i.value, sDay);
 			},
-			pollData.aB);
+			pollData.originalItems);
 		var originalSelected = function () {
-			if (!originalDateOptionItem.$) {
+			if (originalDateOptionItem.$ === 'Just') {
 				var dateOptionItem = originalDateOptionItem.a;
-				return (!dateOptionItem.aq) && (!A2(
+				return (!dateOptionItem.hidden) && (!A2(
 					$elm$core$Set$member,
-					$author$project$Data$DataModel$optionIdInt(dateOptionItem.az),
-					pollData.ar));
+					$author$project$Data$DataModel$optionIdInt(dateOptionItem.optionId),
+					pollData.hiddenItems));
 			} else {
 				return false;
 			}
@@ -7638,25 +7741,25 @@ var $author$project$PollEditor$PollEditorView$viewDateCalendarCell = F4(
 		var dayTuple = $author$project$SDate$SDate$dayToTuple(sDay);
 		var future = _Utils_cmp(
 			dayTuple,
-			$author$project$SDate$SDate$dayToTuple(viewConfig.cP)) > -1;
-		var selected = originalSelected || A2($elm$core$Set$member, dayTuple, pollData.af);
-		var onClickAction = selected ? viewConfig.cc(
-			$author$project$PollEditor$PollEditorModel$RemoveDatePollItem(dayTuple)) : viewConfig.cc(
+			$author$project$SDate$SDate$dayToTuple(viewConfig.today)) > -1;
+		var selected = originalSelected || A2($elm$core$Set$member, dayTuple, pollData.addedItems);
+		var onClickAction = selected ? viewConfig.outerMessage(
+			$author$project$PollEditor$PollEditorModel$RemoveDatePollItem(dayTuple)) : viewConfig.outerMessage(
 			$author$project$PollEditor$PollEditorModel$AddDatePollItem(dayTuple));
 		var _v0 = dayTuple;
 		var month = _v0.b;
 		var date = _v0.c;
-		var _v1 = $author$project$SDate$SDate$monthToTuple(state.bS);
+		var _v1 = $author$project$SDate$SDate$monthToTuple(state.month);
 		var activeMonth = _v1.b;
 		var active = _Utils_eq(month, activeMonth);
 		var cellClass = 'calendar-cell' + (A2($author$project$Common$CommonView$optClass, selected, 'calendar-cell-selected') + (A2($author$project$Common$CommonView$optClass, active, 'calendar-cell-active') + (A2($author$project$Common$CommonView$optClass, future, 'calendar-cell-future') + (A2(
 			$author$project$Common$CommonView$optClass,
 			_Utils_eq(
-				state.bG,
+				state.highlightedDay,
 				$elm$core$Maybe$Just(dayTuple)),
 			'calendar-cell-highlighted') + A2(
 			$author$project$Common$CommonView$optClass,
-			_Utils_eq(state.cP, sDay),
+			_Utils_eq(state.today, sDay),
 			'calendar-cell-today')))));
 		return A2(
 			$elm$html$Html$a,
@@ -7665,11 +7768,11 @@ var $author$project$PollEditor$PollEditorView$viewDateCalendarCell = F4(
 					$elm$html$Html$Attributes$class(cellClass),
 					$elm$html$Html$Events$onClick(onClickAction),
 					$elm$html$Html$Events$onMouseEnter(
-					viewConfig.cc(
+					viewConfig.outerMessage(
 						$author$project$PollEditor$PollEditorModel$SetHighlightedDay(
 							$elm$core$Maybe$Just(dayTuple)))),
 					$elm$html$Html$Events$onMouseLeave(
-					viewConfig.cc(
+					viewConfig.outerMessage(
 						$author$project$PollEditor$PollEditorModel$SetHighlightedDay($elm$core$Maybe$Nothing))),
 					$elm$html$Html$Attributes$tabindex(0)
 				]),
@@ -7680,20 +7783,23 @@ var $author$project$PollEditor$PollEditorView$viewDateCalendarCell = F4(
 				]));
 	});
 var $author$project$PollEditor$PollEditorModel$SetCalendarMonth = function (a) {
-	return {$: 10, a: a};
+	return {$: 'SetCalendarMonth', a: a};
 };
 var $author$project$PollEditor$PollEditorModel$SetCalendarMonthDirect = function (a) {
-	return {$: 11, a: a};
+	return {$: 'SetCalendarMonthDirect', a: a};
 };
 var $author$project$PollEditor$PollEditorModel$SetCalendarYearDirect = function (a) {
-	return {$: 12, a: a};
+	return {$: 'SetCalendarYearDirect', a: a};
 };
 var $elm$html$Html$Attributes$min = $elm$html$Html$Attributes$stringProperty('min');
 var $author$project$SDate$SDate$nextMonth = function (_v0) {
 	var sYear = _v0.a;
-	var year = sYear;
+	var year = sYear.a;
 	var month = _v0.b;
-	return (month === 12) ? A2($author$project$SDate$SDate$SMonth, year + 1, 1) : A2($author$project$SDate$SDate$SMonth, sYear, month + 1);
+	return (month === 12) ? A2(
+		$author$project$SDate$SDate$SMonth,
+		$author$project$SDate$SDate$SYear(year + 1),
+		1) : A2($author$project$SDate$SDate$SMonth, sYear, month + 1);
 };
 var $author$project$Common$CommonView$onChange = function (handler) {
 	return A2(
@@ -7711,16 +7817,19 @@ var $author$project$Common$CommonView$onChange = function (handler) {
 var $elm$html$Html$option = _VirtualDom_node('option');
 var $author$project$SDate$SDate$prevMonth = function (_v0) {
 	var sYear = _v0.a;
-	var year = sYear;
+	var year = sYear.a;
 	var month = _v0.b;
-	return (month === 1) ? A2($author$project$SDate$SDate$SMonth, year - 1, 12) : A2($author$project$SDate$SDate$SMonth, sYear, month - 1);
+	return (month === 1) ? A2(
+		$author$project$SDate$SDate$SMonth,
+		$author$project$SDate$SDate$SYear(year - 1),
+		12) : A2($author$project$SDate$SDate$SMonth, sYear, month - 1);
 };
 var $elm$html$Html$select = _VirtualDom_node('select');
 var $elm$html$Html$Attributes$selected = $elm$html$Html$Attributes$boolProperty('selected');
 var $author$project$PollEditor$PollEditorView$viewDateCalendarControls = F2(
 	function (state, viewConfig) {
-		var names = viewConfig.cQ.r.bT;
-		var _v0 = $author$project$SDate$SDate$monthToTuple(state.bS);
+		var names = viewConfig.translation.common.monthNames;
+		var _v0 = $author$project$SDate$SDate$monthToTuple(state.month);
 		var year = _v0.a;
 		var month = _v0.b;
 		var nameToOption = F2(
@@ -7762,7 +7871,7 @@ var $author$project$PollEditor$PollEditorView$viewDateCalendarControls = F2(
 								[
 									$elm$html$Html$Attributes$class('common-input common-select common-group-first calendar-controls-month'),
 									$elm$html$Html$Events$onInput(
-									A2($elm$core$Basics$composeL, viewConfig.cc, $author$project$PollEditor$PollEditorModel$SetCalendarMonthDirect))
+									A2($elm$core$Basics$composeL, viewConfig.outerMessage, $author$project$PollEditor$PollEditorModel$SetCalendarMonthDirect))
 								]),
 							options),
 							A2(
@@ -7775,7 +7884,7 @@ var $author$project$PollEditor$PollEditorView$viewDateCalendarControls = F2(
 									$elm$core$String$fromInt(year)),
 									$elm$html$Html$Attributes$min('1970'),
 									$author$project$Common$CommonView$onChange(
-									A2($elm$core$Basics$composeL, viewConfig.cc, $author$project$PollEditor$PollEditorModel$SetCalendarYearDirect))
+									A2($elm$core$Basics$composeL, viewConfig.outerMessage, $author$project$PollEditor$PollEditorModel$SetCalendarYearDirect))
 								]),
 							_List_Nil)
 						])),
@@ -7793,13 +7902,13 @@ var $author$project$PollEditor$PollEditorView$viewDateCalendarControls = F2(
 								[
 									$elm$html$Html$Attributes$class('common-button common-input calendar-controls-buttons-today'),
 									$elm$html$Html$Events$onClick(
-									viewConfig.cc(
+									viewConfig.outerMessage(
 										$author$project$PollEditor$PollEditorModel$SetCalendarMonth(
-											$author$project$SDate$SDate$monthFromDay(viewConfig.cP))))
+											$author$project$SDate$SDate$monthFromDay(viewConfig.today))))
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text(viewConfig.cQ.r.cP)
+									$elm$html$Html$text(viewConfig.translation.common.today)
 								])),
 							$elm$html$Html$text(' '),
 							A2(
@@ -7808,9 +7917,9 @@ var $author$project$PollEditor$PollEditorView$viewDateCalendarControls = F2(
 								[
 									$elm$html$Html$Attributes$class('common-button common-wide common-input common-group-first'),
 									$elm$html$Html$Events$onClick(
-									viewConfig.cc(
+									viewConfig.outerMessage(
 										$author$project$PollEditor$PollEditorModel$SetCalendarMonth(
-											$author$project$SDate$SDate$prevMonth(state.bS))))
+											$author$project$SDate$SDate$prevMonth(state.month))))
 								]),
 							_List_fromArray(
 								[
@@ -7822,9 +7931,9 @@ var $author$project$PollEditor$PollEditorView$viewDateCalendarControls = F2(
 								[
 									$elm$html$Html$Attributes$class('common-button common-wide common-input common-group-last'),
 									$elm$html$Html$Events$onClick(
-									viewConfig.cc(
+									viewConfig.outerMessage(
 										$author$project$PollEditor$PollEditorModel$SetCalendarMonth(
-											$author$project$SDate$SDate$nextMonth(state.bS))))
+											$author$project$SDate$SDate$nextMonth(state.month))))
 								]),
 							_List_fromArray(
 								[
@@ -7834,7 +7943,7 @@ var $author$project$PollEditor$PollEditorView$viewDateCalendarControls = F2(
 				]));
 	});
 var $author$project$PollEditor$PollEditorView$viewDateCalendarHeaderRow = function (translation) {
-	var days = translation.r.bn;
+	var days = translation.common.dayNamesShort;
 	var dayToCell = function (day) {
 		return A2(
 			$elm$html$Html$div,
@@ -7873,7 +7982,7 @@ var $elm$core$Array$foldl = F3(
 		var tail = _v0.d;
 		var helper = F2(
 			function (node, acc) {
-				if (!node.$) {
+				if (node.$ === 'SubTree') {
 					var subTree = node.a;
 					return A3($elm$core$Elm$JsArray$foldl, helper, acc, subTree);
 				} else {
@@ -7908,7 +8017,7 @@ var $elm$core$Array$insertTailInTree = F4(
 			}
 		} else {
 			var value = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-			if (!value.$) {
+			if (value.$ === 'SubTree') {
 				var subTree = value.a;
 				var newSub = $elm$core$Array$SubTree(
 					A4($elm$core$Array$insertTailInTree, shift - $elm$core$Array$shiftStep, index, tail, subTree));
@@ -8078,8 +8187,8 @@ var $author$project$SDate$SDate$weeksInMonth = function (sMonth) {
 };
 var $author$project$PollEditor$PollEditorView$viewDateCalendar = F3(
 	function (state, pollData, viewConfig) {
-		var weeks = $author$project$SDate$SDate$weeksInMonth(state.bS);
-		var headerRow = $author$project$PollEditor$PollEditorView$viewDateCalendarHeaderRow(viewConfig.cQ);
+		var weeks = $author$project$SDate$SDate$weeksInMonth(state.month);
+		var headerRow = $author$project$PollEditor$PollEditorView$viewDateCalendarHeaderRow(viewConfig.translation);
 		var controlsRow = A2($author$project$PollEditor$PollEditorView$viewDateCalendarControls, state, viewConfig);
 		var cellFn = A3($author$project$PollEditor$PollEditorView$viewDateCalendarCell, state, pollData, viewConfig);
 		var weekRow = function (days) {
@@ -8104,8 +8213,8 @@ var $author$project$PollEditor$PollEditorView$viewDateCalendar = F3(
 				A2($elm$core$List$cons, headerRow, rows)));
 	});
 var $author$project$PollEditor$PollEditorView$viewDeletePollButton = function (viewConfig) {
-	var _v0 = viewConfig.cx;
-	if (!_v0.$) {
+	var _v0 = viewConfig.removePollMessage;
+	if (_v0.$ === 'Just') {
 		var msg = _v0.a;
 		return A2(
 			$elm$html$Html$div,
@@ -8121,7 +8230,7 @@ var $author$project$PollEditor$PollEditorView$viewDeletePollButton = function (v
 						[
 							$elm$html$Html$Attributes$class('delete-poll-button common-button common-input'),
 							$elm$html$Html$Events$onClick(msg),
-							$elm$html$Html$Attributes$title(viewConfig.cQ.h.cw)
+							$elm$html$Html$Attributes$title(viewConfig.translation.pollEditor.removePoll)
 						]),
 					_List_fromArray(
 						[
@@ -8132,7 +8241,7 @@ var $author$project$PollEditor$PollEditorView$viewDeletePollButton = function (v
 		return A2($elm$html$Html$div, _List_Nil, _List_Nil);
 	}
 };
-var $author$project$PollEditor$PollEditorModel$NoOp = {$: 14};
+var $author$project$PollEditor$PollEditorModel$NoOp = {$: 'NoOp'};
 var $elm$core$Set$fromList = function (list) {
 	return A3($elm$core$List$foldl, $elm$core$Set$insert, $elm$core$Set$empty, list);
 };
@@ -8142,9 +8251,10 @@ var $elm$core$Dict$union = F2(
 	});
 var $elm$core$Set$union = F2(
 	function (_v0, _v1) {
-		var dict1 = _v0;
-		var dict2 = _v1;
-		return A2($elm$core$Dict$union, dict1, dict2);
+		var dict1 = _v0.a;
+		var dict2 = _v1.a;
+		return $elm$core$Set$Set_elm_builtin(
+			A2($elm$core$Dict$union, dict1, dict2));
 	});
 var $author$project$PollEditor$PollEditorView$viewPollDateItemTags = F3(
 	function (state, pollData, viewConfig) {
@@ -8158,19 +8268,19 @@ var $author$project$PollEditor$PollEditorView$viewPollDateItemTags = F3(
 				var year = _v1.a;
 				var month = _v1.b;
 				var date = _v1.c;
-				return $elm$core$String$fromInt(date) + ('. ' + ($elm$core$String$fromInt(month) + ('. ' + ($elm$core$String$fromInt(year) + (hidden ? viewConfig.cQ.h.bE : '')))));
+				return $elm$core$String$fromInt(date) + ('. ' + ($elm$core$String$fromInt(month) + ('. ' + ($elm$core$String$fromInt(year) + (hidden ? viewConfig.translation.pollEditor.hiddenSuffix : '')))));
 			});
 		var allDays = $elm$core$Set$toList(
 			A2(
 				$elm$core$Set$union,
-				pollData.af,
+				pollData.addedItems,
 				$elm$core$Set$fromList(
 					A2(
 						$elm$core$List$map,
 						function (i) {
-							return $author$project$SDate$SDate$dayToTuple(i.a_);
+							return $author$project$SDate$SDate$dayToTuple(i.value);
 						},
-						pollData.aB))));
+						pollData.originalItems))));
 		var info = $elm$core$List$isEmpty(allDays) ? _List_fromArray(
 			[
 				A2(
@@ -8181,10 +8291,10 @@ var $author$project$PollEditor$PollEditorView$viewPollDateItemTags = F3(
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text(viewConfig.cQ.h.b4)
+						$elm$html$Html$text(viewConfig.translation.pollEditor.nothingSelected)
 					]))
 			]) : _List_Nil;
-		var _v0 = $author$project$SDate$SDate$monthToTuple(state.bS);
+		var _v0 = $author$project$SDate$SDate$monthToTuple(state.month);
 		var shownYear = _v0.a;
 		var shownMonth = _v0.b;
 		var tupleToTag = function (tuple) {
@@ -8194,18 +8304,18 @@ var $author$project$PollEditor$PollEditorView$viewPollDateItemTags = F3(
 				$author$project$Common$ListUtils$findFirst,
 				function (i) {
 					return _Utils_eq(
-						$elm$core$Maybe$Just(i.a_),
+						$elm$core$Maybe$Just(i.value),
 						$author$project$SDate$SDate$dayFromTuple(tuple));
 				},
-				pollData.aB);
+				pollData.originalItems);
 			var isHidden = function (item) {
-				return ((!item.aq) && A2(
+				return ((!item.hidden) && A2(
 					$elm$core$Set$member,
-					$author$project$Data$DataModel$optionIdInt(item.az),
-					pollData.ar)) || (item.aq && (!A2(
+					$author$project$Data$DataModel$optionIdInt(item.optionId),
+					pollData.hiddenItems)) || (item.hidden && (!A2(
 					$elm$core$Set$member,
-					$author$project$Data$DataModel$optionIdInt(item.az),
-					pollData.aZ)));
+					$author$project$Data$DataModel$optionIdInt(item.optionId),
+					pollData.unhiddenItems)));
 			};
 			var hidden = A2(
 				$elm$core$Maybe$withDefault,
@@ -8217,11 +8327,11 @@ var $author$project$PollEditor$PollEditorView$viewPollDateItemTags = F3(
 					[
 						$elm$html$Html$Attributes$class('poll-date-tag'),
 						$elm$html$Html$Events$onMouseEnter(
-						viewConfig.cc(
+						viewConfig.outerMessage(
 							$author$project$PollEditor$PollEditorModel$SetHighlightedDay(
 								$elm$core$Maybe$Just(tuple)))),
 						$elm$html$Html$Events$onMouseLeave(
-						viewConfig.cc(
+						viewConfig.outerMessage(
 							$author$project$PollEditor$PollEditorModel$SetHighlightedDay($elm$core$Maybe$Nothing)))
 					]),
 				_List_fromArray(
@@ -8239,11 +8349,11 @@ var $author$project$PollEditor$PollEditorView$viewPollDateItemTags = F3(
 									'poll-date-tag-name-active') + (A2(
 									$author$project$Common$CommonView$optClass,
 									_Utils_eq(
-										state.bG,
+										state.highlightedDay,
 										$elm$core$Maybe$Just(tuple)),
 									'poll-date-tag-name-highlighted') + A2($author$project$Common$CommonView$optClass, hidden, 'poll-date-tag-name-hidden')))),
 								$elm$html$Html$Events$onClick(
-								viewConfig.cc(
+								viewConfig.outerMessage(
 									A2(
 										$elm$core$Maybe$withDefault,
 										$author$project$PollEditor$PollEditorModel$NoOp,
@@ -8269,8 +8379,8 @@ var $author$project$PollEditor$PollEditorView$viewPollDateItemTags = F3(
 								$elm$html$Html$Attributes$class(
 								'poll-date-tag-delete' + A2($author$project$Common$CommonView$optClass, hidden, 'poll-date-tag-delete-hidden')),
 								$elm$html$Html$Events$onClick(
-								hidden ? viewConfig.cc(
-									$author$project$PollEditor$PollEditorModel$AddDatePollItem(tuple)) : viewConfig.cc(
+								hidden ? viewConfig.outerMessage(
+									$author$project$PollEditor$PollEditorModel$AddDatePollItem(tuple)) : viewConfig.outerMessage(
 									$author$project$PollEditor$PollEditorModel$RemoveDatePollItem(tuple)))
 							]),
 						_List_fromArray(
@@ -8294,7 +8404,7 @@ var $author$project$PollEditor$PollEditorView$viewPollDateItemTags = F3(
 						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$text(viewConfig.cQ.h.cb)
+								$elm$html$Html$text(viewConfig.translation.pollEditor.optionsOverview)
 							])),
 					tags),
 				info));
@@ -8326,7 +8436,7 @@ var $author$project$PollEditor$PollEditorView$viewPollDate = F4(
 							_List_fromArray(
 								[
 									$elm$html$Html$text(
-									viewConfig.cQ.h.bu(viewConfig.ck + 1))
+									viewConfig.translation.pollEditor.editorTitleDate(viewConfig.pollNumber + 1))
 								])),
 							$author$project$PollEditor$PollEditorView$viewDeletePollButton(viewConfig)
 						])),
@@ -8359,7 +8469,7 @@ var $author$project$PollEditor$PollEditorView$viewPollDate = F4(
 												]),
 											_List_fromArray(
 												[
-													$elm$html$Html$text(viewConfig.cQ.r.aH)
+													$elm$html$Html$text(viewConfig.translation.common.pollTitleLabel)
 												])),
 											A2(
 											$elm$html$Html$input,
@@ -8367,11 +8477,11 @@ var $author$project$PollEditor$PollEditorView$viewPollDate = F4(
 												[
 													$elm$html$Html$Attributes$type_('text'),
 													$elm$html$Html$Attributes$class('common-input poll-name-input'),
-													$elm$html$Html$Attributes$placeholder(viewConfig.cQ.h.cm),
+													$elm$html$Html$Attributes$placeholder(viewConfig.translation.pollEditor.pollTitlePlaceholderDate),
 													$elm$html$Html$Attributes$value(
-													A2($elm$core$Maybe$withDefault, model.aC, model.be)),
+													A2($elm$core$Maybe$withDefault, model.originalTitle, model.changedTitle)),
 													$elm$html$Html$Events$onInput(
-													A2($elm$core$Basics$composeL, viewConfig.cc, $author$project$PollEditor$PollEditorModel$SetPollTitle))
+													A2($elm$core$Basics$composeL, viewConfig.outerMessage, $author$project$PollEditor$PollEditorModel$SetPollTitle))
 												]),
 											_List_Nil)
 										])),
@@ -8388,18 +8498,18 @@ var $author$project$PollEditor$PollEditorView$viewPollDate = F4(
 												]),
 											_List_fromArray(
 												[
-													$elm$html$Html$text(viewConfig.cQ.r.aF)
+													$elm$html$Html$text(viewConfig.translation.common.pollDescriptionLabel)
 												])),
 											A2(
 											$elm$html$Html$textarea,
 											_List_fromArray(
 												[
 													$elm$html$Html$Attributes$class('common-input poll-description-textarea'),
-													$elm$html$Html$Attributes$placeholder(viewConfig.cQ.h.aG),
+													$elm$html$Html$Attributes$placeholder(viewConfig.translation.pollEditor.pollDescriptionPlaceholder),
 													$elm$html$Html$Attributes$value(
-													A2($elm$core$Maybe$withDefault, model.aA, model.bd)),
+													A2($elm$core$Maybe$withDefault, model.originalDescription, model.changedDescription)),
 													$elm$html$Html$Events$onInput(
-													A2($elm$core$Basics$composeL, viewConfig.cc, $author$project$PollEditor$PollEditorModel$SetPollDescription))
+													A2($elm$core$Basics$composeL, viewConfig.outerMessage, $author$project$PollEditor$PollEditorModel$SetPollDescription))
 												]),
 											_List_Nil)
 										]))
@@ -8412,7 +8522,7 @@ var $author$project$PollEditor$PollEditorView$viewPollDate = F4(
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text(viewConfig.cQ.h.b9)
+									$elm$html$Html$text(viewConfig.translation.pollEditor.optionsInstructionsDate)
 								])),
 							A3($author$project$PollEditor$PollEditorView$viewDateCalendar, state, pollData, viewConfig),
 							A3($author$project$PollEditor$PollEditorView$viewPollDateItemTags, state, pollData, viewConfig)
@@ -8420,27 +8530,27 @@ var $author$project$PollEditor$PollEditorView$viewPollDate = F4(
 				]));
 	});
 var $elm$html$Html$ol = _VirtualDom_node('ol');
-var $author$project$PollEditor$PollEditorModel$AddGenericPollItem = {$: 3};
+var $author$project$PollEditor$PollEditorModel$AddGenericPollItem = {$: 'AddGenericPollItem'};
 var $elm$html$Html$li = _VirtualDom_node('li');
 var $author$project$PollEditor$PollEditorModel$HideGenericPollItem = function (a) {
-	return {$: 6, a: a};
+	return {$: 'HideGenericPollItem', a: a};
 };
 var $author$project$PollEditor$PollEditorModel$RenameGenericPollItem = F2(
 	function (a, b) {
-		return {$: 5, a: a, b: b};
+		return {$: 'RenameGenericPollItem', a: a, b: b};
 	});
 var $author$project$PollEditor$PollEditorModel$UnhideGenericPollItem = function (a) {
-	return {$: 7, a: a};
+	return {$: 'UnhideGenericPollItem', a: a};
 };
 var $author$project$PollEditor$PollEditorView$viewPollGenericItemExisting = F3(
 	function (item, pollData, viewConfig) {
-		var hidden = (item.aq && (!A2(
+		var hidden = (item.hidden && (!A2(
 			$elm$core$Set$member,
-			$author$project$Data$DataModel$optionIdInt(item.az),
-			pollData.aZ))) || A2(
+			$author$project$Data$DataModel$optionIdInt(item.optionId),
+			pollData.unhiddenItems))) || A2(
 			$elm$core$Set$member,
-			$author$project$Data$DataModel$optionIdInt(item.az),
-			pollData.ar);
+			$author$project$Data$DataModel$optionIdInt(item.optionId),
+			pollData.hiddenItems);
 		return A2(
 			$elm$html$Html$li,
 			_List_fromArray(
@@ -8457,19 +8567,19 @@ var $author$project$PollEditor$PollEditorView$viewPollGenericItemExisting = F3(
 							$elm$html$Html$Attributes$value(
 							A2(
 								$elm$core$Maybe$withDefault,
-								item.a_,
+								item.value,
 								A2(
 									$elm$core$Dict$get,
-									$author$project$Data$DataModel$optionIdInt(item.az),
-									pollData.cy))),
-							$elm$html$Html$Attributes$placeholder(item.a_),
+									$author$project$Data$DataModel$optionIdInt(item.optionId),
+									pollData.renamedItems))),
+							$elm$html$Html$Attributes$placeholder(item.value),
 							$elm$html$Html$Attributes$class(
 							'common-input poll-option-generic-input' + A2($author$project$Common$CommonView$optClass, hidden, 'poll-option-hidden')),
 							$elm$html$Html$Events$onInput(
 							A2(
 								$elm$core$Basics$composeL,
-								viewConfig.cc,
-								$author$project$PollEditor$PollEditorModel$RenameGenericPollItem(item.az)))
+								viewConfig.outerMessage,
+								$author$project$PollEditor$PollEditorModel$RenameGenericPollItem(item.optionId)))
 						]),
 					_List_Nil),
 					$elm$html$Html$text(' '),
@@ -8479,11 +8589,11 @@ var $author$project$PollEditor$PollEditorView$viewPollGenericItemExisting = F3(
 						[
 							$elm$html$Html$Attributes$class('common-button common-icon-button'),
 							$elm$html$Html$Events$onClick(
-							hidden ? viewConfig.cc(
-								$author$project$PollEditor$PollEditorModel$UnhideGenericPollItem(item.az)) : viewConfig.cc(
-								$author$project$PollEditor$PollEditorModel$HideGenericPollItem(item.az))),
+							hidden ? viewConfig.outerMessage(
+								$author$project$PollEditor$PollEditorModel$UnhideGenericPollItem(item.optionId)) : viewConfig.outerMessage(
+								$author$project$PollEditor$PollEditorModel$HideGenericPollItem(item.optionId))),
 							$elm$html$Html$Attributes$title(
-							hidden ? viewConfig.cQ.h.cR : viewConfig.cQ.h.bF)
+							hidden ? viewConfig.translation.pollEditor.unhide : viewConfig.translation.pollEditor.hide)
 						]),
 					_List_fromArray(
 						[
@@ -8492,11 +8602,11 @@ var $author$project$PollEditor$PollEditorView$viewPollGenericItemExisting = F3(
 				]));
 	});
 var $author$project$PollEditor$PollEditorModel$RemoveGenericPollItem = function (a) {
-	return {$: 4, a: a};
+	return {$: 'RemoveGenericPollItem', a: a};
 };
 var $author$project$PollEditor$PollEditorModel$SetNewGenericPollItem = F2(
 	function (a, b) {
-		return {$: 2, a: a, b: b};
+		return {$: 'SetNewGenericPollItem', a: a, b: b};
 	});
 var $author$project$PollEditor$PollEditorView$viewPollGenericItemNew = F4(
 	function (itemNumber, itemValue, pollData, viewConfig) {
@@ -8518,7 +8628,7 @@ var $author$project$PollEditor$PollEditorView$viewPollGenericItemNew = F4(
 							$elm$html$Html$Events$onInput(
 							A2(
 								$elm$core$Basics$composeL,
-								viewConfig.cc,
+								viewConfig.outerMessage,
 								$author$project$PollEditor$PollEditorModel$SetNewGenericPollItem(itemNumber)))
 						]),
 					_List_Nil),
@@ -8529,11 +8639,11 @@ var $author$project$PollEditor$PollEditorView$viewPollGenericItemNew = F4(
 						[
 							$elm$html$Html$Attributes$class('common-button common-icon-button'),
 							$elm$html$Html$Events$onClick(
-							viewConfig.cc(
+							viewConfig.outerMessage(
 								$author$project$PollEditor$PollEditorModel$RemoveGenericPollItem(itemNumber))),
 							$elm$html$Html$Attributes$disabled(
-							(!itemNumber) && ($elm$core$String$isEmpty(itemValue) && $elm$core$List$isEmpty(pollData.aB))),
-							$elm$html$Html$Attributes$title(viewConfig.cQ.r.cv)
+							(!itemNumber) && ($elm$core$String$isEmpty(itemValue) && $elm$core$List$isEmpty(pollData.originalItems))),
+							$elm$html$Html$Attributes$title(viewConfig.translation.common.remove)
 						]),
 					_List_fromArray(
 						[
@@ -8549,13 +8659,13 @@ var $author$project$PollEditor$PollEditorView$viewPollGenericItems = F2(
 				function (itemNumber, item) {
 					return A4($author$project$PollEditor$PollEditorView$viewPollGenericItemNew, itemNumber, item, pollData, viewConfig);
 				}),
-			pollData.af);
+			pollData.addedItems);
 		var existing = A2(
 			$elm$core$List$map,
 			function (item) {
 				return A3($author$project$PollEditor$PollEditorView$viewPollGenericItemExisting, item, pollData, viewConfig);
 			},
-			pollData.aB);
+			pollData.originalItems);
 		var add = A2(
 			$elm$html$Html$li,
 			_List_fromArray(
@@ -8569,12 +8679,12 @@ var $author$project$PollEditor$PollEditorView$viewPollGenericItems = F2(
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick(
-							viewConfig.cc($author$project$PollEditor$PollEditorModel$AddGenericPollItem)),
+							viewConfig.outerMessage($author$project$PollEditor$PollEditorModel$AddGenericPollItem)),
 							$elm$html$Html$Attributes$class('common-button common-button-bigger colors-neutral common-add-icon')
 						]),
 					_List_fromArray(
 						[
-							$elm$html$Html$text(viewConfig.cQ.h.a1)
+							$elm$html$Html$text(viewConfig.translation.pollEditor.addOption)
 						]))
 				]));
 		return _Utils_ap(
@@ -8611,7 +8721,7 @@ var $author$project$PollEditor$PollEditorView$viewPollGeneric = F3(
 							_List_fromArray(
 								[
 									$elm$html$Html$text(
-									viewConfig.cQ.h.bv(viewConfig.ck + 1))
+									viewConfig.translation.pollEditor.editorTitleGeneric(viewConfig.pollNumber + 1))
 								])),
 							$author$project$PollEditor$PollEditorView$viewDeletePollButton(viewConfig)
 						])),
@@ -8644,7 +8754,7 @@ var $author$project$PollEditor$PollEditorView$viewPollGeneric = F3(
 												]),
 											_List_fromArray(
 												[
-													$elm$html$Html$text(viewConfig.cQ.r.aH)
+													$elm$html$Html$text(viewConfig.translation.common.pollTitleLabel)
 												])),
 											A2(
 											$elm$html$Html$input,
@@ -8652,11 +8762,11 @@ var $author$project$PollEditor$PollEditorView$viewPollGeneric = F3(
 												[
 													$elm$html$Html$Attributes$type_('text'),
 													$elm$html$Html$Attributes$class('common-input poll-name-input'),
-													$elm$html$Html$Attributes$placeholder(viewConfig.cQ.h.cn),
+													$elm$html$Html$Attributes$placeholder(viewConfig.translation.pollEditor.pollTitlePlaceholderGeneric),
 													$elm$html$Html$Attributes$value(
-													A2($elm$core$Maybe$withDefault, model.aC, model.be)),
+													A2($elm$core$Maybe$withDefault, model.originalTitle, model.changedTitle)),
 													$elm$html$Html$Events$onInput(
-													A2($elm$core$Basics$composeL, viewConfig.cc, $author$project$PollEditor$PollEditorModel$SetPollTitle))
+													A2($elm$core$Basics$composeL, viewConfig.outerMessage, $author$project$PollEditor$PollEditorModel$SetPollTitle))
 												]),
 											_List_Nil)
 										])),
@@ -8673,18 +8783,18 @@ var $author$project$PollEditor$PollEditorView$viewPollGeneric = F3(
 												]),
 											_List_fromArray(
 												[
-													$elm$html$Html$text(viewConfig.cQ.r.aF)
+													$elm$html$Html$text(viewConfig.translation.common.pollDescriptionLabel)
 												])),
 											A2(
 											$elm$html$Html$textarea,
 											_List_fromArray(
 												[
 													$elm$html$Html$Attributes$class('common-input poll-description-textarea'),
-													$elm$html$Html$Attributes$placeholder(viewConfig.cQ.h.aG),
+													$elm$html$Html$Attributes$placeholder(viewConfig.translation.pollEditor.pollDescriptionPlaceholder),
 													$elm$html$Html$Attributes$value(
-													A2($elm$core$Maybe$withDefault, model.aA, model.bd)),
+													A2($elm$core$Maybe$withDefault, model.originalDescription, model.changedDescription)),
 													$elm$html$Html$Events$onInput(
-													A2($elm$core$Basics$composeL, viewConfig.cc, $author$project$PollEditor$PollEditorModel$SetPollDescription))
+													A2($elm$core$Basics$composeL, viewConfig.outerMessage, $author$project$PollEditor$PollEditorModel$SetPollDescription))
 												]),
 											_List_Nil)
 										]))
@@ -8697,7 +8807,7 @@ var $author$project$PollEditor$PollEditorView$viewPollGeneric = F3(
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text(viewConfig.cQ.h.ca)
+									$elm$html$Html$text(viewConfig.translation.pollEditor.optionsInstructionsGeneric)
 								])),
 							A2(
 							$elm$html$Html$div,
@@ -8715,7 +8825,7 @@ var $author$project$PollEditor$PollEditorView$viewPollGeneric = F3(
 										]),
 									_List_fromArray(
 										[
-											$elm$html$Html$text(viewConfig.cQ.r.cl)
+											$elm$html$Html$text(viewConfig.translation.common.pollOptionsLabel)
 										])),
 									A2(
 									$elm$html$Html$ol,
@@ -8730,8 +8840,8 @@ var $author$project$PollEditor$PollEditorView$viewPollGeneric = F3(
 	});
 var $author$project$PollEditor$PollEditorView$viewPoll = F2(
 	function (model, viewConfig) {
-		var _v0 = model.bt;
-		if (_v0.$ === 1) {
+		var _v0 = model.editor;
+		if (_v0.$ === 'GenericPollEditor') {
 			var genericDef = _v0.a;
 			return A3($author$project$PollEditor$PollEditorView$viewPollGeneric, model, genericDef, viewConfig);
 		} else {
@@ -8746,13 +8856,13 @@ var $author$project$Create$CreateView$viewEditing = function (model) {
 		_List_Nil,
 		_List_fromArray(
 			[
-				A2($author$project$Translations$TranslationsView$translationsView, model.cQ, $author$project$Create$CreateModel$SetTranslation),
+				A2($author$project$Translations$TranslationsView$translationsView, model.translation, $author$project$Create$CreateModel$SetTranslation),
 				A2(
 				$elm$html$Html$h2,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$text(model.cQ.n.bX)
+						$elm$html$Html$text(model.translation.create.newProjectHeader)
 					])),
 				A2(
 				$elm$html$Html$label,
@@ -8767,7 +8877,7 @@ var $author$project$Create$CreateView$viewEditing = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(model.cQ.r.cs)
+								$elm$html$Html$text(model.translation.common.projectTitleLabel)
 							])),
 						A2(
 						$elm$html$Html$input,
@@ -8775,13 +8885,13 @@ var $author$project$Create$CreateView$viewEditing = function (model) {
 							[
 								$elm$html$Html$Attributes$type_('text'),
 								$elm$html$Html$Attributes$class('project-title'),
-								$elm$html$Html$Attributes$placeholder(model.cQ.r.ct),
+								$elm$html$Html$Attributes$placeholder(model.translation.common.projectTitlePlaceholder),
 								$elm$html$Html$Events$onInput($author$project$Create$CreateModel$SetTitle),
-								$elm$html$Html$Attributes$value(model.S)
+								$elm$html$Html$Attributes$value(model.title)
 							]),
 						_List_Nil)
 					])),
-				$author$project$Common$CommonView$viewBoxInfo(model.cQ.n.bJ),
+				$author$project$Common$CommonView$viewBoxInfo(model.translation.create.infoText),
 				A2(
 				$elm$html$Html$div,
 				_List_fromArray(
@@ -8796,16 +8906,16 @@ var $author$project$Create$CreateView$viewEditing = function (model) {
 								$author$project$PollEditor$PollEditorView$viewPoll,
 								p,
 								{
-									cc: $author$project$Create$CreateModel$EditPoll(i),
-									ck: i,
-									cx: $elm$core$Maybe$Just(
+									outerMessage: $author$project$Create$CreateModel$EditPoll(i),
+									pollNumber: i,
+									removePollMessage: $elm$core$Maybe$Just(
 										$author$project$Create$CreateModel$RemovePoll(i)),
-									cP: model.cP,
-									cQ: model.cQ
+									today: model.today,
+									translation: model.translation
 								});
 						}),
-					model.Z)),
-				$elm$core$List$isEmpty(model.Z) ? $author$project$Create$CreateView$viewChooseFirstPoll(model.cQ) : A2(
+					model.polls)),
+				$elm$core$List$isEmpty(model.polls) ? $author$project$Create$CreateView$viewChooseFirstPoll(model.translation) : A2(
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
@@ -8813,15 +8923,15 @@ var $author$project$Create$CreateView$viewEditing = function (model) {
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text(model.cQ.n.a3),
+						$elm$html$Html$text(model.translation.create.addPollFirstPart),
 						A2(
 						$elm$html$Html$b,
 						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$text(model.cQ.n.a2)
+								$elm$html$Html$text(model.translation.create.addPollBoldPart)
 							])),
-						$elm$html$Html$text(model.cQ.n.a4),
+						$elm$html$Html$text(model.translation.create.addPollLastPart),
 						A2(
 						$elm$html$Html$span,
 						_List_fromArray(
@@ -8839,7 +8949,7 @@ var $author$project$Create$CreateView$viewEditing = function (model) {
 									]),
 								_List_fromArray(
 									[
-										$elm$html$Html$text(model.cQ.r.aJ)
+										$elm$html$Html$text(model.translation.common.pollTypeGeneric)
 									])),
 								$elm$html$Html$text(' '),
 								A2(
@@ -8851,13 +8961,13 @@ var $author$project$Create$CreateView$viewEditing = function (model) {
 									]),
 								_List_fromArray(
 									[
-										$elm$html$Html$text(model.cQ.r.aI)
+										$elm$html$Html$text(model.translation.common.pollTypeDate)
 									]))
 							]))
 					])),
 				function () {
-				var _v0 = model.bm;
-				if (_v0.$ === 1) {
+				var _v0 = model.created;
+				if (_v0.$ === 'Nothing') {
 					return A2(
 						$elm$html$Html$div,
 						_List_fromArray(
@@ -8869,8 +8979,8 @@ var $author$project$Create$CreateView$viewEditing = function (model) {
 								$author$project$Create$CreateView$submitButton(model)
 							]));
 				} else {
-					var projectKey = _v0.a.cr;
-					var secretKey = _v0.a.cI;
+					var projectKey = _v0.a.projectKey;
+					var secretKey = _v0.a.secretKey;
 					return A2(
 						$elm$html$Html$div,
 						_List_Nil,
@@ -8885,8 +8995,8 @@ var $author$project$Create$CreateView$viewEditing = function (model) {
 			]));
 };
 var $author$project$Create$CreateView$view = function (model) {
-	var _v0 = model.bm;
-	if (_v0.$ === 1) {
+	var _v0 = model.created;
+	if (_v0.$ === 'Nothing') {
 		return $author$project$Create$CreateView$viewEditing(model);
 	} else {
 		var projectInfo = _v0.a;
@@ -8894,5 +9004,23 @@ var $author$project$Create$CreateView$view = function (model) {
 	}
 };
 var $author$project$CreatePage$main = $elm$browser$Browser$element(
-	{bL: $author$project$Create$CreateUpdate$init, cK: $author$project$Create$CreateUpdate$subscriptions, cT: $author$project$Create$CreateUpdate$update, cU: $author$project$Create$CreateView$view});
+	{init: $author$project$Create$CreateUpdate$init, subscriptions: $author$project$Create$CreateUpdate$subscriptions, update: $author$project$Create$CreateUpdate$update, view: $author$project$Create$CreateView$view});
 _Platform_export({'CreatePage':{'init':$author$project$CreatePage$main($elm$json$Json$Decode$value)(0)}});}(this));
+
+  var app = Elm.CreatePage.init({ node: document.getElementById("elm") });
+}
+catch (e)
+{
+  // display initialization errors (e.g. bad flags, infinite recursion)
+  var header = document.createElement("h1");
+  header.style.fontFamily = "monospace";
+  header.innerText = "Initialization Error";
+  var pre = document.getElementById("elm");
+  document.body.insertBefore(header, pre);
+  pre.innerText = e;
+  throw e;
+}
+</script>
+
+</body>
+</html>

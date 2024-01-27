@@ -1,0 +1,113 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Czoodle.cz - create poll</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="/v02/css/main.css">
+    <link rel="stylesheet" href="/v02/css/info.css">
+    <script src="/v02/js/encryptionutils.js"></script>
+    <script src="/v02/js/create.elm.js"></script>
+    <meta property="og:title" content="Czoodle"/>
+    <meta property="og:description" content="Simple group polls"/>
+</head>
+<body>
+    <header>
+        <h1 class="header">
+            <span class="cz-start">Cz</span><span class="oo">oo</span><span class="d">d</span><span class="le">le</span>
+        </h1>
+    </header>
+    <main>
+        <div id="project" class="project notranslate" translate="no">
+            <div class="width">
+                <div id="elm-root"></div>
+            </div>
+        </div>
+    </main>
+    <script type="text/javascript">
+        const date = new Date();
+        const today = {
+            year: date.getFullYear(),
+            month: date.getMonth() + 1,
+            day: date.getDate(),
+        }
+        const baseUrl = /(https?:\/\/[^/]*)(\/.*)?/.exec(window.location)[1];
+        let app = Elm.CreatePage.init({
+            node: document.getElementById('elm-root'),
+            flags: { today, baseUrl, languages: navigator.languages || [] },
+        });
+        app.ports.persist.subscribe(async function(data) {
+            try {
+                const evidence = byteArrayToHex(generateRandomByteArray(32));
+                data.evidence = evidence;
+                const key = await generateKey();
+                const { encryptedData, iv } = await encryptJson(data, key);
+
+                const trySave = async() => {
+                    const requestKeyResult = await get('/data/v02/requestProjectKey');
+                    const keyVerification = await verify(requestKeyResult.projectKey, requestKeyResult.requiredHashPrefix);
+                    const body = {
+                        encryptedData,
+                        iv,
+                        evidence,
+                        projectKey: requestKeyResult.projectKey,
+                        keyVerification,
+                    };
+                    const result = await post('/data/v02/create', body);
+                    if (result.result === 'key_used') {
+                        trySave()
+                    } else if (result.result === 'verification_failed') {
+                        // that is bad
+                    } else if (result.result === 'created') {
+                        app.ports.createdProjectInfo.send({
+                            projectKey: result.projectKey,
+                            secretKey: key,
+                        });
+                    }
+                }
+                trySave();
+            } catch (e) {
+                console.log(e);
+            }
+        });
+
+        async function sha256(message) {
+            // https://stackoverflow.com/questions/18338890/are-there-any-sha-256-javascript-implementations-that-are-generally-considered-t
+            // encode as UTF-8
+            const msgBuffer = new TextEncoder('utf-8').encode(message);
+            // hash the message
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            // convert ArrayBuffer to Array
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            // convert bytes to hex string
+            const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
+            return hashHex;
+        }
+
+        const verify = async (base, requiredPrefix) => {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
+            const queue = [''];
+            let start = 0;
+            const tryNext = () => {
+                const prefix = queue[start++];
+                chars.forEach((c) => {
+                    queue.push(prefix + c);
+                });
+                return sha256(base + prefix).then((hash) => {
+                    if (hash.startsWith(requiredPrefix)) {
+                        return prefix;
+                    } else {
+                        return tryNext()
+                    }
+                });
+            }
+            return Promise.resolve().then(tryNext);
+        }
+
+    </script>
+</body>
+</html>

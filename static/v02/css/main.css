@@ -1,0 +1,17 @@
+:root {
+    /* Color Variables */
+    --page-back: #ffffff;
+    --page-text: #000000;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --page-back: #000000;
+        --page-text: #ffffff;
+    }
+}
+
+body {
+    background-color: var(--page-back);
+    color: var(--page-text);
+}
