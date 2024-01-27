@@ -228,7 +228,7 @@
                 const { encryptedData, iv } = await encryptJson(data, key);
 
                 const trySave = async() => {
-                    const requestKeyResult = await get('/data/v02/requestProjectKey');
+                    const requestKeyResult = await get('/data/v01/requestProjectKey');
                     const keyVerification = await verify(requestKeyResult.projectKey, requestKeyResult.requiredHashPrefix);
                     const body = {
                         encryptedData,
@@ -237,7 +237,7 @@
                         projectKey: requestKeyResult.projectKey,
                         keyVerification,
                     };
-                    const result = await post('/data/v02/create', body);
+                    const result = await post('/data/v01/create', body);
                     if (result.result === 'key_used') {
                         trySave()
                     } else if (result.result === 'verification_failed') {

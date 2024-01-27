@@ -90,7 +90,7 @@ viewCreated : CreatedProjectInfo -> Model -> Html Msg
 viewCreated { projectKey, secretKey } model =
     let
         urlBase =
-            String.concat [ model.baseUrl, "/v02/vote.html#", projectKey, "/" ]
+            String.concat [ model.baseUrl, "/v01/vote.html#", projectKey, "/" ]
 
         url =
             String.concat [ urlBase, secretKey ]
