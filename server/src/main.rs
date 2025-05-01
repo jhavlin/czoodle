@@ -1,4 +1,3 @@
-extern crate actix_files;
 extern crate actix_web;
 extern crate chrono;
 extern crate serde;
@@ -7,7 +6,6 @@ extern crate sha2;
 
 mod common;
 mod key_utils;
-mod v01;
 mod v02;
 
 use actix_web::{App, HttpServer, Result};
@@ -24,13 +22,11 @@ async fn main() -> Result<(), std::io::Error> {
     );
 
     let app = || {
-        let static_files_handler = actix_files::Files::new("/", "./static")
-            .show_files_listing()
-            .index_file("index.html");
-        App::new()
-            .service(v01::scope())
-            .service(v02::scope())
-            .service(static_files_handler)
+        //let static_files_handler = actix_files::Files::new("/", "./static")
+        // .show_files_listing()
+        // .index_file("index.html");
+        App::new().service(v02::scope())
+        // .service(static_files_handler)
     };
     HttpServer::new(app)
         .bind(host + ":" + &port)?
