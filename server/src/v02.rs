@@ -2,7 +2,7 @@ use crate::common::{
     self, CreateInputData, CreateOutputData, GetOutputData, RequestProjectKeyOutputData,
     UpdateInputData, UpdateOutputData,
 };
-use actix_web::{web, web::Json, Result, Scope};
+use actix_web::{Result, Scope, web, web::Json};
 
 const VERSION: &'static str = "v02";
 
