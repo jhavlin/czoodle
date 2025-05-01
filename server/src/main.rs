@@ -21,13 +21,7 @@ async fn main() -> Result<(), std::io::Error> {
         path.display()
     );
 
-    let app = || {
-        //let static_files_handler = actix_files::Files::new("/", "./static")
-        // .show_files_listing()
-        // .index_file("index.html");
-        App::new().service(v02::scope())
-        // .service(static_files_handler)
-    };
+    let app = || App::new().service(v02::scope());
     HttpServer::new(app)
         .bind(host + ":" + &port)?
         .workers(1)
