@@ -1,0 +1,21 @@
+:root {
+    color-scheme: light dark;
+
+    --background-body: white;
+    --text-color-body: black;
+
+    --background-project: #f8f8f8;
+    --background-project-gradient-top: #e6e6e6;
+
+    --panel-header-background: a;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-body: black;
+        --text-color-body: white;
+
+        --background-project: #222222;
+        --background-project-gradient-top: #2a2a2a;
+    }
+}

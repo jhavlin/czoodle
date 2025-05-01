@@ -1,0 +1,377 @@
+.vote-project {
+    margin: 0 auto;
+    padding: 0.5rem;
+}
+
+.vote-project-title-line {
+    display: flex;
+    align-items: center;
+    margin: 0.7em 0;
+}
+
+.vote-project-title-cell {
+    flex: 1;
+}
+
+.vote-project-title {
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 22px;
+}
+
+h1.vote-project-title {
+    margin: 0 0;
+}
+
+input.vote-project-title {
+    padding: 0.2em;
+    width: 100%;
+}
+
+.vote-project-edit-cell {
+    flex: 0;
+    user-select: none;
+    padding: 0 2px;
+}
+
+.vote-project-edit-button {
+    color: #bbbbbb;
+    font-size: 32px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4em;
+    min-height: 1.4em;
+    box-sizing: border-box;
+    text-align: center;
+    cursor: pointer;
+}
+
+.vote-project-edit-button:hover {
+    background: white;
+    border-radius: 3px;
+}
+
+.vote-process-overlay {
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vote-process-overlay-text {
+    color: white;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 1rem;
+    border: 2px lightgray solid;
+    font-size: 150%;
+}
+
+.vote-poll-center-outer {
+    display: flex;
+    justify-content: center;
+}
+
+.vote-poll-center {
+    overflow: auto;
+}
+
+.vote-poll {
+    padding-bottom: 10px;
+}
+
+.vote-poll-preferred-width {
+    width: 750px;
+    max-width: 100%;
+}
+
+.vote-poll-title {
+    font-family: sans-serif;
+    font-size: 18px;
+    color: rgb(102, 106, 102);
+    border-bottom: 1px rgb(102, 106, 102) solid;
+    padding-bottom: 5px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.vote-poll-description {
+    white-space: pre-line;
+    font-family: sans-serif;
+}
+
+.vote-poll-description:not(:empty) {
+    margin-bottom: 20px;
+}
+
+.vote-legend {
+    float: right;
+}
+
+.vote-legend-text {
+    padding-right: 0.5rem;
+}
+
+@media (max-width: 400px) {
+    .vote-legend-text {
+        font-size: 12px;
+    }
+}
+
+.vote-poll-table {
+    border-spacing: 0px 1px;
+    height: 100%;
+    /* to make relative heights in cells work */
+    box-sizing: border-box;
+    padding-bottom: 0.5rem;
+}
+
+.vote-poll-table.padding-bottom {
+    padding-bottom: 1.5rem;
+}
+
+.vote-poll-table>tr {
+    height: 100%;
+}
+
+.vote-poll-table th {
+    padding: 2px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.vote-poll-header-cell {
+    padding: 5px;
+    color: white;
+    background: rgb(102, 106, 102);
+    border-radius: 2px;
+    min-width: 4.5em;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.vote-poll-header-cell-generic {
+    width: 7em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vote-poll-day-in-week {
+    font-size: 130%;
+}
+
+.vote-poll-row>td {
+    padding: 2px 3px;
+    height: 1px;
+}
+
+.vote-poll-row>td:first-child {
+    border-radius: 3px 0 0 3px;
+    padding-left: 7px;
+}
+
+.vote-poll-row>td:last-child {
+    border-radius: 0 3px 3px 0;
+    padding-right: 7px;
+}
+
+.vote-poll-row-added.editable>td {
+    background-color: rgb(219, 242, 215);
+}
+
+.vote-poll-row-existing.editable>td {
+    background-color: rgb(215, 231, 251);
+}
+
+.vote-poll-name-cell {
+    vertical-align: middle;
+    text-align: right;
+}
+
+.vote-poll-name-cell-existing {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: end;
+    flex-wrap: nowrap;
+}
+
+.vote-poll-name-cell-name {
+    flex: 0 0 auto;
+}
+
+.vote-poll-name-cell-button {
+    flex: 0 0 auto;
+    width: 2rem;
+    margin-right: 0.25em;
+    font-size: 16px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 2px;
+}
+
+.vote-poll-name-cell-button:hover {
+    background: white;
+    border-color: darkgray;
+}
+
+.vote-poll-count-cell {
+    text-align: center;
+    vertical-align: center;
+    padding: 3px 0;
+}
+
+.vote-poll-count-cell-max {
+    font-weight: bold;
+}
+
+.vote-poll-count-positive {
+    margin-right: 3px;
+}
+
+.vote-poll-count-yes {
+    font-size: 90%;
+    color: #48cd0e;
+}
+
+.vote-poll-new-name-input,
+.vote-poll-existing-name-input {
+    padding: 4px 2px;
+    width: 10rem;
+}
+
+.vote-poll-existing-name-input {
+    background: transparent;
+    border: 1px lightgray solid;
+}
+
+.vote-poll-existing-name-input:disabled {
+    color: #444;
+}
+
+.vote-poll-new-name-input,
+.vote-poll-existing-name-input.editable {
+    background: white;
+    border: 1px gray solid;
+}
+
+.vote-poll-new-name-input-invalid {
+    border-color: red;
+    border-width: 2px;
+}
+
+.vote-poll-select-cell {
+    border: 1px rgb(197, 197, 197) solid;
+    border-radius: 2px;
+    padding: 1px;
+    text-align: center;
+    user-select: none;
+}
+
+.editable .vote-poll-select-cell {
+    cursor: pointer;
+}
+
+.vote-poll-select-cell.changed {
+    border-color: black;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+}
+
+.vote-poll-select-cell.transparent {
+    opacity: 0.35;
+}
+
+.vote-poll-select-cell-yes {
+    background: #e4fcdf;
+    border-color: #2f8609;
+}
+
+.editable .vote-poll-select-cell-yes:hover {
+    background: #b8ffa8;
+}
+
+.vote-poll-select-cell-svg-yes {
+    fill: #48cd0e;
+    stroke: #48cd0e;
+    stroke-width: 3;
+}
+
+.vote-poll-select-cell-no {
+    background: white;
+    border-color: #ffb4b4;
+}
+
+.editable .vote-poll-select-cell-no:hover {
+    background: #ffeeee;
+}
+
+.vote-poll-select-cell-svg-no {
+    fill: transparent;
+    stroke: #ffcccc;
+    stroke-width: 2;
+}
+
+.vote-poll-select-cell-ifneeded {
+    background: #ffffd9;
+    border-color: #be9501;
+}
+
+.editable .vote-poll-select-cell-ifneeded:hover {
+    background: #fbfbb0;
+}
+
+.vote-poll-select-cell-svg-ifneeded {
+    fill: transparent;
+    stroke: #ffc800;
+    stroke-width: 3;
+}
+
+.vote-poll-deleted-cell {
+    border: 1px gray solid;
+    background: transparent;
+    color: gray;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.vote-poll-edit-cell {
+    text-align: center;
+    vertical-align: middle;
+    padding: 2px 5px;
+    user-select: none;
+}
+
+.vote-poll-edit-link {
+    font-size: 80%;
+    cursor: pointer;
+    color: #555;
+}
+
+.vote-poll-edit-link:hover {
+    text-decoration: underline;
+}
+
+.vote-footer {
+    max-width: 750px;
+    padding: 3rem 1rem 1rem 1rem;
+    margin: 0 auto;
+    color: black;
+}
+
+.vote-footer a,
+.vote-footer a:visited,
+.vote-footer a:hover {
+    color: black;
+}

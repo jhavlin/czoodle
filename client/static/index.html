@@ -1,0 +1,43 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Czoodle</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+
+    <link rel="stylesheet" href="v02/css/colors.css">
+    <link rel="stylesheet" href="v02/css/common.css">
+    <link rel="stylesheet" href="v02/css/create.css">
+
+    <meta property="og:title" content="Czoodle" />
+    <meta property="og:site_name" content="Czoodle" />
+    <meta property="og:description" content="Group Polls" />
+
+    <script src="v02/js/encryptionutils.js"></script>
+    <script src="v02/js/create.elm.js"></script>
+</head>
+
+<body>
+    <div
+        style="display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; flex-direction: column;">
+        <span>CZOODLE</span>
+        <span><small>...</small></span>
+    </div>
+
+    <script>
+        const app = Elm.Create.CreatePage.init({
+            flags: {
+            }
+        });
+    </script>
+</body>
+
+</html>
