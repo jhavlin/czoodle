@@ -100,8 +100,7 @@
 
 .poll-instructions {
     margin: 1rem 0 0.5rem;
-    color: #444;
-    text-shadow: 0px 1px 0px rgba(255, 255, 255, .5);
+    color: var(--panel-box-body-secondary-fg);
 }
 
 .poll-options-header {
@@ -151,8 +150,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px white solid;
-    color: lightgray;
+    color: var(--calendar-cell-base-fg);
+    border: 1px var(--calendar-cell-base-border) solid;
     cursor: pointer;
 }
 
@@ -164,41 +163,40 @@
 }
 
 .calendar-cell.calendar-cell-active {
-    color: #a7a6a6;
-    background: rgba(255, 255, 255, 0.7);
+    color: var(--calendar-cell-active-fg);
+    background: var(--calender-cell-active-bg);
 }
 
 .calendar-cell.calendar-cell-active.calendar-cell-future {
-    color: black;
+    color: var(--calendar-cell-active-future-fg);
 }
 
 .calendar-cell.calendar-cell-selected {
-    background-color: rgb(180, 223, 223);
-    color: white;
-    font-weight: bold;
+    background-color: var(--calendar-cell-selected-bg);
+    color: var(--calendar-cell-selected-fg);
 }
 
 .calendar-cell.calendar-cell-selected.calendar-cell-active.calendar-cell-future {
-    background-color: rgb(34, 133, 151);
-    color: white;
+    background-color: var(--calendar-cell-selected-active-future-bg);
+    color: var(--calendar-cell-selected-active-future-fg);
+    font-weight: bold;
 }
 
 .calendar-cell.calendar-cell-active:hover {
-    background-color: white;
-    border-color: gray;
+    background-color: var(--calendar-cell-active-hover-bg);
+    border-color: var(--calendar-cell-active-hover-border);
 }
 
 .calendar-cell.calendar-cell-selected.calendar-cell-highlighted,
 .calendar-cell.calendar-cell-selected:hover,
 .calendar-cell.calendar-cell-selected.calendar-cell-active:hover {
-    background-color: rgb(14, 103, 121);
-    color: white;
-    font-weight: bold;
-    border-color: white;
+    background-color: var(--calendar-cell-selected-hover-bg);
+    color: var(--calendar-cell-selected-hover-fg);
+    border-color: var(--calendar-cell-selected-hover-border);
 }
 
 .calendar-cell-today.calendar-cell-active {
-    border-color: rgb(34, 133, 151);
+    border-color: var(--calendar-cell-active-today-border);
 }
 
 .calendar-controls {
@@ -238,13 +236,13 @@ input.calendar-controls-year {
 
 .poll-date-tag {
     display: inline-block;
-    color: white;
+    color: var(--calendar-cell-selected-active-future-fg);
     margin: 4px;
 }
 
 .poll-date-tag-name {
     display: inline-block;
-    background: rgb(34, 133, 151);
+    background: var(--calendar-cell-selected-active-future-bg);
     line-height: 1.5;
     padding: 0 5px;
     border-radius: 3px 0 0 3px;
@@ -252,7 +250,7 @@ input.calendar-controls-year {
 }
 
 .poll-date-tag-name.poll-date-tag-name-highlighted {
-    background-color: rgb(14, 103, 121);
+    background-color: var(--calendar-cell-selected-hover-bg);
 }
 
 
@@ -271,7 +269,7 @@ input.calendar-controls-year {
 
 .poll-date-tag-delete {
     display: inline-block;
-    background: rgb(34, 133, 151);
+    background: var(--calendar-cell-selected-active-future-bg);
     border-left: 1px rgba(255, 255, 255, 0.4) solid;
     line-height: 1.5;
     padding: 0 3px;
@@ -298,7 +296,8 @@ input.calendar-controls-year {
     padding: 0 5px;
     margin: 4px;
     border-radius: 3px;
-    background: gray;
+    color: var(--tag-neutral-fg);
+    background: var(--tag-neutral-bg);
 }
 
 .submit-row {

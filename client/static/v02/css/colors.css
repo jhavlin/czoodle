@@ -17,6 +17,24 @@
     --panel-box-header-fg: white;
     --panel-box-header-close-bg: rgb(104 99 98);
     --panel-box-body-bg: rgb(229 229 224);
+    --panel-box-body-secondary-fg: #525252;
+    --calendar-cell-base-border: white;
+    --calendar-cell-base-fg: #8e8d8d;
+    --calendar-cell-active-fg: #a7a6a6;
+    --calender-cell-active-bg: rgba(255, 255, 255, 0.7);
+    --calendar-cell-active-future-fg: black;
+    --calendar-cell-active-hover-bg: white;
+    --calendar-cell-active-hover-border: gray;
+    --calendar-cell-active-today-border: rgb(34, 133, 151);
+    --calendar-cell-selected-active-future-bg: rgb(59, 147, 179);
+    --calendar-cell-selected-active-future-fg: white;
+    --calendar-cell-selected-bg: rgb(184, 213, 224);
+    --calendar-cell-selected-fg: white;
+    --calendar-cell-selected-hover-bg: rgb(17, 102, 133);
+    --calendar-cell-selected-hover-fg: white;
+    --calendar-cell-selected-hover-border: white;
+    --tag-neutral-bg: gray;
+    --tag-neutral-fg: white;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,5 +56,9 @@
         --panel-box-header-fg: white;
         --panel-box-header-close-bg: rgb(73 69 52);
         --panel-box-body-bg: rgb(52 49 46);
+        --panel-box-body-secondary-fg: #a9a9a9;
+        --calendar-cell-base-border: #979797;
+        --calendar-cell-selected-bg: rgb(28 62 78);
+        --calendar-cell-selected-fg: gray;
     }
 }
