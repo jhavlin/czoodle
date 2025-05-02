@@ -38,7 +38,7 @@ viewEditing model =
         , h2 [] [ text model.translation.create.newProjectHeader ]
         , label []
             [ span [ class "project-title-label" ] [ text model.translation.common.projectTitleLabel ]
-            , input [ type_ "text", class "project-title", placeholder model.translation.common.projectTitlePlaceholder, onInput SetTitle, value model.title ] []
+            , input [ type_ "text", class "project-title common-input", placeholder model.translation.common.projectTitlePlaceholder, onInput SetTitle, value model.title ] []
             ]
         , viewBoxInfo model.translation.create.infoText
         , div [ class "polls" ]
@@ -84,12 +84,12 @@ viewEditing model =
 viewChooseFirstPoll : Translation -> Html Msg
 viewChooseFirstPoll translation =
     div []
-        [ div [ class "polls-empty-add", onClick AddDatePoll, tabindex 0 ]
-            [ button [ class "polls-empty-add-button" ] [ text <| "+ " ++ translation.common.pollTypeDate ]
+        [ div [ class "polls-empty-add" ]
+            [ button [ class "polls-empty-add-button", onClick AddDatePoll, tabindex 0 ] [ text <| "+ " ++ translation.common.pollTypeDate ]
             , div [ class "polls-empty-add-description" ] [ text translation.create.pollDescriptionDate ]
             ]
-        , div [ class "polls-empty-add", onClick AddGenericPoll, tabindex 0 ]
-            [ button [ class "polls-empty-add-button" ] [ text <| "+ " ++ translation.common.pollTypeGeneric ]
+        , div [ class "polls-empty-add" ]
+            [ button [ class "polls-empty-add-button", onClick AddGenericPoll, tabindex 0 ] [ text <| "+ " ++ translation.common.pollTypeGeneric ]
             , div [ class "polls-empty-add-description" ] [ text translation.create.pollDescriptionGeneric ]
             ]
         ]

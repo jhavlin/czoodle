@@ -19,7 +19,7 @@
     font-size: 120%;
     font-weight: bold;
     border: none;
-    box-shadow: -2px 2px 4px gray;
+    box-shadow: -2px 2px 4px var(--shadow-base);
     width: 12rem;
     flex: 0 0 auto;
     justify-self: center;
@@ -37,27 +37,32 @@
 
 .poll {
     margin: 1rem 0;
-    background: rgb(237, 244, 255);
-    border: 1px rgb(34, 133, 151) solid;
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
 }
 
 .poll-header-row {
     display: flex;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem;
+    padding-left: 1rem;
     align-items: center;
-    color: white;
-    background: rgb(34, 133, 151);
+    color: var(--panel-box-header-fg);
+    background: var(--panel-box-header-bg);
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
 }
 
 .poll-body {
     padding: 1rem;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    background: var(--panel-box-body-bg);
+    border: 1px var(--panel-box-header-bg) solid;
 }
 
 .poll-header-name {
     flex: 1 1 auto;
+    padding-top: 0.5ex;
     font-family: sans-serif;
+    vertical-align: bottom;
 }
 
 .poll-header-delete {
@@ -66,7 +71,7 @@
 
 .delete-poll-button {
     color: white;
-    background: rgb(34, 133, 151);
+    background: var(--panel-box-header-close-bg);
     border-color: white;
     border-width: 2px;
 }
@@ -307,7 +312,7 @@ input.calendar-controls-year {
     margin: 10px;
     padding: 10px;
     font-size: 15pt;
-    box-shadow: -1px 1px 3px gray;
+    box-shadow: -1px 1px 3px var(--shadow-base);
     border-radius: 5px;
     border: none;
 }

@@ -2,8 +2,8 @@ body {
     margin: 0 0;
     padding: 0 0;
     overflow: auto scroll;
-    background-color: var(--background-body);
-    color: var(--text-color-body);
+    background-color: var(--body-bg);
+    color: var(--body-fg);
 }
 
 header {
@@ -34,9 +34,6 @@ header {
     width: 100%;
 }
 
-/* OLD ================================================================== */
-
-
 .desc {
     font-size: 24px;
     text-align: center;
@@ -49,18 +46,31 @@ header {
 
 /* Common UI types */
 
+.common-input {
+    color: var(--input-fg);
+    background: var(--input-bg);
+    padding: 6px 5px 4px 5px;
+    font-size: 100%;
+    border: 1px var(--input-border) solid;
+}
+
+.common-input::placeholder {
+    color: var(--input-placeholder);
+}
+
 .common-button,
 .common-select {
     cursor: pointer;
     text-decoration: none;
     font-family: sans-serif;
-    background: #f5f5f5 linear-gradient(to bottom, #f5f5f5, #dddddd);
+    color: var(--button-fg);
+    background: var(--button-bg) linear-gradient(to bottom, var(--button-bg), var(--button-bg-gradient-bottom));
     border-radius: 4px;
 }
 
 .common-button:hover,
 .common-select:hover {
-    background: #f5f5f5;
+    background: var(--button-bg-hover);
 }
 
 .common-button.common-wide {
@@ -71,7 +81,7 @@ header {
     margin: 1px;
     padding: 7px 7px 5px 7px;
     font-size: 12pt;
-    box-shadow: -1px 1px 3px gray;
+    box-shadow: -1px 1px 3px var(--shadow-base);
     border-radius: 5px;
 }
 
@@ -82,12 +92,6 @@ header {
     line-height: 1;
 }
 
-.common-input {
-    color: black;
-    padding: 4px 5px;
-    font-size: 100%;
-    border: 1px gray solid;
-}
 
 .common-icon-button {
     font-size: 120%;
@@ -170,7 +174,7 @@ header {
     min-width: 100px;
     padding: 15px 25px;
     font-size: 18pt;
-    box-shadow: -3px 3px 9px gray;
+    box-shadow: -3px 3px 9px var(--shadow-base);
 }
 
 @media (min-width: 600px) {
@@ -216,7 +220,7 @@ header {
 }
 
 .project {
-    background: linear-gradient(var(--background-project-gradient-top), var(--background-project) 70px, var(--background-project));
+    background: linear-gradient(var(--project-bg-gradient-top), var(--project-bg) 70px, var(--project-bg));
     padding-bottom: 1rem;
 }
 
