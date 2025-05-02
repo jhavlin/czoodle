@@ -58,6 +58,7 @@
         --panel-box-body-bg: rgb(52 49 46);
         --panel-box-body-secondary-fg: #a9a9a9;
         --calendar-cell-base-border: #979797;
+        --calendar-cell-active-fg: #7d7d7d;
         --calendar-cell-selected-bg: rgb(28 62 78);
         --calendar-cell-selected-fg: gray;
     }

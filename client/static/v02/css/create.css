@@ -159,7 +159,7 @@
     border-color: transparent;
     background: none;
     cursor: default;
-    color: gray;
+    color: var(--panel-box-body-secondary-fg);
 }
 
 .calendar-cell.calendar-cell-active {
@@ -188,6 +188,7 @@
 }
 
 .calendar-cell.calendar-cell-selected.calendar-cell-highlighted,
+.calendar-cell.calendar-cell-selected.calendar-cell-future.calendar-cell-highlighted,
 .calendar-cell.calendar-cell-selected:hover,
 .calendar-cell.calendar-cell-selected.calendar-cell-active:hover {
     background-color: var(--calendar-cell-selected-hover-bg);
