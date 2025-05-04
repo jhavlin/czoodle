@@ -13,7 +13,7 @@ import Data.DataModel
         , Project
         , SelectedOption(..)
         , commentIdInt
-        , optionIdInt
+        , candidateIdInt
         , personIdInt
         , pollIdInt
         )
@@ -35,7 +35,7 @@ encodeProject project =
         encodeGenericItem : GenericOptionItem -> E.Value
         encodeGenericItem item =
             E.object
-                ([ ( "id", E.int <| optionIdInt item.optionId )
+                ([ ( "id", E.int <| candidateIdInt item.candidateId )
                  , ( "value", E.string item.value )
                  ]
                     ++ (if item.hidden then
@@ -49,7 +49,7 @@ encodeProject project =
         encodeDateItem : DateOptionItem -> E.Value
         encodeDateItem item =
             E.object
-                ([ ( "id", E.int <| optionIdInt item.optionId )
+                ([ ( "id", E.int <| candidateIdInt item.candidateId )
                  , ( "value", encodeDayTuple <| dayToTuple item.value )
                  ]
                     ++ (if item.hidden then
@@ -67,14 +67,14 @@ encodeProject project =
                     E.object
                         [ ( "type", E.string "generic" )
                         , ( "items", E.list encodeGenericItem items )
-                        , ( "lastItemId", E.int <| withLast (\i -> optionIdInt i.optionId) 0 items )
+                        , ( "lastItemId", E.int <| withLast (\i -> candidateIdInt i.candidateId) 0 items )
                         ]
 
                 DatePollInfo { items } ->
                     E.object
                         [ ( "type", E.string "date" )
                         , ( "items", E.list encodeDateItem items )
-                        , ( "lastItemId", E.int <| withLast (\i -> optionIdInt i.optionId) 0 items )
+                        , ( "lastItemId", E.int <| withLast (\i -> candidateIdInt i.candidateId) 0 items )
                         ]
 
         selectedOptionToString selectedOption =

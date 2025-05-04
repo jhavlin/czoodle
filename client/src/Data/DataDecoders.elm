@@ -1,67 +1,26 @@
-module Data.DataDecoders exposing
-    ( decodeComment
-    , decodePersonRow
-    , decodePoll
-    , decodePollInfo
-    , decodeProject
-    , decodeSelectedOption
-    )
+module Data.DataDecoders exposing (decodePollInfo)
 
-import Common.CommonDecoders exposing (decodeDay)
+import Candidate.DateCandidate.DateCandidateEncoding exposing (decodeDateCandidateItem)
+import Candidate.TextCandidate.TextCandidateEncoding exposing (decodeTextCandidateItem)
 import Common.CommonUtils exposing (stringToMaybe)
 import Data.DataModel
     exposing
-        ( Comment
-        , CommentId(..)
-        , DateOptionItem
-        , GenericOptionItem
-        , OptionId(..)
-        , PersonId(..)
-        , PersonRow
-        , Poll
+        ( VoterId(..)
         , PollId(..)
         , PollInfo(..)
-        , Project
-        , SelectedOption(..)
         )
-import Dict exposing (Dict)
 import Json.Decode as D
-
 
 decodePollInfo : D.Decoder PollInfo
 decodePollInfo =
     let
-        strictDayDecoder =
-            let
-                beStrict maybeSDay =
-                    case maybeSDay of
-                        Just sDay ->
-                            D.succeed sDay
-
-                        Nothing ->
-                            D.fail "invalid day encountered"
-            in
-            D.andThen beStrict decodeDay
-
-        decodeDayItem =
-            D.map3 DateOptionItem
-                (D.map OptionId <| D.field "id" D.int)
-                (D.field "value" strictDayDecoder)
-                (D.map (Maybe.withDefault False) <| (D.maybe <| D.field "hidden" D.bool))
-
-        decodeStringItem =
-            D.map3 GenericOptionItem
-                (D.map OptionId <| D.field "id" D.int)
-                (D.field "value" D.string)
-                (D.map (Maybe.withDefault False) <| (D.maybe <| D.field "hidden" D.bool))
-
         datePollInfoDecoder =
             D.map (\l -> DatePollInfo { items = l }) <|
-                D.field "items" (D.list decodeDayItem)
+                D.field "items" (D.list decodeDateCandidateItem)
 
         genericPollInfoDecoder =
             D.map (\l -> GenericPollInfo { items = l }) <|
-                D.field "items" (D.list decodeStringItem)
+                D.field "items" (D.list decodeTextCandidateItem)
 
         choose type_ =
             case type_ of
@@ -76,22 +35,6 @@ decodePollInfo =
     in
     D.andThen choose <| D.field "type" D.string
 
-
-decodeSelectedOption : D.Decoder SelectedOption
-decodeSelectedOption =
-    let
-        convert s =
-            case s of
-                "yes" ->
-                    Yes
-
-                "ifNeeded" ->
-                    IfNeeded
-
-                _ ->
-                    No
-    in
-    D.map convert D.string
 
 
 decodePersonRow : D.Decoder PersonRow

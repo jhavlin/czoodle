@@ -6,7 +6,7 @@ module PollEditor.PollEditorView exposing
 import Common.CommonModel exposing (CalendarStateModel)
 import Common.CommonView as CommonView exposing (optClass)
 import Common.ListUtils as ListUtils
-import Data.DataModel exposing (GenericOptionItem, optionIdInt)
+import Data.DataModel exposing (GenericOptionItem, candidateIdInt)
 import Dict
 import Html exposing (Html, a, button, div, input, label, li, ol, option, select, span, text, textarea)
 import Html.Attributes exposing (class, disabled, placeholder, selected, tabindex, title, type_, value)
@@ -138,16 +138,16 @@ viewPollGenericItemExisting : GenericOptionItem -> GenericPollEditorData -> View
 viewPollGenericItemExisting item pollData viewConfig =
     let
         hidden =
-            (item.hidden && (not <| Set.member (optionIdInt item.optionId) pollData.unhiddenItems))
-                || Set.member (optionIdInt item.optionId) pollData.hiddenItems
+            (item.hidden && (not <| Set.member (candidateIdInt item.candidateId) pollData.unhiddenItems))
+                || Set.member (candidateIdInt item.candidateId) pollData.hiddenItems
     in
     li [ class <| "poll-option-generic" ]
         [ input
             [ type_ "text"
-            , value <| Maybe.withDefault item.value <| Dict.get (optionIdInt item.optionId) pollData.renamedItems
+            , value <| Maybe.withDefault item.value <| Dict.get (candidateIdInt item.candidateId) pollData.renamedItems
             , placeholder item.value
             , class <| "common-input poll-option-generic-input" ++ optClass hidden "poll-option-hidden"
-            , onInput (viewConfig.outerMessage << RenameGenericPollItem item.optionId)
+            , onInput (viewConfig.outerMessage << RenameGenericPollItem item.candidateId)
             ]
             []
         , text " "
@@ -155,10 +155,10 @@ viewPollGenericItemExisting item pollData viewConfig =
             [ class "common-button common-icon-button"
             , onClick <|
                 if hidden then
-                    viewConfig.outerMessage <| UnhideGenericPollItem item.optionId
+                    viewConfig.outerMessage <| UnhideGenericPollItem item.candidateId
 
                 else
-                    viewConfig.outerMessage <| HideGenericPollItem item.optionId
+                    viewConfig.outerMessage <| HideGenericPollItem item.candidateId
             , title <|
                 if hidden then
                     viewConfig.translation.pollEditor.unhide
@@ -355,7 +355,7 @@ viewDateCalendarCell state pollData viewConfig sDay =
             case originalDateOptionItem of
                 Just dateOptionItem ->
                     not dateOptionItem.hidden
-                        && (not <| Set.member (optionIdInt dateOptionItem.optionId) pollData.hiddenItems)
+                        && (not <| Set.member (candidateIdInt dateOptionItem.candidateId) pollData.hiddenItems)
 
                 Nothing ->
                     False
@@ -420,8 +420,8 @@ viewPollDateItemTags state pollData viewConfig =
                     ListUtils.findFirst (\i -> Just i.value == dayFromTuple tuple) pollData.originalItems
 
                 isHidden item =
-                    (not item.hidden && Set.member (optionIdInt item.optionId) pollData.hiddenItems)
-                        || (item.hidden && (not <| Set.member (optionIdInt item.optionId) pollData.unhiddenItems))
+                    (not item.hidden && Set.member (candidateIdInt item.candidateId) pollData.hiddenItems)
+                        || (item.hidden && (not <| Set.member (candidateIdInt item.candidateId) pollData.unhiddenItems))
 
                 hidden =
                     Maybe.map isHidden originalItem |> Maybe.withDefault False

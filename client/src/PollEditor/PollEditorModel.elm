@@ -8,7 +8,7 @@ module PollEditor.PollEditorModel exposing
     )
 
 import Common.CommonModel exposing (CalendarStateModel, DayTuple)
-import Data.DataModel exposing (DateOptionItem, GenericOptionItem, OptionId)
+import Data.DataModel exposing (DateOptionItem, GenericOptionItem, CandidateId)
 import Dict exposing (Dict)
 import Maybe exposing (Maybe)
 import Candidate.DateCandidate.SDate exposing (SMonth)
@@ -21,9 +21,9 @@ type PollEditorMsg
     | SetNewGenericPollItem Int String
     | AddGenericPollItem
     | RemoveGenericPollItem Int
-    | RenameGenericPollItem OptionId String
-    | HideGenericPollItem OptionId
-    | UnhideGenericPollItem OptionId
+    | RenameGenericPollItem CandidateId String
+    | HideGenericPollItem CandidateId
+    | UnhideGenericPollItem CandidateId
     | AddDatePollItem DayTuple
     | RemoveDatePollItem DayTuple
     | SetCalendarMonth SMonth

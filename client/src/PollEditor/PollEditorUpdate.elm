@@ -2,7 +2,7 @@ module PollEditor.PollEditorUpdate exposing (update)
 
 import Common.CommonModel exposing (CalendarStateModel, DayTuple)
 import Common.ListUtils as ListUtils
-import Data.DataModel exposing (OptionId, optionIdInt)
+import Data.DataModel exposing (CandidateId, candidateIdInt)
 import Dict
 import List
 import PollEditor.PollEditorModel
@@ -39,14 +39,14 @@ update msg model =
         RemoveGenericPollItem itemNumber ->
             doWithGenericPoll (removeGenericItem itemNumber) model
 
-        RenameGenericPollItem optionId value ->
-            doWithGenericPoll (renameGenericItem optionId value) model
+        RenameGenericPollItem candidateId value ->
+            doWithGenericPoll (renameGenericItem candidateId value) model
 
-        HideGenericPollItem optionId ->
-            doWithGenericPoll (hideGenericItem optionId) model
+        HideGenericPollItem candidateId ->
+            doWithGenericPoll (hideGenericItem candidateId) model
 
-        UnhideGenericPollItem optionId ->
-            doWithGenericPoll (unhideGenericItem optionId) model
+        UnhideGenericPollItem candidateId ->
+            doWithGenericPoll (unhideGenericItem candidateId) model
 
         AddDatePollItem dayTuple ->
             doWithDatePoll (selectDate dayTuple) model
@@ -149,51 +149,51 @@ removeGenericItem itemNumber data =
     { data | addedItems = newItems }
 
 
-renameGenericItem : OptionId -> String -> GenericPollEditorData -> GenericPollEditorData
-renameGenericItem optionId value pollData =
+renameGenericItem : CandidateId -> String -> GenericPollEditorData -> GenericPollEditorData
+renameGenericItem candidateId value pollData =
     let
         valueOpt =
-            ListUtils.findFirst (\i -> i.optionId == optionId) pollData.originalItems
+            ListUtils.findFirst (\i -> i.candidateId == candidateId) pollData.originalItems
                 |> Maybe.map .value
 
         newRenamedItems =
             if Just value == valueOpt then
-                Dict.remove (optionIdInt optionId) pollData.renamedItems
+                Dict.remove (candidateIdInt candidateId) pollData.renamedItems
 
             else
-                Dict.insert (optionIdInt optionId) value pollData.renamedItems
+                Dict.insert (candidateIdInt candidateId) value pollData.renamedItems
     in
     { pollData | renamedItems = newRenamedItems }
 
 
-hideGenericItem : OptionId -> GenericPollEditorData -> GenericPollEditorData
-hideGenericItem optionId pollData =
+hideGenericItem : CandidateId -> GenericPollEditorData -> GenericPollEditorData
+hideGenericItem candidateId pollData =
     let
         originallyHidden =
-            ListUtils.findFirst (\i -> i.optionId == optionId) pollData.originalItems
+            ListUtils.findFirst (\i -> i.candidateId == candidateId) pollData.originalItems
                 |> Maybe.map .hidden
                 |> Maybe.withDefault False
     in
     if originallyHidden then
-        { pollData | unhiddenItems = Set.remove (optionIdInt optionId) pollData.unhiddenItems }
+        { pollData | unhiddenItems = Set.remove (candidateIdInt candidateId) pollData.unhiddenItems }
 
     else
-        { pollData | hiddenItems = Set.insert (optionIdInt optionId) pollData.hiddenItems }
+        { pollData | hiddenItems = Set.insert (candidateIdInt candidateId) pollData.hiddenItems }
 
 
-unhideGenericItem : OptionId -> GenericPollEditorData -> GenericPollEditorData
-unhideGenericItem optionId pollData =
+unhideGenericItem : CandidateId -> GenericPollEditorData -> GenericPollEditorData
+unhideGenericItem candidateId pollData =
     let
         originallyHidden =
-            ListUtils.findFirst (\i -> i.optionId == optionId) pollData.originalItems
+            ListUtils.findFirst (\i -> i.candidateId == candidateId) pollData.originalItems
                 |> Maybe.map .hidden
                 |> Maybe.withDefault False
     in
     if originallyHidden then
-        { pollData | unhiddenItems = Set.insert (optionIdInt optionId) pollData.unhiddenItems }
+        { pollData | unhiddenItems = Set.insert (candidateIdInt candidateId) pollData.unhiddenItems }
 
     else
-        { pollData | hiddenItems = Set.remove (optionIdInt optionId) pollData.hiddenItems }
+        { pollData | hiddenItems = Set.remove (candidateIdInt candidateId) pollData.hiddenItems }
 
 
 setCalendarMonthDirect : String -> CalendarStateModel -> CalendarStateModel
@@ -249,10 +249,10 @@ selectDate dayTuple data =
             case originalDateOptionItem of
                 Just optionItem ->
                     if optionItem.hidden then
-                        { data | unhiddenItems = Set.insert (optionIdInt optionItem.optionId) data.unhiddenItems }
+                        { data | unhiddenItems = Set.insert (candidateIdInt optionItem.candidateId) data.unhiddenItems }
 
                     else
-                        { data | hiddenItems = Set.remove (optionIdInt optionItem.optionId) data.hiddenItems }
+                        { data | hiddenItems = Set.remove (candidateIdInt optionItem.candidateId) data.hiddenItems }
 
                 Nothing ->
                     { data | addedItems = Set.insert dayTuple data.addedItems }
@@ -282,10 +282,10 @@ deselectDate dayTuple data =
             case originalDateOptionItem of
                 Just optionItem ->
                     if optionItem.hidden then
-                        { data | unhiddenItems = Set.remove (optionIdInt optionItem.optionId) data.unhiddenItems }
+                        { data | unhiddenItems = Set.remove (candidateIdInt optionItem.candidateId) data.unhiddenItems }
 
                     else
-                        { data | hiddenItems = Set.insert (optionIdInt optionItem.optionId) data.hiddenItems }
+                        { data | hiddenItems = Set.insert (candidateIdInt optionItem.candidateId) data.hiddenItems }
 
                 Nothing ->
                     { data | addedItems = Set.remove dayTuple data.addedItems }

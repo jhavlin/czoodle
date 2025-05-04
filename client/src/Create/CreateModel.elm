@@ -7,7 +7,8 @@ module Create.CreateModel exposing
 
 import Common.CommonUtils exposing (normalizeStringMaybe, stringToMaybe)
 import Common.ListUtils exposing (filterNothings)
-import Data.DataModel exposing (OptionId(..), Poll, PollId(..), PollInfo(..), Project)
+import Data.CandidateId exposing (CandidateId(..))
+import Data.DataModel exposing (Poll, PollId(..), PollInfo(..), Project)
 import PollEditor.PollEditorModel exposing (PollEditor(..), PollEditorModel, PollEditorMsg)
 import Candidate.DateCandidate.SDate exposing (SDay, dayFromTuple)
 import Set
@@ -66,11 +67,11 @@ newPollsToProject { title, polls } =
             Set.toList addedItems
                 |> List.map dayFromTuple
                 |> filterNothings
-                |> List.indexedMap (\index item -> { optionId = OptionId <| 1 + index, value = item, hidden = False })
+                |> List.indexedMap (\index item -> { candidateId = CandidateId <| 1 + index, value = item, hidden = False })
 
         newGenericPollDataToPollInfo { addedItems } =
             List.filter (\v -> not <| String.isEmpty <| String.trim v) addedItems
-                |> List.indexedMap (\index item -> { optionId = OptionId <| 1 + index, value = item, hidden = False })
+                |> List.indexedMap (\index item -> { candidateId = CandidateId <| 1 + index, value = item, hidden = False })
 
         newPollModelToPollInfo : PollEditor -> PollInfo
         newPollModelToPollInfo pollEditorModel =

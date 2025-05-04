@@ -1,25 +1,21 @@
 module Data.DataModel exposing
-    ( Comment
-    , CommentId(..)
-    , DateOptionItem
-    , GenericOptionItem
-    , Keys
-    , OptionId(..)
-    , PersonId(..)
-    , PersonRow
+    ( Keys
     , Poll
     , PollId(..)
     , PollInfo(..)
     , Project
-    , SelectedOption(..)
-    , commentIdInt
-    , optionIdInt
-    , personIdInt
+    , RowComment(..)
+    , Voter
+    , VoterId(..)
     , pollIdInt
+    , voterIdInt
     )
 
+import Candidate.DateCandidate.DateCandidateData exposing (DateCandidateItem)
+import Candidate.TextCandidate.TextCandidateData exposing (TextCandidateItem)
+import Data.CandidateId exposing (CandidateId)
 import Dict exposing (Dict)
-import Candidate.DateCandidate.SDate exposing (SDay)
+import Poll.YesNoPoll.YesNoPollData exposing (YesNoPollSettings, YesNoVote)
 
 
 
@@ -34,58 +30,35 @@ type alias Keys =
     }
 
 
-type SelectedOption
-    = Yes
-    | No
-    | IfNeeded
-
-
 type PollId
     = PollId Int
 
 
-type PersonId
-    = PersonId Int
+type VoterId
+    = VoterId Int
 
 
-type OptionId
-    = OptionId Int
-
-
-type alias DateOptionItem =
-    { optionId : OptionId
-    , value : SDay
-    , hidden : Bool
-    }
-
-
-type alias GenericOptionItem =
-    { optionId : OptionId
-    , value : String
-    , hidden : Bool
-    }
-
-
-type CommentId
-    = CommentId Int
-
-
-type alias Comment =
-    { commentId : CommentId
-    , text : String
-    }
-
-
-type alias PersonRow =
-    { personId : PersonId
+type alias Voter =
+    { voterId : VoterId
     , name : String
-    , selectedOptions : Dict Int SelectedOption
     }
+
+
+type RowComment
+    = RowComment String
 
 
 type PollInfo
-    = DatePollInfo { items : List DateOptionItem }
-    | GenericPollInfo { items : List GenericOptionItem }
+    = DatePollInfo
+        { items : List DateCandidateItem
+        , settings : YesNoPollSettings
+        , votes : Dict VoterId ( Dict CandidateId YesNoVote, RowComment )
+        }
+    | GenericPollInfo
+        { items : List TextCandidateItem
+        , settings : YesNoPollSettings
+        , votes : Dict VoterId ( Dict Int YesNoVote, RowComment )
+        }
 
 
 type alias Poll =
@@ -93,8 +66,6 @@ type alias Poll =
     , title : Maybe String
     , description : Maybe String
     , pollInfo : PollInfo
-    , personRows : List PersonRow
-    , lastPersonId : Int
     }
 
 
@@ -102,8 +73,8 @@ type alias Project =
     { title : Maybe String
     , polls : List Poll
     , lastPollId : Int
-    , comments : List Comment
-    , lastCommentId : Int
+    , voters : List Voter
+    , lastPersonId : Int
     }
 
 
@@ -118,16 +89,6 @@ pollIdInt (PollId id) =
     id
 
 
-personIdInt : PersonId -> Int
-personIdInt (PersonId id) =
-    id
-
-
-commentIdInt : CommentId -> Int
-commentIdInt (CommentId id) =
-    id
-
-
-optionIdInt : OptionId -> Int
-optionIdInt (OptionId id) =
+voterIdInt : VoterId -> Int
+voterIdInt (VoterId id) =
     id
