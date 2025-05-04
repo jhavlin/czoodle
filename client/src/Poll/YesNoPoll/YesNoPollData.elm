@@ -13,9 +13,3 @@ type alias YesNoPollSettings =
     { allowIfNeeded : Bool
     , allowMaybe : Bool
     }
-
-
-type alias YesNoVote =
-    { voteOption : YesNoOption
-    , comment : String
-    }

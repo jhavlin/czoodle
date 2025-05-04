@@ -1,21 +1,20 @@
 module Data.DataModel exposing
-    ( Keys
+    ( CandidatesInfo(..)
+    , Keys
     , Poll
     , PollId(..)
-    , PollInfo(..)
+    , PollInfo
     , Project
-    , RowComment(..)
     , Voter
-    , VoterId(..)
+    , VotesInfo(..)
     , pollIdInt
-    , voterIdInt
     )
 
 import Candidate.DateCandidate.DateCandidateData exposing (DateCandidateItem)
 import Candidate.TextCandidate.TextCandidateData exposing (TextCandidateItem)
-import Data.CandidateId exposing (CandidateId)
-import Dict exposing (Dict)
-import Poll.YesNoPoll.YesNoPollData exposing (YesNoPollSettings, YesNoVote)
+import Data.PollRows exposing (PollRows)
+import Data.VoterId exposing (VoterId)
+import Poll.YesNoPoll.YesNoPollData exposing (YesNoOption, YesNoPollSettings)
 
 
 
@@ -34,31 +33,28 @@ type PollId
     = PollId Int
 
 
-type VoterId
-    = VoterId Int
-
-
 type alias Voter =
     { voterId : VoterId
     , name : String
     }
 
 
-type RowComment
-    = RowComment String
+type CandidatesInfo
+    = DateCandidatesInfo (List DateCandidateItem)
+    | TextCandidatesInfo (List TextCandidateItem)
 
 
-type PollInfo
-    = DatePollInfo
-        { items : List DateCandidateItem
-        , settings : YesNoPollSettings
-        , votes : Dict VoterId ( Dict CandidateId YesNoVote, RowComment )
+type VotesInfo
+    = YesNotVotesInfo
+        { settings : YesNoPollSettings
+        , votes : PollRows YesNoOption
         }
-    | GenericPollInfo
-        { items : List TextCandidateItem
-        , settings : YesNoPollSettings
-        , votes : Dict VoterId ( Dict Int YesNoVote, RowComment )
-        }
+
+
+type alias PollInfo =
+    { candidateInfo : CandidatesInfo
+    , votesInfo : VotesInfo
+    }
 
 
 type alias Poll =
@@ -74,7 +70,7 @@ type alias Project =
     , polls : List Poll
     , lastPollId : Int
     , voters : List Voter
-    , lastPersonId : Int
+    , lastVoterIdId : Int
     }
 
 
@@ -86,9 +82,4 @@ type alias Project =
 
 pollIdInt : PollId -> Int
 pollIdInt (PollId id) =
-    id
-
-
-voterIdInt : VoterId -> Int
-voterIdInt (VoterId id) =
     id
