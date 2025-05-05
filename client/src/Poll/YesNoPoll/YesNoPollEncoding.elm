@@ -10,12 +10,17 @@ import Poll.YesNoPoll.YesNoPollData exposing (YesNoOption(..), YesNoPollSettings
 stringKeyedDictToIntKeyedDict : Dict String v -> Dict Int v
 stringKeyedDictToIntKeyedDict f =
     let
-        listWithStringKey : List ((String, v))
-        listWithStringKey = Dict.toList f
+        listWithStringKey : List ( String, v )
+        listWithStringKey =
+            Dict.toList f
 
-        listWithIntKey : List ((Int, v))
-        
+        listWithIntKey : List ( Int, v )
+        listWithIntKey =
+            List.filterMap
+                (\( k, value ) -> String.toInt k |> Maybe.map (\ki -> ( ki, value )))
+                listWithStringKey
     in
+    Dict.fromList listWithIntKey
 
 
 decodeYesNoOption : D.Decoder YesNoOption
@@ -63,6 +68,7 @@ decodeOneVoterVotes =
 
 decodeOneVoterVotesAndComment : D.Decoder (VoterRow YesNoOption)
 decodeOneVoterVotesAndComment =
+    {- TODO make comment optional -}
     D.map2 (\v c -> { voterVotes = v, voterComment = RowComment c })
         (D.field "votes" decodeOneVoterVotes)
         (D.field "comment" D.string)
