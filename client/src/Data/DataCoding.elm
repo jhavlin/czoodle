@@ -1,25 +1,98 @@
-module Data.DataEncoders exposing (encodeProject, encodeProjectAndKeys, withLast)
+module Data.DataCoding exposing (decodeProject)
 
-import Common.CommonEncoders exposing (encodeDayTuple)
+import Candidate.DateCandidate.DateCandidateCoding exposing (decodeDateCandidateItem)
+import Candidate.TextCandidate.TextCandidateCoding exposing (decodeTextCandidateItem)
+import Common.CommonUtils exposing (stringToMaybe)
 import Data.DataModel
     exposing
-        ( Comment
-        , DateOptionItem
-        , GenericOptionItem
-        , Keys
-        , PersonRow
+        ( CandidatesInfo(..)
         , Poll
-        , PollInfo(..)
+        , PollId(..)
+        , PollInfo
         , Project
-        , SelectedOption(..)
-        , commentIdInt
-        , candidateIdInt
-        , personIdInt
-        , pollIdInt
+        , Voter
+        , VotesInfo(..)
         )
-import Dict exposing (Dict)
+import Data.VoterId exposing (VoterId(..))
+import Json.Decode as D
 import Json.Encode as E
-import Candidate.DateCandidate.SDate exposing (dayToTuple)
+import Poll.YesNoPoll.YesNoPollCoding exposing (decodeYesNoVotesInfo)
+
+
+decodeCandidatesInfo : D.Decoder CandidatesInfo
+decodeCandidatesInfo =
+    let
+        dateCandidatesInfoDecoder =
+            D.map DateCandidatesInfo <|
+                D.field "items" (D.list decodeDateCandidateItem)
+
+        textCandidatesInfoDecoder =
+            D.map TextCandidatesInfo <|
+                D.field "items" (D.list decodeTextCandidateItem)
+
+        choose type_ =
+            case type_ of
+                "date" ->
+                    dateCandidatesInfoDecoder
+
+                "text" ->
+                    textCandidatesInfoDecoder
+
+                _ ->
+                    D.fail <| "Invalid 'candidates' type " ++ type_
+    in
+    D.andThen choose <| D.field "type" D.string
+
+
+decodeVotesInfo : D.Decoder VotesInfo
+decodeVotesInfo =
+    let
+        choose type_ =
+            case type_ of
+                "yesNo" ->
+                    D.map YesNotVotesInfo decodeYesNoVotesInfo
+
+                _ ->
+                    D.fail <| "Invalid 'candidates' type " ++ type_
+    in
+    D.andThen choose <| D.field "type" D.string
+
+
+decodePollInfo : D.Decoder PollInfo
+decodePollInfo =
+    D.map2 PollInfo
+        (D.field "candidates" decodeCandidatesInfo)
+        (D.field "votes" decodeVotesInfo)
+
+
+decodePoll : D.Decoder Poll
+decodePoll =
+    D.map4 Poll
+        (D.map PollId <| D.field "id" D.int)
+        (D.map stringToMaybe <| D.field "title" D.string)
+        (D.maybe <| D.field "description" D.string)
+        (D.field "def" decodePollInfo)
+
+
+decodeVoter : D.Decoder Voter
+decodeVoter =
+    D.map2 Voter
+        (D.map VoterId <| D.field "voterId" D.int)
+        (D.field "name" D.string)
+
+
+decodeProject : D.Value -> Result D.Error Project
+decodeProject json =
+    let
+        projectDecoder =
+            D.map5 Project
+                (D.map stringToMaybe (D.field "title" <| D.string))
+                (D.field "polls" <| D.list decodePoll)
+                (D.field "lastPollId" D.int)
+                (D.field "voters" <| D.list decodeVoter)
+                (D.field "lastVoterId" D.int)
+    in
+    D.decodeValue projectDecoder json
 
 
 {-| Map value of last item of a list.
@@ -32,34 +105,6 @@ withLast fn default list =
 encodeProject : Project -> E.Value
 encodeProject project =
     let
-        encodeGenericItem : GenericOptionItem -> E.Value
-        encodeGenericItem item =
-            E.object
-                ([ ( "id", E.int <| candidateIdInt item.candidateId )
-                 , ( "value", E.string item.value )
-                 ]
-                    ++ (if item.hidden then
-                            [ ( "hidden", E.bool True ) ]
-
-                        else
-                            []
-                       )
-                )
-
-        encodeDateItem : DateOptionItem -> E.Value
-        encodeDateItem item =
-            E.object
-                ([ ( "id", E.int <| candidateIdInt item.candidateId )
-                 , ( "value", encodeDayTuple <| dayToTuple item.value )
-                 ]
-                    ++ (if item.hidden then
-                            [ ( "hidden", E.bool True ) ]
-
-                        else
-                            []
-                       )
-                )
-
         encodePollInfo : PollInfo -> E.Value
         encodePollInfo info =
             case info of
@@ -76,17 +121,6 @@ encodeProject project =
                         , ( "items", E.list encodeDateItem items )
                         , ( "lastItemId", E.int <| withLast (\i -> candidateIdInt i.candidateId) 0 items )
                         ]
-
-        selectedOptionToString selectedOption =
-            case selectedOption of
-                Yes ->
-                    "yes"
-
-                No ->
-                    "no"
-
-                IfNeeded ->
-                    "ifNeeded"
 
         encodeSelectedOptions : Dict Int SelectedOption -> E.Value
         encodeSelectedOptions selectedOptions =
