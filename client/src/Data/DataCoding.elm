@@ -1,22 +1,24 @@
-module Data.DataCoding exposing (decodeProject)
+module Data.DataCoding exposing (decodeProject, encodeProject, encodeProjectAndKeys)
 
-import Candidate.DateCandidate.DateCandidateCoding exposing (decodeDateCandidateItem)
-import Candidate.TextCandidate.TextCandidateCoding exposing (decodeTextCandidateItem)
+import Candidate.DateCandidate.DateCandidateCoding exposing (decodeDateCandidateItem, encodeDateCandidateItem)
+import Candidate.TextCandidate.TextCandidateCoding exposing (decodeTextCandidateItem, encodeTextCandidateItem)
 import Common.CommonUtils exposing (stringToMaybe)
 import Data.DataModel
     exposing
         ( CandidatesInfo(..)
+        , Keys
         , Poll
         , PollId(..)
         , PollInfo
         , Project
         , Voter
         , VotesInfo(..)
+        , pollIdInt
         )
-import Data.VoterId exposing (VoterId(..))
+import Data.VoterId exposing (VoterId(..), voterIdInt)
 import Json.Decode as D
 import Json.Encode as E
-import Poll.YesNoPoll.YesNoPollCoding exposing (decodeYesNoVotesInfo)
+import Poll.YesNoPoll.YesNoPollCoding exposing (decodeYesNoVotesInfo, encodeYesNoVotesInfo)
 
 
 decodeCandidatesInfo : D.Decoder CandidatesInfo
@@ -44,13 +46,30 @@ decodeCandidatesInfo =
     D.andThen choose <| D.field "type" D.string
 
 
+encodeCandidatesInfo : CandidatesInfo -> E.Value
+encodeCandidatesInfo candidatesInfo =
+    let
+        ( type_, items ) =
+            case candidatesInfo of
+                DateCandidatesInfo list ->
+                    ( "date", E.list encodeDateCandidateItem list )
+
+                TextCandidatesInfo list ->
+                    ( "text", E.list encodeTextCandidateItem list )
+    in
+    E.object
+        [ ( "type", E.string type_ )
+        , ( "items", items )
+        ]
+
+
 decodeVotesInfo : D.Decoder VotesInfo
 decodeVotesInfo =
     let
         choose type_ =
             case type_ of
                 "yesNo" ->
-                    D.map YesNotVotesInfo decodeYesNoVotesInfo
+                    D.map YesNoVotesInfo decodeYesNoVotesInfo
 
                 _ ->
                     D.fail <| "Invalid 'candidates' type " ++ type_
@@ -58,11 +77,26 @@ decodeVotesInfo =
     D.andThen choose <| D.field "type" D.string
 
 
+encodeVotesInfo : VotesInfo -> E.Value
+encodeVotesInfo votesInfo =
+    case votesInfo of
+        YesNoVotesInfo info ->
+            encodeYesNoVotesInfo info
+
+
 decodePollInfo : D.Decoder PollInfo
 decodePollInfo =
     D.map2 PollInfo
         (D.field "candidates" decodeCandidatesInfo)
         (D.field "votes" decodeVotesInfo)
+
+
+encodePollInfo : PollInfo -> E.Value
+encodePollInfo pollInfo =
+    E.object
+        [ ( "candidates", encodeCandidatesInfo pollInfo.candidateInfo )
+        , ( "votes", encodeVotesInfo pollInfo.votesInfo )
+        ]
 
 
 decodePoll : D.Decoder Poll
@@ -74,11 +108,29 @@ decodePoll =
         (D.field "def" decodePollInfo)
 
 
+encodePoll : Poll -> E.Value
+encodePoll poll =
+    E.object
+        [ ( "id", E.int <| pollIdInt poll.pollId )
+        , ( "title", E.string <| Maybe.withDefault "" poll.title )
+        , ( "description", E.string <| Maybe.withDefault "" poll.description )
+        , ( "def", encodePollInfo poll.pollInfo )
+        ]
+
+
 decodeVoter : D.Decoder Voter
 decodeVoter =
     D.map2 Voter
         (D.map VoterId <| D.field "voterId" D.int)
         (D.field "name" D.string)
+
+
+encodeVoter : Voter -> E.Value
+encodeVoter voter =
+    E.object
+        [ ( "voterId", E.int <| voterIdInt voter.voterId )
+        , ( "name", E.string voter.name )
+        ]
 
 
 decodeProject : D.Value -> Result D.Error Project
@@ -95,79 +147,14 @@ decodeProject json =
     D.decodeValue projectDecoder json
 
 
-{-| Map value of last item of a list.
--}
-withLast : (a -> b) -> b -> List a -> b
-withLast fn default list =
-    List.foldl (\item _ -> fn item) default list
-
-
 encodeProject : Project -> E.Value
 encodeProject project =
-    let
-        encodePollInfo : PollInfo -> E.Value
-        encodePollInfo info =
-            case info of
-                GenericPollInfo { items } ->
-                    E.object
-                        [ ( "type", E.string "generic" )
-                        , ( "items", E.list encodeGenericItem items )
-                        , ( "lastItemId", E.int <| withLast (\i -> candidateIdInt i.candidateId) 0 items )
-                        ]
-
-                DatePollInfo { items } ->
-                    E.object
-                        [ ( "type", E.string "date" )
-                        , ( "items", E.list encodeDateItem items )
-                        , ( "lastItemId", E.int <| withLast (\i -> candidateIdInt i.candidateId) 0 items )
-                        ]
-
-        encodeSelectedOptions : Dict Int SelectedOption -> E.Value
-        encodeSelectedOptions selectedOptions =
-            E.dict String.fromInt (\v -> selectedOptionToString v |> E.string) selectedOptions
-
-        encodePersonRow : PersonRow -> E.Value
-        encodePersonRow personRow =
-            E.object
-                [ ( "id", E.int <| personIdInt personRow.personId )
-                , ( "name", E.string personRow.name )
-                , ( "options", encodeSelectedOptions personRow.selectedOptions )
-                ]
-
-        descriptionToFieldEncoder : Maybe String -> List ( String, E.Value )
-        descriptionToFieldEncoder description =
-            case description of
-                Nothing ->
-                    []
-
-                Just desc ->
-                    [ ( "description", E.string desc ) ]
-
-        encodePoll : Poll -> E.Value
-        encodePoll { pollId, title, description, pollInfo, personRows, lastPersonId } =
-            E.object
-                ([ ( "title", E.string <| Maybe.withDefault "" title )
-                 , ( "def", encodePollInfo pollInfo )
-                 , ( "id", E.int <| pollIdInt pollId )
-                 , ( "lastPersonId", E.int lastPersonId )
-                 , ( "people", E.list encodePersonRow personRows )
-                 ]
-                    ++ descriptionToFieldEncoder description
-                )
-
-        encodeComment : Comment -> E.Value
-        encodeComment comment =
-            E.object
-                [ ( "id", E.int <| commentIdInt comment.commentId )
-                , ( "text", E.string comment.text )
-                ]
-    in
     E.object
         [ ( "title", E.string <| Maybe.withDefault "" project.title )
         , ( "polls", E.list encodePoll project.polls )
         , ( "lastPollId", E.int project.lastPollId )
-        , ( "comments", E.list encodeComment project.comments )
-        , ( "lastCommentId", E.int project.lastCommentId )
+        , ( "voters", E.list encodeVoter project.voters )
+        , ( "lastVoterId", E.int project.lastVoterIdId )
         ]
 
 

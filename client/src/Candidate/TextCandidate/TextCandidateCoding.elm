@@ -14,8 +14,8 @@ decodeTextCandidateItem =
         (D.map (Maybe.withDefault False) <| (D.maybe <| D.field "hidden" D.bool))
 
 
-encodeGenericItem : TextCandidateItem -> E.Value
-encodeGenericItem item =
+encodeTextCandidateItem : TextCandidateItem -> E.Value
+encodeTextCandidateItem item =
     E.object
         ([ ( "id", E.int <| candidateIdInt item.candidateId )
          , ( "value", E.string item.value )

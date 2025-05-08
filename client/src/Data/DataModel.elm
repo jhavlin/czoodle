@@ -45,7 +45,7 @@ type CandidatesInfo
 
 
 type VotesInfo
-    = YesNotVotesInfo
+    = YesNoVotesInfo
         { settings : YesNoPollSettings
         , votes : PollRows YesNoOption
         }

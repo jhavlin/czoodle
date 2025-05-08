@@ -5,12 +5,12 @@ module Create.CreateModel exposing
     , newPollsToProject
     )
 
+import Candidate.DateCandidate.SDate exposing (SDay, dayFromTuple)
 import Common.CommonUtils exposing (normalizeStringMaybe, stringToMaybe)
 import Common.ListUtils exposing (filterNothings)
 import Data.CandidateId exposing (CandidateId(..))
-import Data.DataModel exposing (Poll, PollId(..), PollInfo(..), Project)
+import Data.DataModel exposing (Poll, PollId(..), PollInfo, Project)
 import PollEditor.PollEditorModel exposing (PollEditor(..), PollEditorModel, PollEditorMsg)
-import Candidate.DateCandidate.SDate exposing (SDay, dayFromTuple)
 import Set
 import Translations.Translation exposing (Translation)
 
