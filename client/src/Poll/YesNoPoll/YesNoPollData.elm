@@ -51,3 +51,10 @@ yesNoOptionFromString string =
 
         _ ->
             Unset
+
+
+defaultYesNoPollSettings : YesNoPollSettings
+defaultYesNoPollSettings =
+    { allowIfNeeded = True
+    , allowMaybe = False
+    }

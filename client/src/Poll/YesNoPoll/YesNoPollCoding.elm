@@ -144,8 +144,8 @@ decodeYesNoVotesInfo =
         (D.field "votes" decodeVotes)
 
 
-encodeYesNoVotesInfo : { settings : YesNoPollSettings, votes : PollRows YesNoOption } -> E.Value
-encodeYesNoVotesInfo { settings, votes } =
+encodeYesNoVotesInfo : ( String, E.Value ) -> { settings : YesNoPollSettings, votes : PollRows YesNoOption } -> E.Value
+encodeYesNoVotesInfo typeEntry { settings, votes } =
     let
         stringToRowPairs : List ( String, VoterRow YesNoOption )
         stringToRowPairs =
@@ -158,4 +158,5 @@ encodeYesNoVotesInfo { settings, votes } =
     E.object
         [ ( "settings", encodeYesNoPollSettings settings )
         , ( "votes", E.object <| encodedVotes )
+        , typeEntry
         ]

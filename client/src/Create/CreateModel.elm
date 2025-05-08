@@ -9,7 +9,9 @@ import Candidate.DateCandidate.SDate exposing (SDay, dayFromTuple)
 import Common.CommonUtils exposing (normalizeStringMaybe, stringToMaybe)
 import Common.ListUtils exposing (filterNothings)
 import Data.CandidateId exposing (CandidateId(..))
-import Data.DataModel exposing (Poll, PollId(..), PollInfo, Project)
+import Data.DataModel exposing (CandidatesInfo(..), Poll, PollId(..), Project, VotesInfo(..))
+import Dict
+import Poll.YesNoPoll.YesNoPollData exposing (defaultYesNoPollSettings)
 import PollEditor.PollEditorModel exposing (PollEditor(..), PollEditorModel, PollEditorMsg)
 import Set
 import Translations.Translation exposing (Translation)
@@ -73,23 +75,24 @@ newPollsToProject { title, polls } =
             List.filter (\v -> not <| String.isEmpty <| String.trim v) addedItems
                 |> List.indexedMap (\index item -> { candidateId = CandidateId <| 1 + index, value = item, hidden = False })
 
-        newPollModelToPollInfo : PollEditor -> PollInfo
-        newPollModelToPollInfo pollEditorModel =
+        newPollModelToCandidatesInfo : PollEditor -> CandidatesInfo
+        newPollModelToCandidatesInfo pollEditorModel =
             case pollEditorModel of
                 DatePollEditor _ newPollData ->
-                    DatePollInfo { items = newDatePollDataToPollInfo newPollData }
+                    DateCandidatesInfo (newDatePollDataToPollInfo newPollData)
 
                 GenericPollEditor newPollData ->
-                    GenericPollInfo { items = newGenericPollDataToPollInfo newPollData }
+                    TextCandidatesInfo (newGenericPollDataToPollInfo newPollData)
 
         pollEditorModelToPoll : Int -> PollEditorModel -> Poll
         pollEditorModelToPoll index pollEditorModel =
             { pollId = PollId <| index + 1
             , title = normalizeStringMaybe pollEditorModel.changedTitle
             , description = normalizeStringMaybe pollEditorModel.changedDescription
-            , pollInfo = newPollModelToPollInfo pollEditorModel.editor
-            , personRows = []
-            , lastPersonId = 0
+            , pollInfo =
+                { candidatesInfo = newPollModelToCandidatesInfo pollEditorModel.editor
+                , votesInfo = YesNoVotesInfo { settings = defaultYesNoPollSettings, votes = Dict.empty }
+                }
             }
 
         finalPolls =
@@ -98,6 +101,6 @@ newPollsToProject { title, polls } =
     { title = stringToMaybe title
     , polls = finalPolls
     , lastPollId = 1 + List.length finalPolls
-    , comments = []
-    , lastCommentId = 0
+    , voters = []
+    , lastVoterId = 1
     }

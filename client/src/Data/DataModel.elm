@@ -52,7 +52,7 @@ type VotesInfo
 
 
 type alias PollInfo =
-    { candidateInfo : CandidatesInfo
+    { candidatesInfo : CandidatesInfo
     , votesInfo : VotesInfo
     }
 
@@ -70,7 +70,7 @@ type alias Project =
     , polls : List Poll
     , lastPollId : Int
     , voters : List Voter
-    , lastVoterIdId : Int
+    , lastVoterId : Int
     }
 
 

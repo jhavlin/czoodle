@@ -4,7 +4,7 @@ import Browser.Dom
 import Common.ListUtils as ListUtils
 import Create.CreateDecoders exposing (decodeCreateFlags)
 import Create.CreateModel exposing (CreatedProjectInfo, Model, Msg(..), newPollsToProject)
-import Data.DataEncoders exposing (encodeProject)
+import Data.DataCoding exposing (encodeProject)
 import Dict
 import Json.Decode as D
 import Json.Encode as E

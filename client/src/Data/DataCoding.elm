@@ -81,7 +81,7 @@ encodeVotesInfo : VotesInfo -> E.Value
 encodeVotesInfo votesInfo =
     case votesInfo of
         YesNoVotesInfo info ->
-            encodeYesNoVotesInfo info
+            encodeYesNoVotesInfo ( "type", E.string "yesNo" ) info
 
 
 decodePollInfo : D.Decoder PollInfo
@@ -94,7 +94,7 @@ decodePollInfo =
 encodePollInfo : PollInfo -> E.Value
 encodePollInfo pollInfo =
     E.object
-        [ ( "candidates", encodeCandidatesInfo pollInfo.candidateInfo )
+        [ ( "candidates", encodeCandidatesInfo pollInfo.candidatesInfo )
         , ( "votes", encodeVotesInfo pollInfo.votesInfo )
         ]
 
@@ -154,7 +154,7 @@ encodeProject project =
         , ( "polls", E.list encodePoll project.polls )
         , ( "lastPollId", E.int project.lastPollId )
         , ( "voters", E.list encodeVoter project.voters )
-        , ( "lastVoterId", E.int project.lastVoterIdId )
+        , ( "lastVoterId", E.int project.lastVoterId )
         ]
 
 

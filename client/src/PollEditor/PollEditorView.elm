@@ -3,22 +3,6 @@ module PollEditor.PollEditorView exposing
     , viewPoll
     )
 
-import Common.CommonModel exposing (CalendarStateModel)
-import Common.CommonView as CommonView exposing (optClass)
-import Common.ListUtils as ListUtils
-import Data.DataModel exposing (GenericOptionItem, candidateIdInt)
-import Dict
-import Html exposing (Html, a, button, div, input, label, li, ol, option, select, span, text, textarea)
-import Html.Attributes exposing (class, disabled, placeholder, selected, tabindex, title, type_, value)
-import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
-import PollEditor.PollEditorModel
-    exposing
-        ( DatePollEditorData
-        , GenericPollEditorData
-        , PollEditor(..)
-        , PollEditorModel
-        , PollEditorMsg(..)
-        )
 import Candidate.DateCandidate.SDate
     exposing
         ( SDay
@@ -30,6 +14,23 @@ import Candidate.DateCandidate.SDate
         , nextMonth
         , prevMonth
         , weeksInMonth
+        )
+import Candidate.TextCandidate.TextCandidateData exposing (TextCandidateItem)
+import Common.CommonModel exposing (CalendarStateModel)
+import Common.CommonView as CommonView exposing (optClass)
+import Common.ListUtils as ListUtils
+import Data.CandidateId exposing (candidateIdInt)
+import Dict
+import Html exposing (Html, a, button, div, input, label, li, ol, option, select, span, text, textarea)
+import Html.Attributes exposing (class, disabled, placeholder, selected, tabindex, title, type_, value)
+import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
+import PollEditor.PollEditorModel
+    exposing
+        ( DatePollEditorData
+        , GenericPollEditorData
+        , PollEditor(..)
+        , PollEditorModel
+        , PollEditorMsg(..)
         )
 import Set
 import Translations.Translation exposing (Translation)
@@ -134,7 +135,7 @@ viewPollGenericItems pollData viewConfig =
     existing ++ new ++ [ add ]
 
 
-viewPollGenericItemExisting : GenericOptionItem -> GenericPollEditorData -> ViewConfig a -> Html a
+viewPollGenericItemExisting : TextCandidateItem -> GenericPollEditorData -> ViewConfig a -> Html a
 viewPollGenericItemExisting item pollData viewConfig =
     let
         hidden =

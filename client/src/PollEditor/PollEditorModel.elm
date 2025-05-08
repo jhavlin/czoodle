@@ -7,11 +7,13 @@ module PollEditor.PollEditorModel exposing
     , isChanged
     )
 
+import Candidate.DateCandidate.DateCandidateData exposing (DateCandidateItem)
+import Candidate.DateCandidate.SDate exposing (SMonth)
+import Candidate.TextCandidate.TextCandidateData exposing (TextCandidateItem)
 import Common.CommonModel exposing (CalendarStateModel, DayTuple)
-import Data.DataModel exposing (DateOptionItem, GenericOptionItem, CandidateId)
+import Data.CandidateId exposing (CandidateId)
 import Dict exposing (Dict)
 import Maybe exposing (Maybe)
-import Candidate.DateCandidate.SDate exposing (SMonth)
 import Set exposing (Set)
 
 
@@ -48,7 +50,7 @@ type PollEditor
 
 
 type alias DatePollEditorData =
-    { originalItems : List DateOptionItem
+    { originalItems : List DateCandidateItem
     , addedItems : Set DayTuple
     , hiddenItems : Set Int
     , unhiddenItems : Set Int
@@ -56,7 +58,7 @@ type alias DatePollEditorData =
 
 
 type alias GenericPollEditorData =
-    { originalItems : List GenericOptionItem
+    { originalItems : List TextCandidateItem
     , addedItems : List String
     , hiddenItems : Set Int
     , unhiddenItems : Set Int

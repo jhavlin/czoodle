@@ -1,8 +1,9 @@
 module PollEditor.PollEditorUpdate exposing (update)
 
+import Candidate.DateCandidate.SDate exposing (dayFromTuple, monthFromTuple, monthToTuple)
 import Common.CommonModel exposing (CalendarStateModel, DayTuple)
 import Common.ListUtils as ListUtils
-import Data.DataModel exposing (CandidateId, candidateIdInt)
+import Data.CandidateId exposing (CandidateId, candidateIdInt)
 import Dict
 import List
 import PollEditor.PollEditorModel
@@ -13,7 +14,6 @@ import PollEditor.PollEditorModel
         , PollEditorModel
         , PollEditorMsg(..)
         )
-import Candidate.DateCandidate.SDate exposing (dayFromTuple, monthFromTuple, monthToTuple)
 import Set
 
 
