@@ -12,7 +12,7 @@ import Data.CandidateId exposing (CandidateId(..))
 import Data.DataModel exposing (CandidatesInfo(..), Poll, PollId(..), Project, VotesInfo(..))
 import Dict
 import Poll.YesNoPoll.YesNoPollData exposing (defaultYesNoPollSettings)
-import PollEditor.PollEditorModel exposing (PollEditor(..), PollEditorModel, PollEditorMsg)
+import PollEditor.PollEditorModel exposing (CandidatesEditor(..), PollEditorModel, PollEditorMsg)
 import Set
 import Translations.Translation exposing (Translation)
 
@@ -75,13 +75,13 @@ newPollsToProject { title, polls } =
             List.filter (\v -> not <| String.isEmpty <| String.trim v) addedItems
                 |> List.indexedMap (\index item -> { candidateId = CandidateId <| 1 + index, value = item, hidden = False })
 
-        newPollModelToCandidatesInfo : PollEditor -> CandidatesInfo
+        newPollModelToCandidatesInfo : PollEditorModel -> CandidatesInfo
         newPollModelToCandidatesInfo pollEditorModel =
-            case pollEditorModel of
-                DatePollEditor _ newPollData ->
-                    DateCandidatesInfo (newDatePollDataToPollInfo newPollData)
+            case pollEditorModel.candidatesEditor of
+                DateCandidatesEditor newPollData ->
+                    DateCandidatesInfo (newDatePollDataToPollInfo newPollData.data)
 
-                GenericPollEditor newPollData ->
+                TextCandidatesEditor newPollData ->
                     TextCandidatesInfo (newGenericPollDataToPollInfo newPollData)
 
         pollEditorModelToPoll : Int -> PollEditorModel -> Poll
@@ -90,7 +90,7 @@ newPollsToProject { title, polls } =
             , title = normalizeStringMaybe pollEditorModel.changedTitle
             , description = normalizeStringMaybe pollEditorModel.changedDescription
             , pollInfo =
-                { candidatesInfo = newPollModelToCandidatesInfo pollEditorModel.editor
+                { candidatesInfo = newPollModelToCandidatesInfo pollEditorModel
                 , votesInfo = YesNoVotesInfo { settings = defaultYesNoPollSettings, votes = Dict.empty }
                 }
             }

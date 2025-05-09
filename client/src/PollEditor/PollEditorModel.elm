@@ -1,38 +1,41 @@
 module PollEditor.PollEditorModel exposing
-    ( DatePollEditorData
-    , GenericPollEditorData
-    , PollEditor(..)
+    ( CandidatesEditor(..)
+    , CandidatesEditorMsg(..)
     , PollEditorModel
     , PollEditorMsg(..)
+    , VotesEditor(..)
+    , VotesEditorMsg(..)
     , isChanged
     )
 
-import Candidate.DateCandidate.DateCandidateData exposing (DateCandidateItem)
-import Candidate.DateCandidate.SDate exposing (SMonth)
-import Candidate.TextCandidate.TextCandidateData exposing (TextCandidateItem)
-import Common.CommonModel exposing (CalendarStateModel, DayTuple)
-import Data.CandidateId exposing (CandidateId)
-import Dict exposing (Dict)
+import Candidate.DateCandidate.DateCandidatesEditorModel as DateCandidatesEditorModel
+    exposing
+        ( DateCandidatesEditorModel
+        , DateCandidatesEditorMsg
+        )
+import Candidate.TextCandidate.TextCandidatesEditorModel as TextCandidatesEditorModel
+    exposing
+        ( TextCandidatesEditorModel
+        , TextCandidatesEditorMsg
+        )
 import Maybe exposing (Maybe)
-import Set exposing (Set)
 
 
 type PollEditorMsg
     = SetPollTitle String
     | SetPollDescription String
-    | SetNewGenericPollItem Int String
-    | AddGenericPollItem
-    | RemoveGenericPollItem Int
-    | RenameGenericPollItem CandidateId String
-    | HideGenericPollItem CandidateId
-    | UnhideGenericPollItem CandidateId
-    | AddDatePollItem DayTuple
-    | RemoveDatePollItem DayTuple
-    | SetCalendarMonth SMonth
-    | SetCalendarMonthDirect String
-    | SetCalendarYearDirect String
-    | SetHighlightedDay (Maybe DayTuple)
+    | InnerMsgCandidates CandidatesEditorMsg
+    | InnerMsgVotes VotesEditorMsg
     | NoOp
+
+
+type CandidatesEditorMsg
+    = InnerMsgDate DateCandidatesEditorMsg
+    | InnerMsgText TextCandidatesEditorMsg
+
+
+type VotesEditorMsg
+    = InnerMsgYesNo
 
 
 type alias PollEditorModel =
@@ -40,30 +43,18 @@ type alias PollEditorModel =
     , originalDescription : String
     , changedTitle : Maybe String
     , changedDescription : Maybe String
-    , editor : PollEditor
+    , candidatesEditor : CandidatesEditor
+    , votesEditor : VotesEditor
     }
 
 
-type PollEditor
-    = DatePollEditor CalendarStateModel DatePollEditorData
-    | GenericPollEditor GenericPollEditorData
+type CandidatesEditor
+    = DateCandidatesEditor DateCandidatesEditorModel
+    | TextCandidatesEditor TextCandidatesEditorModel
 
 
-type alias DatePollEditorData =
-    { originalItems : List DateCandidateItem
-    , addedItems : Set DayTuple
-    , hiddenItems : Set Int
-    , unhiddenItems : Set Int
-    }
-
-
-type alias GenericPollEditorData =
-    { originalItems : List TextCandidateItem
-    , addedItems : List String
-    , hiddenItems : Set Int
-    , unhiddenItems : Set Int
-    , renamedItems : Dict Int String
-    }
+type VotesEditor
+    = YesNoVotesEditor
 
 
 isJust : Maybe a -> Bool
@@ -80,15 +71,22 @@ isChanged : PollEditorModel -> Bool
 isChanged editorModel =
     isJust editorModel.changedTitle
         || isJust editorModel.changedDescription
-        || (case editorModel.editor of
-                DatePollEditor _ { addedItems, hiddenItems, unhiddenItems } ->
-                    (not <| Set.isEmpty addedItems)
-                        || (not <| Set.isEmpty hiddenItems)
-                        || (not <| Set.isEmpty unhiddenItems)
+        || isCandidatesChanged editorModel.candidatesEditor
+        || isVotesChanged editorModel.votesEditor
 
-                GenericPollEditor { addedItems, hiddenItems, unhiddenItems, renamedItems } ->
-                    (not <| List.isEmpty addedItems)
-                        || (not <| Set.isEmpty hiddenItems)
-                        || (not <| Set.isEmpty unhiddenItems)
-                        || (not <| Dict.isEmpty renamedItems)
-           )
+
+isCandidatesChanged : CandidatesEditor -> Bool
+isCandidatesChanged candidatesEditor =
+    case candidatesEditor of
+        DateCandidatesEditor model ->
+            DateCandidatesEditorModel.isChanged model
+
+        TextCandidatesEditor model ->
+            TextCandidatesEditorModel.isChanged model
+
+
+isVotesChanged : VotesEditor -> Bool
+isVotesChanged votesEditor =
+    case votesEditor of
+        YesNoVotesEditor ->
+            False

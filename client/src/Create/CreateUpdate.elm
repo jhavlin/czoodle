@@ -1,6 +1,7 @@
 port module Create.CreateUpdate exposing (init, subscriptions, update)
 
 import Browser.Dom
+import Candidate.DateCandidate.SDate exposing (SDay, defaultDay, monthFromDay)
 import Common.ListUtils as ListUtils
 import Create.CreateDecoders exposing (decodeCreateFlags)
 import Create.CreateModel exposing (CreatedProjectInfo, Model, Msg(..), newPollsToProject)
@@ -8,9 +9,8 @@ import Data.DataCoding exposing (encodeProject)
 import Dict
 import Json.Decode as D
 import Json.Encode as E
-import PollEditor.PollEditorModel exposing (PollEditor(..), PollEditorModel)
+import PollEditor.PollEditorModel exposing (CandidatesEditor(..), PollEditorModel, VotesEditor(..))
 import PollEditor.PollEditorUpdate as PollEditorUpdate
-import Candidate.DateCandidate.SDate exposing (SDay, defaultDay, monthFromDay)
 import Set
 import Task
 import Translations.Translations as Translations
@@ -119,30 +119,50 @@ update msg model =
 emptyGenericPoll : PollEditorModel
 emptyGenericPoll =
     let
-        editor =
-            GenericPollEditor
+        candidatesEditor =
+            TextCandidatesEditor
                 { addedItems = [ "", "" ]
                 , originalItems = []
                 , hiddenItems = Set.empty
                 , unhiddenItems = Set.empty
                 , renamedItems = Dict.empty
                 }
+
+        votesEditor =
+            YesNoVotesEditor
     in
-    { originalTitle = "", originalDescription = "", changedTitle = Nothing, changedDescription = Nothing, editor = editor }
+    { originalTitle = ""
+    , originalDescription = ""
+    , changedTitle = Nothing
+    , changedDescription = Nothing
+    , candidatesEditor = candidatesEditor
+    , votesEditor = votesEditor
+    }
 
 
 emptyDatePoll : SDay -> PollEditorModel
 emptyDatePoll today =
     let
+        data =
+            { addedItems = Set.empty
+            , originalItems = []
+            , hiddenItems = Set.empty
+            , unhiddenItems = Set.empty
+            }
+
         state =
             { month = monthFromDay today, highlightedDay = Nothing, today = today }
 
-        editor =
-            DatePollEditor state
-                { addedItems = Set.empty
-                , originalItems = []
-                , hiddenItems = Set.empty
-                , unhiddenItems = Set.empty
-                }
+        candidatesEditor =
+            DateCandidatesEditor { data = data, state = state }
+
+        votesEditor =
+            YesNoVotesEditor
     in
-    { originalTitle = "", originalDescription = "", changedTitle = Nothing, changedDescription = Nothing, editor = editor }
+    { originalTitle = ""
+    , originalDescription = ""
+    , changedTitle = Nothing
+    , changedDescription = Nothing
+    , candidatesEditor = candidatesEditor
+    , votesEditor = votesEditor
+    }

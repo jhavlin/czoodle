@@ -1,6 +1,6 @@
-module Candidate.TextCandidate.TextCandidateEditorModel exposing
-    ( TextCandidateEditorModel
-    , TextCandidateEditorMsg(..)
+module Candidate.TextCandidate.TextCandidatesEditorModel exposing
+    ( TextCandidatesEditorModel
+    , TextCandidatesEditorMsg(..)
     , isChanged
     )
 
@@ -10,7 +10,7 @@ import Dict exposing (Dict)
 import Set exposing (Set)
 
 
-type TextCandidateEditorMsg
+type TextCandidatesEditorMsg
     = SetNewGenericPollItem Int String
     | AddGenericPollItem
     | RemoveGenericPollItem Int
@@ -20,7 +20,7 @@ type TextCandidateEditorMsg
     | NoOp
 
 
-type alias TextCandidateEditorModel =
+type alias TextCandidatesEditorModel =
     { originalItems : List TextCandidateItem
     , addedItems : List String
     , hiddenItems : Set Int
@@ -29,7 +29,7 @@ type alias TextCandidateEditorModel =
     }
 
 
-isChanged : TextCandidateEditorModel -> Bool
+isChanged : TextCandidatesEditorModel -> Bool
 isChanged { addedItems, hiddenItems, unhiddenItems, renamedItems } =
     (not <| List.isEmpty addedItems)
         || (not <| Set.isEmpty hiddenItems)

@@ -1,10 +1,10 @@
-module Candidate.DateCandidate.DateCandidateEditorView exposing (viewDateCandidateEditor, ViewConfig)
+module Candidate.DateCandidate.DateCandidatesEditorView exposing (viewDateCandidatesEditor, ViewConfig)
 
-import Candidate.DateCandidate.DateCandidateEditorModel
+import Candidate.DateCandidate.DateCandidatesEditorModel
     exposing
-        ( DateCandidateEditorData
-        , DateCandidateEditorModel
-        , DateCandidateEditorMsg(..)
+        ( DateCandidatesEditorData
+        , DateCandidatesEditorModel
+        , DateCandidatesEditorMsg(..)
         )
 import Candidate.DateCandidate.SDate
     exposing
@@ -30,17 +30,15 @@ import Translations.Translation exposing (Translation)
 
 
 type alias ViewConfig outerMsg =
-    { outerMessage : DateCandidateEditorMsg -> outerMsg
-    , removePollMessage : Maybe outerMsg
+    { outerMessage : DateCandidatesEditorMsg -> outerMsg
     , today : SDay
-    , pollNumber : Int
     , translation : Translation
     }
 
 
-viewDateCandidateEditor : DateCandidateEditorModel -> ViewConfig a -> Html a
-viewDateCandidateEditor model viewConfig =
-    div [ class "poll poll-date" ]
+viewDateCandidatesEditor : DateCandidatesEditorModel -> ViewConfig a -> Html a
+viewDateCandidatesEditor model viewConfig =
+    div []
         [ div [ class "poll-instructions" ]
             [ text viewConfig.translation.pollEditor.optionsInstructionsDate ]
         , viewDateCalendar model.state model.data viewConfig
@@ -48,7 +46,7 @@ viewDateCandidateEditor model viewConfig =
         ]
 
 
-viewDateCalendar : CalendarStateModel -> DateCandidateEditorData -> ViewConfig a -> Html a
+viewDateCalendar : CalendarStateModel -> DateCandidatesEditorData -> ViewConfig a -> Html a
 viewDateCalendar state pollData viewConfig =
     let
         weeks =
@@ -142,7 +140,7 @@ viewDateCalendarHeaderRow translation =
     div [ class "calendar-row calendar-header-row" ] cells
 
 
-viewDateCalendarCell : CalendarStateModel -> DateCandidateEditorData -> ViewConfig a -> SDay -> Html a
+viewDateCalendarCell : CalendarStateModel -> DateCandidatesEditorData -> ViewConfig a -> SDay -> Html a
 viewDateCalendarCell state pollData viewConfig sDay =
     let
         dayTuple =
@@ -201,7 +199,7 @@ viewDateCalendarCell state pollData viewConfig sDay =
         ]
 
 
-viewPollDateItemTags : CalendarStateModel -> DateCandidateEditorData -> ViewConfig a -> Html a
+viewPollDateItemTags : CalendarStateModel -> DateCandidatesEditorData -> ViewConfig a -> Html a
 viewPollDateItemTags state pollData viewConfig =
     let
         ( shownYear, shownMonth ) =

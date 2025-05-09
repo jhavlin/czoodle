@@ -1,10 +1,10 @@
-module Candidate.DateCandidate.DateCandidateEditorUpdate exposing (update)
+module Candidate.DateCandidate.DateCandidatesEditorUpdate exposing (update)
 
-import Candidate.DateCandidate.DateCandidateEditorModel
+import Candidate.DateCandidate.DateCandidatesEditorModel
     exposing
-        ( DateCandidateEditorData
-        , DateCandidateEditorModel
-        , DateCandidateEditorMsg(..)
+        ( DateCandidatesEditorData
+        , DateCandidatesEditorModel
+        , DateCandidatesEditorMsg(..)
         )
 import Candidate.DateCandidate.SDate exposing (dayFromTuple, monthFromTuple, monthToTuple)
 import Common.CommonModel exposing (CalendarStateModel, DayTuple)
@@ -17,7 +17,7 @@ import Set
 ---- Update ----
 
 
-update : DateCandidateEditorMsg -> DateCandidateEditorModel -> DateCandidateEditorModel
+update : DateCandidatesEditorMsg -> DateCandidatesEditorModel -> DateCandidatesEditorModel
 update msg model =
     case msg of
         AddDatePollItem dayTuple ->
@@ -42,12 +42,12 @@ update msg model =
             model
 
 
-doWithDatePollData : (DateCandidateEditorData -> DateCandidateEditorData) -> DateCandidateEditorModel -> DateCandidateEditorModel
+doWithDatePollData : (DateCandidatesEditorData -> DateCandidatesEditorData) -> DateCandidatesEditorModel -> DateCandidatesEditorModel
 doWithDatePollData fn model =
     { model | data = fn model.data }
 
 
-doWithDatePollState : (CalendarStateModel -> CalendarStateModel) -> DateCandidateEditorModel -> DateCandidateEditorModel
+doWithDatePollState : (CalendarStateModel -> CalendarStateModel) -> DateCandidatesEditorModel -> DateCandidatesEditorModel
 doWithDatePollState fn model =
     { model | state = fn model.state }
 
@@ -92,7 +92,7 @@ setCalendarYearDirect str data =
             data
 
 
-selectDate : DayTuple -> DateCandidateEditorData -> DateCandidateEditorData
+selectDate : DayTuple -> DateCandidatesEditorData -> DateCandidatesEditorData
 selectDate dayTuple data =
     let
         sDayOpt =
@@ -125,7 +125,7 @@ selectDate dayTuple data =
 -- Some problem with day tuple, return original data
 
 
-deselectDate : DayTuple -> DateCandidateEditorData -> DateCandidateEditorData
+deselectDate : DayTuple -> DateCandidatesEditorData -> DateCandidatesEditorData
 deselectDate dayTuple data =
     let
         sDayOpt =

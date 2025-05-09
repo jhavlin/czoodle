@@ -1,9 +1,9 @@
-module Candidate.TextCandidate.TextCandidateEditorUpdate exposing (update)
+module Candidate.TextCandidate.TextCandidatesEditorUpdate exposing (update)
 
-import Candidate.TextCandidate.TextCandidateEditorModel
+import Candidate.TextCandidate.TextCandidatesEditorModel
     exposing
-        ( TextCandidateEditorModel
-        , TextCandidateEditorMsg(..)
+        ( TextCandidatesEditorModel
+        , TextCandidatesEditorMsg(..)
         )
 import Common.ListUtils as ListUtils
 import Data.CandidateId exposing (CandidateId, candidateIdInt)
@@ -16,7 +16,7 @@ import Set
 ---- Update ----
 
 
-update : TextCandidateEditorMsg -> TextCandidateEditorModel -> TextCandidateEditorModel
+update : TextCandidatesEditorMsg -> TextCandidatesEditorModel -> TextCandidatesEditorModel
 update msg model =
     case msg of
         SetNewGenericPollItem itemNumber itemVal ->
@@ -41,17 +41,17 @@ update msg model =
             model
 
 
-addGenericItem : TextCandidateEditorModel -> TextCandidateEditorModel
+addGenericItem : TextCandidatesEditorModel -> TextCandidatesEditorModel
 addGenericItem data =
     { data | addedItems = data.addedItems ++ [ "" ] }
 
 
-setNewGenericItem : Int -> String -> TextCandidateEditorModel -> TextCandidateEditorModel
+setNewGenericItem : Int -> String -> TextCandidatesEditorModel -> TextCandidatesEditorModel
 setNewGenericItem itemNumber newValue data =
     { data | addedItems = ListUtils.changeIndex (\_ -> newValue) itemNumber data.addedItems }
 
 
-removeGenericItem : Int -> TextCandidateEditorModel -> TextCandidateEditorModel
+removeGenericItem : Int -> TextCandidatesEditorModel -> TextCandidatesEditorModel
 removeGenericItem itemNumber data =
     let
         newItems =
@@ -64,7 +64,7 @@ removeGenericItem itemNumber data =
     { data | addedItems = newItems }
 
 
-renameGenericItem : CandidateId -> String -> TextCandidateEditorModel -> TextCandidateEditorModel
+renameGenericItem : CandidateId -> String -> TextCandidatesEditorModel -> TextCandidatesEditorModel
 renameGenericItem candidateId value pollData =
     let
         valueOpt =
@@ -81,7 +81,7 @@ renameGenericItem candidateId value pollData =
     { pollData | renamedItems = newRenamedItems }
 
 
-hideGenericItem : CandidateId -> TextCandidateEditorModel -> TextCandidateEditorModel
+hideGenericItem : CandidateId -> TextCandidatesEditorModel -> TextCandidatesEditorModel
 hideGenericItem candidateId pollData =
     let
         originallyHidden =
@@ -96,7 +96,7 @@ hideGenericItem candidateId pollData =
         { pollData | hiddenItems = Set.insert (candidateIdInt candidateId) pollData.hiddenItems }
 
 
-unhideGenericItem : CandidateId -> TextCandidateEditorModel -> TextCandidateEditorModel
+unhideGenericItem : CandidateId -> TextCandidatesEditorModel -> TextCandidatesEditorModel
 unhideGenericItem candidateId pollData =
     let
         originallyHidden =

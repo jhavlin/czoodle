@@ -1,7 +1,7 @@
-module Candidate.TextCandidate.TextCandidateEditorView exposing (ViewConfig, viewTextCandidateEditor)
+module Candidate.TextCandidate.TextCandidatesEditorView exposing (ViewConfig, viewTextCandidatesEditor)
 
 import Candidate.TextCandidate.TextCandidateData exposing (TextCandidateItem)
-import Candidate.TextCandidate.TextCandidateEditorModel exposing (TextCandidateEditorModel, TextCandidateEditorMsg(..))
+import Candidate.TextCandidate.TextCandidatesEditorModel exposing (TextCandidatesEditorModel, TextCandidatesEditorMsg(..))
 import Common.CommonView exposing (optClass)
 import Data.CandidateId exposing (candidateIdInt)
 import Dict
@@ -13,16 +13,14 @@ import Translations.Translation exposing (Translation)
 
 
 type alias ViewConfig outerMsg =
-    { outerMessage : TextCandidateEditorMsg -> outerMsg
-    , removePollMessage : Maybe outerMsg
-    , pollNumber : Int
+    { outerMessage : TextCandidatesEditorMsg -> outerMsg
     , translation : Translation
     }
 
 
-viewTextCandidateEditor : TextCandidateEditorModel -> ViewConfig a -> Html a
-viewTextCandidateEditor model viewConfig =
-    div [ class "poll poll-generic" ]
+viewTextCandidatesEditor : TextCandidatesEditorModel -> ViewConfig a -> Html a
+viewTextCandidatesEditor model viewConfig =
+    div []
         [ div [ class "poll-instructions" ]
             [ text viewConfig.translation.pollEditor.optionsInstructionsGeneric ]
         , div [ class "poll-options" ]
@@ -32,7 +30,7 @@ viewTextCandidateEditor model viewConfig =
         ]
 
 
-viewPollGenericItems : TextCandidateEditorModel -> ViewConfig a -> List (Html a)
+viewPollGenericItems : TextCandidatesEditorModel -> ViewConfig a -> List (Html a)
 viewPollGenericItems model viewConfig =
     let
         existing =
@@ -53,7 +51,7 @@ viewPollGenericItems model viewConfig =
     existing ++ new ++ [ add ]
 
 
-viewPollGenericItemExisting : TextCandidateItem -> TextCandidateEditorModel -> ViewConfig a -> Html a
+viewPollGenericItemExisting : TextCandidateItem -> TextCandidatesEditorModel -> ViewConfig a -> Html a
 viewPollGenericItemExisting item model viewConfig =
     let
         hidden =
@@ -94,7 +92,7 @@ viewPollGenericItemExisting item model viewConfig =
         ]
 
 
-viewPollGenericItemNew : Int -> String -> TextCandidateEditorModel -> ViewConfig a -> Html a
+viewPollGenericItemNew : Int -> String -> TextCandidatesEditorModel -> ViewConfig a -> Html a
 viewPollGenericItemNew itemNumber itemValue model viewConfig =
     li [ class "poll-option-generic" ]
         [ input

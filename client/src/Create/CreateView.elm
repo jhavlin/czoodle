@@ -6,8 +6,8 @@ import Create.CreateModel exposing (CreatedProjectInfo, Model, Msg(..))
 import Html exposing (Html, a, b, button, div, h2, header, input, label, p, span, text)
 import Html.Attributes exposing (attribute, class, disabled, href, placeholder, tabindex, type_, value)
 import Html.Events exposing (onClick, onInput)
-import PollEditor.PollEditorModel exposing (PollEditor(..))
-import PollEditor.PollEditorView exposing (viewPoll)
+import PollEditor.PollEditorModel exposing (CandidatesEditor(..))
+import PollEditor.PollEditorView exposing (viewPollEditor)
 import Set
 import Translations.Translation exposing (Translation)
 import Translations.TranslationsView exposing (translationsView)
@@ -26,8 +26,8 @@ view model =
     in
     div
         [ attribute "translate" "no", class "notranslate" ]
-        [ header [] [headerLogo]
-        , div [ class "project" ] [div [ class "width" ] [content]]
+        [ header [] [ headerLogo ]
+        , div [ class "project" ] [ div [ class "width" ] [ content ] ]
         ]
 
 
@@ -44,7 +44,7 @@ viewEditing model =
         , div [ class "polls" ]
             (List.indexedMap
                 (\i p ->
-                    viewPoll p
+                    viewPollEditor p
                         { today = model.today
                         , outerMessage = EditPoll i
                         , removePollMessage = Just <| RemovePoll i
@@ -138,12 +138,12 @@ submitButton model =
         genericPollValid items =
             List.all (\s -> not (String.isEmpty <| String.trim s)) items
 
-        pollValid { editor } =
-            case editor of
-                DatePollEditor _ { addedItems } ->
-                    not (Set.isEmpty addedItems)
+        pollValid pollEditorModel =
+            case pollEditorModel.candidatesEditor of
+                DateCandidatesEditor { data } ->
+                    not (Set.isEmpty data.addedItems)
 
-                GenericPollEditor { addedItems } ->
+                TextCandidatesEditor { addedItems } ->
                     not (List.isEmpty addedItems) && genericPollValid addedItems
 
         allValid =

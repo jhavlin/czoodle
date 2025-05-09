@@ -1,7 +1,7 @@
-module Candidate.DateCandidate.DateCandidateEditorModel exposing
-    ( DateCandidateEditorModel
-    , DateCandidateEditorMsg(..)
-    , DateCandidateEditorData
+module Candidate.DateCandidate.DateCandidatesEditorModel exposing
+    ( DateCandidatesEditorModel
+    , DateCandidatesEditorMsg(..)
+    , DateCandidatesEditorData
     , isChanged
     )
 
@@ -12,7 +12,7 @@ import Maybe exposing (Maybe)
 import Set exposing (Set)
 
 
-type DateCandidateEditorMsg
+type DateCandidatesEditorMsg
     = AddDatePollItem DayTuple
     | RemoveDatePollItem DayTuple
     | SetCalendarMonth SMonth
@@ -22,7 +22,7 @@ type DateCandidateEditorMsg
     | NoOp
 
 
-type alias DateCandidateEditorData =
+type alias DateCandidatesEditorData =
     { originalItems : List DateCandidateItem
     , addedItems : Set DayTuple
     , hiddenItems : Set Int
@@ -30,13 +30,13 @@ type alias DateCandidateEditorData =
     }
 
 
-type alias DateCandidateEditorModel =
-    { data : DateCandidateEditorData
+type alias DateCandidatesEditorModel =
+    { data : DateCandidatesEditorData
     , state : CalendarStateModel
     }
 
 
-isChanged : DateCandidateEditorModel -> Bool
+isChanged : DateCandidatesEditorModel -> Bool
 isChanged editorModel =
     (not <| Set.isEmpty editorModel.data.addedItems)
         || (not <| Set.isEmpty editorModel.data.hiddenItems)
