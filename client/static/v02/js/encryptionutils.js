@@ -11,6 +11,34 @@ const byteArrayToHex = (arr) => {
     return Array.from(arr).map(b => ('00' + b.toString(16)).slice(-2)).join('');
 }
 
+const byteToHex = (byte) => {
+    if (byte < 16) {
+        return '0' + byte.toString(16);
+    }
+    return byte.toString(16);
+}
+
+const hex = (hashArray) => {
+    const hashHex = hashArray.map(byteToHex).join('');
+    return hashHex;
+}
+
+const sha256HashArray = async (message) => {
+    // https://stackoverflow.com/questions/18338890/are-there-any-sha-256-javascript-implementations-that-are-generally-considered-t
+    // encode as UTF-8
+    const msgBuffer = new TextEncoder('utf-8').encode(message);
+    // hash the message
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    // convert ArrayBuffer to Array
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray;
+}
+
+
+const sha256 = async (message) => {
+    return hex(await sha256HashArray(message));
+}
+
 /**
  * Generate new key.
  *
@@ -121,4 +149,101 @@ const get = (url) => {
         req.open("GET", url);
         req.send();
     });
+}
+
+/**
+ * Prove/sign project key.
+ *
+ * @param {string} key
+ * @param {string} hashPrefix
+ * @param {number} rounds - Number of rounds of hashing, i.e. length of resulting nonces array.
+ * @param {function} [port] - Port to send (intermediate) results to.
+ * @param {string[]} [knownNonces] - Pre-computed nonces
+ *
+ * @returns {{ cancel: function, promise: Promise<String[]> }}
+ */
+const prove = (key, hashPrefix, rounds, port, knownNonces = []) => {
+
+    let cancelled = false;
+
+    function hexStart(hashArray, len) {
+        const hashHex = hashArray.slice(0, len).map(byteToHex).join('');
+        return hashHex;
+    }
+
+    const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+    const charToIndex = {};
+
+    const nextChar = chars.reduce((acc, cur, index, arr) => {
+        acc[cur] = arr[index + 1];
+        charToIndex[cur] = index;
+        return acc;
+    }, {});
+
+    let strArr = [];
+
+    const next = () => {
+        for (let i = 0; i < strArr.length; i++) {
+            const c = strArr[i];
+            const next = nextChar[c];
+            if (next) {
+                strArr[i] = next;
+                for (let j = 0; j < i; j++) {
+                    strArr[j] = chars[0];
+                }
+                return;
+            }
+        }
+        // No next
+        for (let i = 0; i < strArr.length; i++) {
+            strArr[i] = chars[0];
+        }
+        strArr.push(chars[0]);
+    };
+
+    const check = hash => hexStart(hash).startsWith(hashPrefix)
+
+    let base = key + 'czoodle';
+
+    const run = async () => {
+
+        const start = Date.now();
+
+        for (nonce of knownNonces) {
+            base = await sha256(base + nonce);
+        }
+        const results = knownNonces.slice();
+
+        port?.send(results);
+
+        for (let round = results.length; round < rounds; round++) {
+            strAttr = [];
+            for (let i = 0; ; i++) {
+                if (cancelled) {
+                    return;
+                }
+                const nonce = strArr.join('');
+                const val = base + nonce;
+                const sha = await sha256HashArray(val);
+                await new Promise(resolve => setTimeout(resolve, 1));
+                if (check(sha)) {
+                    base = hex(sha);
+                    results.push(nonce);
+                    port?.send(results);
+                    break;
+                }
+                next();
+            }
+        }
+
+        return results;
+    };
+
+    const promise = run();
+
+    return {
+        cancel: () => { cancelled = true; },
+        promise,
+    };
 }

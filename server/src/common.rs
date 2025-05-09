@@ -7,7 +7,9 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 
-const REQUIRED_HASH_PREFIX: &'static str = "777"; // todo make configurable
+const REQUIRED_HASH_PREFIX: &'static str = "42"; // todo make configurable
+
+const REQUIRED_NONCES_COUNT: u32 = 10;
 
 #[derive(Serialize, Deserialize)]
 pub struct PersistedDataV1 {
@@ -23,6 +25,8 @@ pub struct RequestProjectKeyOutputData {
     project_key: String,
     #[serde(rename = "requiredHashPrefix")]
     required_hash_prefix: String,
+    #[serde(rename = "requiredNoncesCount")]
+    required_nonces_count: u32,
 }
 
 #[derive(Deserialize, Debug)]
@@ -33,8 +37,8 @@ pub struct CreateInputData {
     evidence: String,
     #[serde(rename = "projectKey")]
     project_key: String,
-    #[serde(rename = "keyVerification")]
-    key_verification: String,
+    #[serde(rename = "nonces")]
+    nonces: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -135,6 +139,7 @@ pub async fn request_project_key(version: &str) -> Result<Json<RequestProjectKey
     Ok(Json(RequestProjectKeyOutputData {
         project_key: key,
         required_hash_prefix: REQUIRED_HASH_PREFIX.to_string(),
+        required_nonces_count: REQUIRED_NONCES_COUNT,
     }))
 }
 
@@ -150,11 +155,10 @@ pub async fn create(info: Json<CreateInputData>, version: &str) -> Result<Json<C
             project_key: key,
         }));
     }
-    if !sha256(&format!("{}{}", info.project_key, info.key_verification))
-        .starts_with(REQUIRED_HASH_PREFIX)
-    {
+    let (nonces_validation_result, nonces_validation_message) = validate_nonces(&info);
+    if !nonces_validation_result {
         return Ok(Json(CreateOutputData {
-            result: "verification_failed".to_string(),
+            result: format!("verification_failed - {}", nonces_validation_message),
             project_key: "".to_string(),
         }));
     }
@@ -227,4 +231,18 @@ pub async fn get(project_key: web::Path<String>, version: &str) -> Result<Json<G
         iv: Some(data.iv),
         version: Some(data.version),
     }))
+}
+
+fn validate_nonces(info: &CreateInputData) -> (bool, String) {
+    if info.nonces.len() < 5 {
+        return (false, "Validation invalid - not enough nonces.".to_owned());
+    }
+    let mut current_string = format!("{}{}", info.project_key, "czoodle");
+    for nonce in &info.nonces {
+        current_string = sha256(&format!("{}{}", current_string, nonce));
+        if !current_string.starts_with(REQUIRED_HASH_PREFIX) {
+            return (false, "Invalid validation nonce.".to_owned());
+        }
+    }
+    return (true, "".to_owned());
 }

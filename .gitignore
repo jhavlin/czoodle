@@ -1,4 +1,5 @@
 /data
+/server/data
 *.elm.js
 **/*.rs.bk
 rls*.log

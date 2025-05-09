@@ -46,22 +46,21 @@
         });
         app.ports.persist.subscribe(async function (data) {
             try {
-                const evidence = byteArrayToHex(generateRandomByteArray(32));
-                data.evidence = evidence;
                 const key = await generateKey();
+                const evidence = await sha256(key)
                 const { encryptedData, iv } = await encryptJson(data, key);
 
                 const trySave = async () => {
-                    const requestKeyResult = await get('/data/v01/requestProjectKey');
-                    const keyVerification = await verify(requestKeyResult.projectKey, requestKeyResult.requiredHashPrefix);
+                    const requestKeyResult = await get('/data/v02/requestProjectKey');
+                    const nonces = await prove(requestKeyResult.projectKey, requestKeyResult.requiredHashPrefix, requestKeyResult.requiredNoncesCount).promise;
                     const body = {
                         encryptedData,
                         iv,
                         evidence,
                         projectKey: requestKeyResult.projectKey,
-                        keyVerification,
+                        nonces,
                     };
-                    const result = await post('/data/v01/create', body);
+                    const result = await post('/data/v02/create', body);
                     if (result.result === 'key_used') {
                         trySave()
                     } else if (result.result === 'verification_failed') {
@@ -78,39 +77,6 @@
                 console.log(e);
             }
         });
-
-        async function sha256(message) {
-            // https://stackoverflow.com/questions/18338890/are-there-any-sha-256-javascript-implementations-that-are-generally-considered-t
-            // encode as UTF-8
-            const msgBuffer = new TextEncoder('utf-8').encode(message);
-            // hash the message
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            // convert ArrayBuffer to Array
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            // convert bytes to hex string
-            const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
-            return hashHex;
-        }
-
-        const verify = async (base, requiredPrefix) => {
-            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
-            const queue = [''];
-            let start = 0;
-            const tryNext = () => {
-                const prefix = queue[start++];
-                chars.forEach((c) => {
-                    queue.push(prefix + c);
-                });
-                return sha256(base + prefix).then((hash) => {
-                    if (hash.startsWith(requiredPrefix)) {
-                        return prefix;
-                    } else {
-                        return tryNext()
-                    }
-                });
-            }
-            return Promise.resolve().then(tryNext);
-        }
     </script>
 </body>
 
