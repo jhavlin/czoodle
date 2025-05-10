@@ -163,16 +163,15 @@ pub async fn create(info: Json<CreateInputData>, version: &str) -> Result<Json<C
         }));
     }
 
-    let mut file = File::create(format!("{}/{}.dat", path_str, next)).expect("Cannot create file");
+    let mut file = File::create(format!("{}/{}.dat", path_str, next))?;
     let persisted_data = PersistedDataV1 {
         encrypted_data: info.encrypted_data.to_owned(),
         iv: info.iv.to_owned(),
         evidence: info.evidence.to_owned(),
         version: 1,
     };
-    let store_str = serde_json::to_string(&persisted_data).unwrap();
-    file.write_all(store_str.as_bytes())
-        .expect("Unable to write to file");
+    let store_str = serde_json::to_string(&persisted_data)?;
+    file.write_all(store_str.as_bytes())?;
     Ok(Json(CreateOutputData {
         result: "created".to_string(),
         project_key: key,
@@ -182,7 +181,7 @@ pub async fn create(info: Json<CreateInputData>, version: &str) -> Result<Json<C
 pub async fn update(input: Json<UpdateInputData>, version: &str) -> Result<Json<UpdateOutputData>> {
     let path = key_utils::key_to_path(&input.project_key);
     let path = format!("./data/{}/{}", version, path);
-    let data = std::fs::read_to_string(&path).expect("Cannot read file");
+    let data = std::fs::read_to_string(&path)?;
     let data: PersistedDataV1 = serde_json::from_str(&data).unwrap();
     if data.evidence != input.evidence {
         return Ok(Json(UpdateOutputData {
@@ -209,7 +208,7 @@ pub async fn update(input: Json<UpdateInputData>, version: &str) -> Result<Json<
             version,
         };
         let store_str = serde_json::to_string(&persisted_data).unwrap();
-        std::fs::write(&path, store_str.as_bytes()).expect("Unable to write to file");
+        std::fs::write(&path, store_str.as_bytes())?;
         Ok(Json(UpdateOutputData {
             success: true,
             error: None,
@@ -223,7 +222,7 @@ pub async fn update(input: Json<UpdateInputData>, version: &str) -> Result<Json<
 pub async fn get(project_key: web::Path<String>, version: &str) -> Result<Json<GetOutputData>> {
     let path = key_utils::key_to_path(&project_key);
     let path = format!("./data/{}/{}", version, path);
-    let data = std::fs::read_to_string(&path).expect("Cannot read file");
+    let data = std::fs::read_to_string(&path)?;
     let data: PersistedDataV1 = serde_json::from_str(&data).unwrap();
     Ok(Json(GetOutputData {
         success: true,
