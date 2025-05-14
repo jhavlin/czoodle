@@ -17,6 +17,12 @@ type alias VoteWithComment voteType =
     }
 
 
+type alias ChangedVoteWithComment voteType =
+    { vote : voteType
+    , changedComment : Maybe VoteComment
+    }
+
+
 
 {- Type for one row in a poll, mapping from candidate id to selected option and a vote comment -}
 
@@ -25,12 +31,31 @@ type alias VoterVotes voteType =
     Dict Int (VoteWithComment voteType)
 
 
+type alias ChangedVoterVotes voteType =
+    Dict Int (ChangedVoteWithComment voteType)
+
+
 
 {- Type for one row in a poll with a row comment -}
 
 
 type alias VoterRow voteType =
-    { voterVotes : VoterVotes voteType, voterComment : RowComment }
+    { voterVotes : VoterVotes voteType, rowComment : RowComment, status : VoterRowStatus }
+
+
+type alias ChangedVoterRow voteType =
+    { changedVoterComment : Maybe RowComment, rowChange : RowChange voteType }
+
+
+type RowChange voteType
+    = VotesChanged (ChangedVoterVotes voteType)
+    | RowSkipped
+    | RowUnSkipped
+
+
+type VoterRowStatus
+    = Valid
+    | Skipped
 
 
 

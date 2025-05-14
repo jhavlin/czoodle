@@ -1,7 +1,7 @@
 module Poll.YesNoPoll.YesNoPollCoding exposing (..)
 
 import Data.Comments exposing (RowComment(..), VoteComment(..), rowCommentToString, voteCommentToString)
-import Data.PollRows exposing (PollRows, VoteWithComment, VoterRow, VoterVotes)
+import Data.PollRows exposing (PollRows, VoteWithComment, VoterRow, VoterRowStatus(..), VoterVotes)
 import Dict exposing (Dict)
 import Json.Decode as D
 import Json.Encode as E
@@ -116,19 +116,45 @@ encodeOneVoterVotes dict =
     E.object stringValuePairs
 
 
+decodeVoterRowStatus : D.Decoder VoterRowStatus
+decodeVoterRowStatus =
+    let
+        stringToStatus s =
+            case s of
+                "skipped" ->
+                    Skipped
+
+                _ ->
+                    Valid
+    in
+    D.map stringToStatus (D.field "status" D.string)
+
+
+encodeVoterRowStatus : VoterRowStatus -> E.Value
+encodeVoterRowStatus status =
+    case status of
+        Valid ->
+            E.string "valid"
+
+        Skipped ->
+            E.string "skipped"
+
+
 decodeOneVoterVotesAndComment : D.Decoder (VoterRow YesNoOption)
 decodeOneVoterVotesAndComment =
     {- TODO make comment optional -}
-    D.map2 (\v c -> { voterVotes = v, voterComment = RowComment c })
+    D.map3 (\v c s -> { voterVotes = v, rowComment = RowComment c, status = s })
         (D.field "votes" decodeOneVoterVotes)
         (D.field "comment" D.string)
+        (D.field "status" decodeVoterRowStatus)
 
 
 encodeOneVoterVotesAndComment : VoterRow YesNoOption -> E.Value
 encodeOneVoterVotesAndComment r =
     E.object
         [ ( "votes", encodeOneVoterVotes r.voterVotes )
-        , ( "comment", E.string <| rowCommentToString r.voterComment )
+        , ( "comment", E.string <| rowCommentToString r.rowComment )
+        , ( "status", encodeVoterRowStatus r.status )
         ]
 
 

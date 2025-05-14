@@ -1,0 +1,92 @@
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Czoodle.cz - hlasování</title>
+    <link rel="icon" href="../favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="../css/main.css?v02">
+    <script src="../js/encryptionutils.js"></script>
+    <script src="js/vote.elm.js?v03"></script>
+    <meta property="og:title" content="Czoodle.cz"/>
+    <meta property="og:image" content="https://czoodle.cz/og/czoodle_og_image.png"/>
+    <meta property="og:site_name" content="Czoodle.cz"/>
+    <meta property="og:description" content="Jednoduché skupinové hlasování"/>
+</head>
+<body>
+    <header>
+        <h1 class="header">
+            <span class="cz-start">Cz</span><span class="oo">oo</span><span class="d">d</span><span class="le">le</span>.<span class="cz-end">cz</span>
+        </h1>
+    </header>
+    <main>
+        <div class="project notranslate" translate="no">
+            <div id="elm-root"></div>
+        </div>
+    </main>
+    <footer>
+        <div class="vote-footer">
+            <p>
+                <a href="https://primitiweb.cz/blog/nejtajnejsi-volba/" target="_blank">Blog: <strong>Nejtajnější volba</strong></a> - o tom, proč je to s&nbsp;tajnými a svobodnými volbami tak složité
+            </p>
+            <p>
+                Vytvořte si hlasování na <a href="https://czoodle.cz">czoodle.cz</a>
+            </p>
+        </div>
+    </footer>
+    <script type="text/javascript">
+        const date = new Date();
+        const today = {
+            year: date.getFullYear(),
+            month: date.getMonth() + 1,
+            day: date.getDate(),
+        }
+        let app = Elm.VotePage.init({
+            node: document.getElementById('elm-root'),
+            flags: { urlHash: location.hash, today, languages: navigator.languages },
+        });
+        let version;
+        let evidence;
+        app.ports.load.subscribe(async function (data) {
+            const result = await get('/data/v01/get/' + data.projectKey);
+            const json = await decryptJson(result.encryptedData, result.iv, data.secretKey);
+            version = result.version;
+            evidence = json.evidence;
+            if (json.title) {
+                document.title = 'Czoodle.cz: ' + json.title;
+            }
+            app.ports.loaded.send(json);
+        });
+        app.ports.modify.subscribe(async function(data) {
+            data.project.evidence = evidence;
+            const { encryptedData, iv } = await encryptJson(data.project, data.secretKey);
+            const toSend = {
+                encryptedData,
+                iv,
+                evidence,
+                previousVersion: version,
+                projectKey: data.projectKey,
+                version,
+            }
+            const result = await post('/data/v01/update', toSend);
+            if (result.success) {
+                version = result.version;
+                app.ports.loaded.send(data.project);
+            } else if (!result.success && result.version) {
+                version = result.version;
+                const json = await decryptJson(result.encryptedData, result.iv, data.secretKey);
+                app.ports.updatedVersionReceived.send(json);
+            } else if (!result.success && !result.version) {
+                // some bigger problem
+            }
+        });
+        window.addEventListener("hashchange", () => {
+            app.ports.hashChanged.send({ urlHash: location.hash });
+        }, false);
+
+    </script>
+</body>
+</html>
