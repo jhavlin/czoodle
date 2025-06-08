@@ -12,13 +12,12 @@ import Data.DataModel
         , PollInfo
         , Project
         , Voter
-        , VotesInfo(..)
         , pollIdInt
         )
 import Data.VoterId exposing (VoterId(..), voterIdInt)
 import Json.Decode as D
 import Json.Encode as E
-import Poll.YesNoPoll.YesNoPollCoding exposing (decodeYesNoVotesInfo, encodeYesNoVotesInfo)
+import Poll.PollKinds exposing (decodeVotesInfo, encodeVotesInfo)
 
 
 decodeCandidatesInfo : D.Decoder CandidatesInfo
@@ -62,26 +61,6 @@ encodeCandidatesInfo candidatesInfo =
         , ( "items", items )
         ]
 
-
-decodeVotesInfo : D.Decoder VotesInfo
-decodeVotesInfo =
-    let
-        choose type_ =
-            case type_ of
-                "yesNo" ->
-                    D.map YesNoVotesInfo decodeYesNoVotesInfo
-
-                _ ->
-                    D.fail <| "Invalid 'candidates' type " ++ type_
-    in
-    D.andThen choose <| D.field "type" D.string
-
-
-encodeVotesInfo : VotesInfo -> E.Value
-encodeVotesInfo votesInfo =
-    case votesInfo of
-        YesNoVotesInfo info ->
-            encodeYesNoVotesInfo ( "type", E.string "yesNo" ) info
 
 
 decodePollInfo : D.Decoder PollInfo

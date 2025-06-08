@@ -9,9 +9,8 @@ import Candidate.DateCandidate.SDate exposing (SDay, dayFromTuple)
 import Common.CommonUtils exposing (normalizeStringMaybe, stringToMaybe)
 import Common.ListUtils exposing (filterNothings)
 import Data.CandidateId exposing (CandidateId(..))
-import Data.DataModel exposing (CandidatesInfo(..), Poll, PollId(..), Project, VotesInfo(..))
-import Dict
-import Poll.YesNoPoll.YesNoPollData exposing (defaultYesNoPollSettings)
+import Data.DataModel exposing (CandidatesInfo(..), Poll, PollId(..), Project)
+import Poll.PollKinds exposing (defaultVotesInfo)
 import PollEditor.PollEditorModel exposing (CandidatesEditor(..), PollEditorModel, PollEditorMsg)
 import Set
 import Translations.Translation exposing (Translation)
@@ -91,7 +90,7 @@ newPollsToProject { title, polls } =
             , description = normalizeStringMaybe pollEditorModel.changedDescription
             , pollInfo =
                 { candidatesInfo = newPollModelToCandidatesInfo pollEditorModel
-                , votesInfo = YesNoVotesInfo { settings = defaultYesNoPollSettings, votes = Dict.empty }
+                , votesInfo = defaultVotesInfo
                 }
             }
 

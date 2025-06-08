@@ -25,10 +25,10 @@ import Data.CandidateId exposing (CandidateId(..), candidateIdInt)
 import Data.Comments exposing (RowComment(..))
 import Data.DataModel
     exposing
-        ( Keys
+        ( CandidatesInfo(..)
+        , Keys
         , Poll
         , PollId(..)
-        , PollInfo
         , Project
         , pollIdInt
         )
@@ -37,8 +37,7 @@ import Data.VoterId exposing (VoterId(..), voterIdInt)
 import Dict exposing (Dict)
 import EditProject.EditProjectModel exposing (ChangesInProjectDefinition)
 import Json.Decode as D
-import Poll.PollCommon exposing (KindOfVoterRow)
-import Poll.YesNoPoll.YesNoPollVote exposing (YesNoPollVoteMsg)
+import Poll.PollKinds as PollKinds exposing (KindOfPollInnerMsg, KindOfVoterRow)
 import Set exposing (Set)
 import Translations.Translation exposing (Translation)
 
@@ -58,10 +57,10 @@ type Msg
     | HashChanged D.Value
     | MakeVoterEditable VoterId
     | MakeVoterNotEditable VoterId
-    | AddedPersonInnerPollMsg PollId KindOfInnerPollMsg
+    | AddedPersonInnerPollMsg PollId KindOfPollInnerMsg
     | SetAddedPersonName String
     | RevertChanges
-    | ExistingPersonInnerPollMsg VoterId PollId KindOfInnerPollMsg
+    | ExistingPersonInnerPollMsg VoterId PollId KindOfPollInnerMsg
     | SetExistingVoterName VoterId String
     | SkipVoterRow VoterId PollId
     | UnSkipVoterRow VoterId PollId
@@ -72,10 +71,6 @@ type Msg
     | SaveProjectDefinitionChanges
     | EditProjectMsg EditProject.EditProjectModel.Msg
     | SetTranslation String
-
-
-type KindOfInnerPollMsg
-    = YesNoPollInnerMsg YesNoPollVoteMsg
 
 
 type ViewMode
@@ -132,7 +127,6 @@ emptyVoterRow =
     { voterVotes = Dict.empty, voterComment = RowComment "", status = Valid }
 
 
-
 emptyChangesInProject : Project -> ChangesInProject
 emptyChangesInProject project =
     let
@@ -149,132 +143,150 @@ emptyChangesInProject project =
     AddedVoter { voterName = "", rowsInPolls = rowsInPolls }
 
 
-applyPersonRowChanges : ChangesInPoll -> PersonRow -> PersonRow
-applyPersonRowChanges changesInPoll personRow =
-    let
-        changesInRow =
-            Dict.get (personIdInt personRow.personId) changesInPoll.changesInPersonRows
 
-        updateName changedName =
-            case changedName of
-                Just newName ->
-                    newName
-
-                Nothing ->
-                    personRow.name
-
-        updateOptions changedOptions =
-            Dict.union changedOptions personRow.selectedOptions
-    in
-    case changesInRow of
-        Just { changedName, changedOptions } ->
-            { personRow
-                | name = updateName changedName
-                , selectedOptions = updateOptions changedOptions
-            }
-
-        Nothing ->
-            personRow
-
-
-mergePollWithChanges : Poll -> ChangesInPoll -> Poll
-mergePollWithChanges poll changesInPoll =
-    let
-        appliedPersonChanges =
-            List.map (applyPersonRowChanges changesInPoll) poll.personRows
-
-        appliedDeletes =
-            List.filter (\pc -> not <| Set.member (personIdInt pc.personId) changesInPoll.deletedPersonRows) appliedPersonChanges
-
-        newPersonRow : Int -> AddedPersonRow -> PersonRow
-        newPersonRow i addedPersonRow =
-            { personId = PersonId <| poll.lastPersonId + i + 1
-            , name = addedPersonRow.name
-            , selectedOptions = addedPersonRow.selectedOptions
-            }
-
-        nonEmptyAddedRows =
-            List.filter (\apr -> not <| String.isEmpty <| String.trim apr.name) changesInPoll.addedPersonRows
-
-        newPersonRows =
-            List.indexedMap newPersonRow nonEmptyAddedRows
-
-        updatedPersonRows =
-            appliedDeletes ++ newPersonRows
-    in
-    { poll
-        | personRows = updatedPersonRows
-        , lastPersonId = poll.lastPersonId + List.length newPersonRows
-    }
+-- applyPersonRowChanges : ChangesInPoll -> PersonRow -> PersonRow
+-- applyPersonRowChanges changesInPoll personRow =
+--     let
+--         changesInRow =
+--             Dict.get (personIdInt personRow.personId) changesInPoll.changesInPersonRows
+--         updateName changedName =
+--             case changedName of
+--                 Just newName ->
+--                     newName
+--                 Nothing ->
+--                     personRow.name
+--         updateOptions changedOptions =
+--             Dict.union changedOptions personRow.selectedOptions
+--     in
+--     case changesInRow of
+--         Just { changedName, changedOptions } ->
+--             { personRow
+--                 | name = updateName changedName
+--                 , selectedOptions = updateOptions changedOptions
+--             }
+--         Nothing ->
+--             personRow
+-- mergePollWithChanges : Poll -> ChangesInPoll -> Poll
+-- mergePollWithChanges poll changesInPoll =
+--     let
+--         appliedPersonChanges =
+--             List.map (applyPersonRowChanges changesInPoll) poll.personRows
+--         appliedDeletes =
+--             List.filter (\pc -> not <| Set.member (personIdInt pc.personId) changesInPoll.deletedPersonRows) appliedPersonChanges
+--         newPersonRow : Int -> AddedPersonRow -> PersonRow
+--         newPersonRow i addedPersonRow =
+--             { personId = PersonId <| poll.lastPersonId + i + 1
+--             , name = addedPersonRow.name
+--             , selectedOptions = addedPersonRow.selectedOptions
+--             }
+--         nonEmptyAddedRows =
+--             List.filter (\apr -> not <| String.isEmpty <| String.trim apr.name) changesInPoll.addedPersonRows
+--         newPersonRows =
+--             List.indexedMap newPersonRow nonEmptyAddedRows
+--         updatedPersonRows =
+--             appliedDeletes ++ newPersonRows
+--     in
+--     { poll
+--         | personRows = updatedPersonRows
+--         , lastPersonId = poll.lastPersonId + List.length newPersonRows
+--     }
+-- mergeWithChanges : Project -> ChangesInProject -> Project
+-- mergeWithChanges project changesInProject =
+--     let
+--         newComment i addedComment =
+--             { commentId = CommentId <| project.lastCommentId + i + 1
+--             , text = addedComment.text
+--             }
+--         newComments =
+--             List.indexedMap newComment changesInProject.addedComments
+--         updatedComments =
+--             project.comments ++ newComments
+--         updatePoll poll =
+--             let
+--                 changesInPoll =
+--                     Maybe.withDefault emptyChangesInPoll <|
+--                         Dict.get (pollIdInt poll.pollId) changesInProject.changesInPolls
+--             in
+--             mergePollWithChanges poll changesInPoll
+--         updatedPolls =
+--             List.map updatePoll project.polls
+--     in
+--     { project
+--         | polls = updatedPolls
+--         , comments = updatedComments
+--         , lastCommentId = project.lastCommentId + List.length changesInProject.addedComments
+--     }
 
 
 mergeWithChanges : Project -> ChangesInProject -> Project
 mergeWithChanges project changesInProject =
-    let
-        newComment i addedComment =
-            { commentId = CommentId <| project.lastCommentId + i + 1
-            , text = addedComment.text
-            }
-
-        newComments =
-            List.indexedMap newComment changesInProject.addedComments
-
-        updatedComments =
-            project.comments ++ newComments
-
-        updatePoll poll =
-            let
-                changesInPoll =
-                    Maybe.withDefault emptyChangesInPoll <|
-                        Dict.get (pollIdInt poll.pollId) changesInProject.changesInPolls
-            in
-            mergePollWithChanges poll changesInPoll
-
-        updatedPolls =
-            List.map updatePoll project.polls
-    in
-    { project
-        | polls = updatedPolls
-        , comments = updatedComments
-        , lastCommentId = project.lastCommentId + List.length changesInProject.addedComments
-    }
+    {- TODO -}
+    project
 
 
-pollOptionIds : Poll -> List OptionId
-pollOptionIds poll =
-    case poll.pollInfo of
-        DatePollInfo { items } ->
+pollCandidateIds : Poll -> List CandidateId
+pollCandidateIds poll =
+    case poll.pollInfo.candidatesInfo of
+        DateCandidatesInfo items ->
             List.map .optionId <| List.filter (not << .hidden) items
 
-        GenericPollInfo { items } ->
+        TextCandidatesInfo items ->
             List.map .optionId <| List.filter (not << .hidden) items
 
 
-isInvalidAddedPersonRow : AddedPersonRow -> Bool
-isInvalidAddedPersonRow addedPersonRow =
+isInvalidAddedVoter : { voterName : String, rowsInPolls : Dict Int KindOfVoterRow } -> Bool
+isInvalidAddedVoter { voterName, rowsInPolls } =
     let
         hasEmptyName =
-            String.isEmpty <| String.trim addedPersonRow.name
+            String.isEmpty <| String.trim voterName
 
-        hasPositiveVote =
-            not <| Dict.isEmpty <| Dict.filter (\_ v -> v /= No) addedPersonRow.selectedOptions
+        hasEditedRows =
+            Dict.values rowsInPolls |> List.any (\kindOfVoterRow -> PollKinds.isEdited kindOfVoterRow)
     in
-    hasEmptyName && hasPositiveVote
+    hasEmptyName && hasEditedRows
 
 
 containsInvalidChange : ChangesInProject -> Bool
 containsInvalidChange changesInProject =
-    let
-        checkPoll _ changesInPoll prev =
-            prev || List.any isInvalidAddedPersonRow changesInPoll.addedPersonRows
-    in
-    Dict.foldl checkPoll False changesInProject.changesInPolls
+    case changesInProject of
+        AddedVoter data ->
+            isInvalidAddedVoter data
+
+        UpdatedVoter { changedName } ->
+            changedName |> Maybe.map (String.isEmpty << String.trim) |> Maybe.withDefault False
+
+        DeletedVoter _ ->
+            False
+
+        ChangedDefinition _ ->
+            False
 
 
-{-| Normalize changes so that thay contain only selected options that differ from persisted project.
+{-| Normalize changes so that they contain only selected options that differ from persisted project.
 -}
 actualChanges : ChangesInProject -> Project -> ChangesInProject
 actualChanges changesInProject project =
+    case ChangesInProject of
+        AddedVoter { voterName, rowsInPolls } -> changesInProject
+        UpdatedVoter { id , changedName , changesInPolls  } ->
+            let
+                originalName = List.filter (\v -> v.voterId == id) project.voters |> List.head
+
+                changedName = if originalName == voterName then Nothing else voterName
+
+                userVotes = List.map (\p -> p.pollInfo.votesInfo) project.polls |>
+                    List.map (\votes -> Dict.get id votes)
+
+                updatedChangesInPolls = -- TODO continue here
+            in
+            UpdatedVoter { id = id, changedName = updatedChangedName, changesInPolls = updatedChangesInPolls }
+
+        DeletedVoter VoterId -> changesInProject
+        ChangedDefinition def ->changesInProject
+
+
+actualChangesOldToDelete : ChangesInProject -> Project -> ChangesInProject
+actualChangesOldToDelete = changesInProject project
     let
         fixChangesInPoll : Poll -> Dict Int ChangesInPoll -> Dict Int ChangesInPoll
         fixChangesInPoll poll dict =

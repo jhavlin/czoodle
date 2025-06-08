@@ -1,5 +1,9 @@
 module Poll.YesNoPoll.YesNoPollData exposing (..)
 
+import Data.Comments exposing (isVoteCommentSet, rowCommentToString)
+import Data.PollRows exposing (VoterRow)
+import Dict
+
 
 type YesNoOption
     = Yes
@@ -58,3 +62,9 @@ defaultYesNoPollSettings =
     { allowIfNeeded = True
     , allowMaybe = False
     }
+
+
+isEdited : VoterRow YesNoOption -> Bool
+isEdited voterRow =
+    (not <| String.isEmpty <| String.trim (rowCommentToString voterRow.rowComment))
+        || (Dict.values voterRow.voterVotes |> List.any (\o -> isVoteCommentSet o.comment || o.vote /= No))

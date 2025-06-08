@@ -19,9 +19,9 @@ import Data.DataModel
         , Poll
         , PollId
         , Project
-        , VotesInfo(..)
         )
 import Dict
+import Poll.PollKinds exposing (KindOfVotesInfo)
 import PollEditor.PollEditorModel
     exposing
         ( CandidatesEditor(..)
@@ -81,10 +81,11 @@ emptyChangesInProjectDefinition project today =
                         , renamedItems = Dict.empty
                         }
 
-        votesInfoToVotesEditor : VotesInfo -> VotesEditor
+        votesInfoToVotesEditor : KindOfVotesInfo -> VotesEditor
         votesInfoToVotesEditor votesInfo =
             case votesInfo of
-                YesNoVotesInfo _ ->
+                _ ->
+                    -- TODO generalize
                     YesNoVotesEditor
 
         pollToEditor : Poll -> ( PollId, PollEditorModel )

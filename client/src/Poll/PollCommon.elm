@@ -1,8 +1,7 @@
-module Poll.PollCommon exposing (PollOptionInfo, SelectedVotes(..), KindOfVoterRow(..))
+module Poll.PollCommon exposing (PollOptionInfo, SelectedVotes(..))
 
 import Data.CandidateId exposing (CandidateId)
 import Data.PollRows exposing (VoterRow)
-import Poll.YesNoPoll.YesNoPollData exposing (YesNoOption)
 
 
 
@@ -20,6 +19,3 @@ type SelectedVotes a
     = NewVoterVotes (VoterRow a)
     | ExistingVotesAndChanges (VoterRow a) (VoterRow a)
     | ExistingVotes (VoterRow a)
-
-type KindOfVoterRow
-    = YesNoVoterRow (VoterRow YesNoOption)

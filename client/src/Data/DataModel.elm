@@ -6,15 +6,13 @@ module Data.DataModel exposing
     , PollInfo
     , Project
     , Voter
-    , VotesInfo(..)
     , pollIdInt
     )
 
 import Candidate.DateCandidate.DateCandidateData exposing (DateCandidateItem)
 import Candidate.TextCandidate.TextCandidateData exposing (TextCandidateItem)
-import Data.PollRows exposing (PollRows)
 import Data.VoterId exposing (VoterId)
-import Poll.YesNoPoll.YesNoPollData exposing (YesNoOption, YesNoPollSettings)
+import Poll.PollKinds exposing (KindOfVotesInfo)
 
 
 
@@ -44,16 +42,12 @@ type CandidatesInfo
     | TextCandidatesInfo (List TextCandidateItem)
 
 
-type VotesInfo
-    = YesNoVotesInfo
-        { settings : YesNoPollSettings
-        , votes : PollRows YesNoOption
-        }
+
 
 
 type alias PollInfo =
     { candidatesInfo : CandidatesInfo
-    , votesInfo : VotesInfo
+    , votesInfo : KindOfVotesInfo
     }
 
 
