@@ -1,23 +1,18 @@
 module Vote.VoteModel exposing
     ( ChangesInProject(..)
-    , KindOfInnerPollMsg(..)
     , Model
     , Msg(..)
     , ProjectState(..)
     , ViewMode(..)
     , ViewState
     , ViewStates
-    , actualChanges
-    , applyPersonRowChanges
+    , actualChanges {- , applyPersonRowChanges -}
     , containsInvalidChange
     , emptyChangesInProject
     , emptyViewState
-    , hasChangesInVotes
-    , isInvalidAddedPersonRow
-    , isValidVotingState
-    , mergePollWithChanges
-    , mergeWithChanges
-    , pollOptionIds
+    , hasChangesInVotes {- , isInvalidAddedPersonRow -}
+    , isValidVotingState {- , mergePollWithChanges TODO -}
+    , mergeWithChanges {- , pollOptionIds -}
     )
 
 import Candidate.DateCandidate.SDate exposing (SDay)
@@ -37,7 +32,7 @@ import Data.VoterId exposing (VoterId(..), voterIdInt)
 import Dict exposing (Dict)
 import EditProject.EditProjectModel exposing (ChangesInProjectDefinition)
 import Json.Decode as D
-import Poll.PollKinds as PollKinds exposing (KindOfPollInnerMsg, KindOfVoterRow)
+import Poll.PollKinds as PollKinds exposing (KindOfChangedVoterRow, KindOfPollInnerMsg, KindOfVoterRow, KindOfVotesInfo)
 import Set exposing (Set)
 import Translations.Translation exposing (Translation)
 
@@ -104,7 +99,7 @@ type alias Model =
 
 type ChangesInProject
     = AddedVoter { voterName : String, rowsInPolls : Dict Int KindOfVoterRow }
-    | UpdatedVoter { id : VoterId, changedName : Maybe String, changesInPolls : Dict Int KindOfVoterRow }
+    | UpdatedVoter { id : VoterId, changedName : Maybe String, changesInPolls : Dict Int KindOfChangedVoterRow }
     | DeletedVoter VoterId
     | ChangedDefinition ChangesInProjectDefinition
 
@@ -122,11 +117,6 @@ emptyViewState =
     { viewMode = OptionsInRow, editableExistingRows = Set.empty }
 
 
-emptyVoterRow : VoterRow a
-emptyVoterRow =
-    { voterVotes = Dict.empty, voterComment = RowComment "", status = Valid }
-
-
 emptyChangesInProject : Project -> ChangesInProject
 emptyChangesInProject project =
     let
@@ -134,7 +124,7 @@ emptyChangesInProject project =
             List.foldl
                 (\poll dict ->
                     Dict.insert (pollIdInt poll.pollId)
-                        emptyVoterRow
+                        (PollKinds.getEmptyVoterRow poll.pollInfo.votesInfo)
                         dict
                 )
                 Dict.empty
@@ -228,10 +218,10 @@ pollCandidateIds : Poll -> List CandidateId
 pollCandidateIds poll =
     case poll.pollInfo.candidatesInfo of
         DateCandidatesInfo items ->
-            List.map .optionId <| List.filter (not << .hidden) items
+            List.map .candidateId <| List.filter (not << .hidden) items
 
         TextCandidatesInfo items ->
-            List.map .optionId <| List.filter (not << .hidden) items
+            List.map .candidateId <| List.filter (not << .hidden) items
 
 
 isInvalidAddedVoter : { voterName : String, rowsInPolls : Dict Int KindOfVoterRow } -> Bool
@@ -266,92 +256,131 @@ containsInvalidChange changesInProject =
 -}
 actualChanges : ChangesInProject -> Project -> ChangesInProject
 actualChanges changesInProject project =
-    case ChangesInProject of
-        AddedVoter { voterName, rowsInPolls } -> changesInProject
-        UpdatedVoter { id , changedName , changesInPolls  } ->
+    case changesInProject of
+        AddedVoter { voterName, rowsInPolls } ->
+            changesInProject
+
+        UpdatedVoter { id, changedName, changesInPolls } ->
             let
-                originalName = List.filter (\v -> v.voterId == id) project.voters |> List.head
+                originalName =
+                    List.filter (\v -> v.voterId == id) project.voters |> List.head |> Maybe.map (\v -> v.name)
 
-                changedName = if originalName == voterName then Nothing else voterName
+                updatedChangedName =
+                    if originalName == changedName then
+                        Nothing
 
-                userVotes = List.map (\p -> p.pollInfo.votesInfo) project.polls |>
-                    List.map (\votes -> Dict.get id votes)
+                    else
+                        changedName
 
-                updatedChangesInPolls = -- TODO continue here
+                idsAndVotesInfo : List { pollId : PollId, votesInfo : KindOfVotesInfo }
+                idsAndVotesInfo =
+                    project.polls
+                        |> List.map (\p -> { pollId = p.pollId, votesInfo = p.pollInfo.votesInfo })
+
+                rows : List { pollId : PollId, maybeVoterRow : Maybe KindOfVoterRow }
+                rows =
+                    idsAndVotesInfo
+                        |> List.map
+                            (\{ pollId, votesInfo } ->
+                                { pollId = pollId, maybeVoterRow = PollKinds.getVoterRow votesInfo id }
+                            )
+
+                changes : List { pollId : PollId, maybeChangedVoterRow : Maybe KindOfChangedVoterRow }
+                changes =
+                    project.polls
+                        |> List.map (\p -> { pollId = p.pollId, maybeChangedVoterRow = Dict.get (pollIdInt p.pollId) changesInPolls })
+
+                updatedChangesInPolls =
+                    List.map2
+                        (\{ pollId, maybeVoterRow } { maybeChangedVoterRow } ->
+                            ( pollIdInt pollId
+                            , Maybe.map2 (\r ch -> PollKinds.normalizeChanges r ch) maybeVoterRow maybeChangedVoterRow |> Maybe.andThen identity
+                            )
+                        )
+                        rows
+                        changes
+                        |> List.filterMap (\( pId, maybeChangedVoterRow ) -> Maybe.map (\m -> ( pId, m )) maybeChangedVoterRow)
+                        |> Dict.fromList
             in
             UpdatedVoter { id = id, changedName = updatedChangedName, changesInPolls = updatedChangesInPolls }
 
-        DeletedVoter VoterId -> changesInProject
-        ChangedDefinition def ->changesInProject
+        DeletedVoter _ ->
+            changesInProject
+
+        ChangedDefinition def ->
+            changesInProject
 
 
-actualChangesOldToDelete : ChangesInProject -> Project -> ChangesInProject
-actualChangesOldToDelete = changesInProject project
-    let
-        fixChangesInPoll : Poll -> Dict Int ChangesInPoll -> Dict Int ChangesInPoll
-        fixChangesInPoll poll dict =
-            let
-                changesInPoll =
-                    Maybe.withDefault emptyChangesInPoll <| Dict.get (pollIdInt poll.pollId) changesInProject.changesInPolls
 
-                pollIdValid id =
-                    List.any (\vi -> vi.personId == PersonId id) poll.personRows
+{-
+   actualChangesOldToDelete : ChangesInProject -> Project -> ChangesInProject
+   actualChangesOldToDelete changesInProject project =
+       let
+           fixChangesInPoll : Poll -> Dict Int ChangesInPoll -> Dict Int ChangesInPoll
+           fixChangesInPoll poll dict =
+               let
+                   changesInPoll =
+                       Maybe.withDefault emptyChangesInPoll <| Dict.get (pollIdInt poll.pollId) changesInProject.changesInPolls
 
-                fixedDeletedVotes =
-                    Set.filter pollIdValid changesInPoll.deletedPersonRows
+                   pollIdValid id =
+                       List.any (\vi -> vi.personId == PersonId id) poll.personRows
 
-                fixChangedVotes personInfo peopleChangesDict =
-                    let
-                        perId =
-                            personIdInt personInfo.personId
+                   fixedDeletedVotes =
+                       Set.filter pollIdValid changesInPoll.deletedPersonRows
 
-                        changedVotesItem =
-                            Maybe.withDefault { changedName = Nothing, changedOptions = Dict.empty } <|
-                                Dict.get perId changesInPoll.changesInPersonRows
+                   fixChangedVotes personInfo peopleChangesDict =
+                       let
+                           perId =
+                               personIdInt personInfo.personId
 
-                        fixedName =
-                            if changedVotesItem.changedName == Just personInfo.name || changedVotesItem.changedName == Just "" then
-                                Nothing
+                           changedVotesItem =
+                               Maybe.withDefault { changedName = Nothing, changedOptions = Dict.empty } <|
+                                   Dict.get perId changesInPoll.changesInPersonRows
 
-                            else
-                                changedVotesItem.changedName
+                           fixedName =
+                               if changedVotesItem.changedName == Just personInfo.name || changedVotesItem.changedName == Just "" then
+                                   Nothing
 
-                        fixOptionSet (OptionId id) optionsDict =
-                            let
-                                valueInPersisted =
-                                    Maybe.withDefault No <| Dict.get id personInfo.selectedOptions
+                               else
+                                   changedVotesItem.changedName
 
-                                valueInChanges =
-                                    Maybe.withDefault valueInPersisted <| Dict.get id changedVotesItem.changedOptions
-                            in
-                            if valueInChanges /= valueInPersisted then
-                                Dict.insert id valueInChanges optionsDict
+                           fixOptionSet (OptionId id) optionsDict =
+                               let
+                                   valueInPersisted =
+                                       Maybe.withDefault No <| Dict.get id personInfo.selectedOptions
 
-                            else
-                                optionsDict
+                                   valueInChanges =
+                                       Maybe.withDefault valueInPersisted <| Dict.get id changedVotesItem.changedOptions
+                               in
+                               if valueInChanges /= valueInPersisted then
+                                   Dict.insert id valueInChanges optionsDict
 
-                        fixedChangedOptions =
-                            List.foldl fixOptionSet Dict.empty (pollOptionIds poll)
-                    in
-                    if fixedName == Nothing && Dict.isEmpty fixedChangedOptions then
-                        peopleChangesDict
+                               else
+                                   optionsDict
 
-                    else
-                        Dict.insert perId { changedName = fixedName, changedOptions = fixedChangedOptions } peopleChangesDict
+                           fixedChangedOptions =
+                               List.foldl fixOptionSet Dict.empty (pollOptionIds poll)
+                       in
+                       if fixedName == Nothing && Dict.isEmpty fixedChangedOptions then
+                           peopleChangesDict
 
-                fixedChangesVotes =
-                    List.foldl fixChangedVotes Dict.empty poll.personRows
-            in
-            Dict.insert (pollIdInt poll.pollId)
-                { addedPersonRows = changesInPoll.addedPersonRows
-                , deletedPersonRows = fixedDeletedVotes
-                , changesInPersonRows = fixedChangesVotes
-                }
-                dict
-    in
-    { changesInPolls = List.foldl fixChangesInPoll Dict.empty project.polls
-    , addedComments = changesInProject.addedComments
-    }
+                       else
+                           Dict.insert perId { changedName = fixedName, changedOptions = fixedChangedOptions } peopleChangesDict
+
+                   fixedChangesVotes =
+                       List.foldl fixChangedVotes Dict.empty poll.personRows
+               in
+               Dict.insert (pollIdInt poll.pollId)
+                   { addedPersonRows = changesInPoll.addedPersonRows
+                   , deletedPersonRows = fixedDeletedVotes
+                   , changesInPersonRows = fixedChangesVotes
+                   }
+                   dict
+       in
+       { changesInPolls = List.foldl fixChangesInPoll Dict.empty project.polls
+       , addedComments = changesInProject.addedComments
+       }
+-}
 
 
 hasChangesInVotes : ChangesInProject -> Bool
