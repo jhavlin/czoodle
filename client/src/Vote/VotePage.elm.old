@@ -1,0 +1,44 @@
+module Vote.VotePage.old exposing (main)
+
+import Browser
+import Vote.VoteModel.old exposing (Model, Msg)
+import Vote.VoteUpdate.old exposing (init, subscriptions, update)
+import Vote.VoteView.old
+import Json.Decode as D
+
+main : Program D.Value Model Msg
+main =
+    Browser.document
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = subscriptions
+        }
+
+view: Model -> Browser.Document Msg
+view model =
+    { title = "Czoodle" -- TODO
+    , body = [Vote.VoteView.old.view model]
+    }
+
+{-
+
+module VotePage exposing (main)
+
+import Browser
+import Json.Decode as D
+import Vote.VoteModel exposing (Model, Msg)
+import Vote.VoteUpdate exposing (init, subscriptions, update)
+import Vote.VoteView exposing (view)
+
+
+main : Program D.Value Model Msg
+main =
+    Browser.element
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = subscriptions
+        }
+
+-}

@@ -1,8 +1,8 @@
 module Poll.PollKinds exposing
     ( KindOfChangedVoterRow
     , KindOfPollInnerMsg
-    , KindOfVoterRow
-    , KindOfVotesInfo
+    , KindOfVoterRow(..) -- TODO hide variants
+    , KindOfVotesInfo(..) -- TODO hide variants
     , decodeVotesInfo
     , defaultVotesInfo
     , encodeVotesInfo

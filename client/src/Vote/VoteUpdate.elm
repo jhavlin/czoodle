@@ -1,48 +1,32 @@
-port module Vote.VoteUpdate exposing (init, subscriptions, update)
+port module Vote.VoteUpdate exposing (Msg(..), init, subscriptions, update)
 
-import Browser.Dom
+import Candidate.DateCandidate.SDate exposing (SDay, dayFromTuple, defaultDay)
 import Common.CommonDecoders exposing (decodeDay)
-import Data.DataDecoders exposing (decodeProject)
-import Data.DataEncoders exposing (encodeProjectAndKeys)
+import Data.CandidateId exposing (CandidateId(..))
+import Data.Comments exposing (RowComment(..), VoteComment(..))
 import Data.DataModel
     exposing
-        ( OptionId(..)
-        , PersonId(..)
-        , PersonRow
+        ( CandidatesInfo(..)
         , Poll
         , PollId(..)
         , Project
-        , SelectedOption(..)
-        , optionIdInt
-        , personIdInt
+        , Voter
         , pollIdInt
         )
+import Data.PollRows exposing (VoterRowStatus(..))
+import Data.VoterId exposing (VoterId(..), voterIdInt)
 import Dict exposing (Dict)
 import EditProject.EditProjectModel exposing (mergeProjectWithDefinitionChanges)
 import EditProject.EditProjectUpdate exposing (init, update)
 import Json.Decode as D
 import Json.Encode as E
-import SDate.SDate exposing (defaultDay)
+import Poll.PollKinds as PollKinds exposing (KindOfChangedVoterRow, KindOfPollInnerMsg, KindOfVoterRow(..), KindOfVotesInfo(..))
+import Poll.YesNoPoll.YesNoPollData exposing (YesNoOption(..))
 import Set
 import Task
 import Translations.Translations as Translations
 import Translations.TranslationsDecoders exposing (decodeTranslation)
-import Vote.VoteModel
-    exposing
-        ( AddedPersonRow
-        , ChangesInPersonRow
-        , ChangesInPoll
-        , ChangesInProject
-        , Model
-        , Msg(..)
-        , ProjectState(..)
-        , ViewMode(..)
-        , ViewState
-        , ViewStates
-        , actualChanges
-        , emptyChangesInProject
-        , mergeWithChanges
-        )
+import Vote.VoteModel exposing (ChangesInProject(..), Model, ProjectState(..), ViewState, ViewStates)
 
 
 port load : E.Value -> Cmd msg
@@ -63,10 +47,27 @@ port modified : (D.Value -> msg) -> Sub msg
 port updatedVersionReceived : (D.Value -> msg) -> Sub msg
 
 
-
-------------------------------------------------------------
----- Init --------------------------------------------------
-------------------------------------------------------------
+type Msg
+    = NoOp
+    | NoOpJson D.Value
+    | LoadedData D.Value
+    | HashChanged D.Value
+    | MakeVoterEditable VoterId
+    | MakeVoterNotEditable VoterId
+    | AddedPersonInnerPollMsg PollId KindOfPollInnerMsg
+    | SetAddedPersonName String
+    | RevertChanges
+    | ExistingPersonInnerPollMsg VoterId PollId KindOfPollInnerMsg
+    | SetExistingVoterName VoterId String
+    | SkipVoterRow VoterId PollId
+    | UnSkipVoterRow VoterId PollId
+    | SaveChanges
+    | RetrySaveChanges D.Value
+    | SwitchToDefinitionEditor
+    | SwitchToVotesEditor Bool
+    | SaveProjectDefinitionChanges
+    | EditProjectMsg EditProject.EditProjectModel.Msg
+    | SetTranslation String
 
 
 init : D.Value -> ( Model, Cmd Msg )
@@ -87,10 +88,13 @@ init jsonFlags =
         secretKey =
             String.join "def" <| Maybe.withDefault [] <| List.tail hashParts
 
+        projectState : ProjectState
         projectState =
             case urlHashResult of
                 Ok _ ->
-                    Loading
+                    -- TODO
+                    -- Loading
+                    exampleProjectState
 
                 Err _ ->
                     Error "Špatný hash"
@@ -121,489 +125,128 @@ init jsonFlags =
     )
 
 
-emptyChangesInPoll : ChangesInPoll
-emptyChangesInPoll =
-    { changesInPersonRows = Dict.empty, addedPersonRows = [], deletedPersonRows = Set.empty }
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        SaveChanges ->
+            ( model, modify (E.object []) )
 
-
-emptyViewState : ViewState
-emptyViewState =
-    { viewMode = OptionsInRow, editableExistingRows = Set.empty }
-
-
-emptyChangesInPersonRow : ChangesInPersonRow
-emptyChangesInPersonRow =
-    { changedName = Nothing
-    , changedOptions = Dict.empty
-    }
-
-
-
-------------------------------------------------------------
----- Subscriptins ------------------------------------------
-------------------------------------------------------------
+        _ ->
+            -- TODO remove default option
+            ( model, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ loaded LoadedData
-        , modified NoOpJson
-        , updatedVersionReceived RetrySaveChanges
-        , hashChanged HashChanged
-        ]
+        []
 
 
-
-------------------------------------------------------------
----- Update ------------------------------------------------
-------------------------------------------------------------
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        NoOp ->
-            ( model, Cmd.none )
-
-        NoOpJson _ ->
-            ( model, Cmd.none )
-
-        LoadedData json ->
-            let
-                newModel =
-                    { model | projectState = loadProject json }
-
-                cmd =
-                    case model.projectState of
-                        SavingDefinition _ _ ->
-                            Browser.Dom.setViewport 0 0
-                                |> Task.attempt (\_ -> NoOp)
-
-                        _ ->
-                            Cmd.none
-            in
-            ( newModel, cmd )
-
-        HashChanged hash ->
-            init hash
-
-        MakePersonRowEditable pollId (PersonId personId) ->
-            let
-                doFn poll changesInPoll viewState =
-                    let
-                        updatedViewState =
-                            { viewState | editableExistingRows = Set.insert personId viewState.editableExistingRows }
-                    in
-                    ( poll, changesInPoll, updatedViewState )
-            in
-            ( doWithPoll model pollId doFn, Cmd.none )
-
-        MakePersonRowNotEditable pollId (PersonId personId) ->
-            let
-                doFn poll changesInPoll viewState =
-                    let
-                        updatedViewState =
-                            { viewState | editableExistingRows = Set.remove personId viewState.editableExistingRows }
-
-                        updatedChangesInPoll =
-                            { changesInPoll
-                                | changesInPersonRows = Dict.remove personId changesInPoll.changesInPersonRows
-                                , deletedPersonRows = Set.remove personId changesInPoll.deletedPersonRows
-                            }
-                    in
-                    ( poll, updatedChangesInPoll, updatedViewState )
-            in
-            ( doWithPoll model pollId doFn, Cmd.none )
-
-        SetAddedPersonRowOption pollId index (OptionId id) selectedOption ->
-            let
-                fn addedVote =
-                    { addedVote | selectedOptions = Dict.insert id selectedOption addedVote.selectedOptions }
-            in
-            ( doWithAddedVote model pollId index fn, Cmd.none )
-
-        SetAddedPersonRowName pollId index name ->
-            let
-                doFn project changes viewState =
-                    let
-                        sourceChanges =
-                            Dict.get (pollIdInt pollId) changes.changesInPolls
-
-                        foldFn ( i, addedVote ) str =
-                            if index == i then
-                                addedVote.name
-
-                            else
-                                str
-
-                        findOrigName changesItem =
-                            List.foldl foldFn "" <| List.indexedMap Tuple.pair changesItem.addedPersonRows
-
-                        origName =
-                            Maybe.withDefault "" <| Maybe.map findOrigName sourceChanges
-
-                        updateName pId i addedVote =
-                            if i == index && (addedVote.name == origName || pId == pollId) then
-                                { addedVote | name = name }
-
-                            else
-                                addedVote
-
-                        updateAddedPersonRows pId addedVotes =
-                            List.indexedMap (updateName pId) addedVotes
-
-                        updateChangesInPoll id changesInPoll =
-                            { changesInPoll | addedPersonRows = updateAddedPersonRows (PollId id) changesInPoll.addedPersonRows }
-
-                        updatedChanges =
-                            Dict.map updateChangesInPoll changes.changesInPolls
-                    in
-                    Loaded project { changes | changesInPolls = updatedChanges } viewState
-            in
-            ( doWithLoadedProject model doFn, Cmd.none )
-
-        AddAnotherPersonRow ->
-            let
-                updateAddedPersonRows addedVotes =
-                    addedVotes ++ [ { name = "", selectedOptions = Dict.empty } ]
-
-                doFn changesInPoll =
-                    { changesInPoll | addedPersonRows = updateAddedPersonRows changesInPoll.addedPersonRows }
-            in
-            ( doWithEachPollChanges model doFn, Cmd.none )
-
-        DeleteAddedPersonRow pollId addedVoteIndex ->
-            let
-                doFn poll changesInPoll viewState =
-                    let
-                        foldFn ( index, addedVote ) previousVotes =
-                            if addedVoteIndex == index then
-                                previousVotes
-
-                            else
-                                addedVote :: previousVotes
-
-                        removeAddedVote votes =
-                            List.foldr foldFn [] <| List.indexedMap Tuple.pair votes
-
-                        updatedChangesItem =
-                            { changesInPoll | addedPersonRows = removeAddedVote changesInPoll.addedPersonRows }
-                    in
-                    ( poll, updatedChangesItem, viewState )
-            in
-            ( doWithPoll model pollId doFn, Cmd.none )
-
-        DeleteAllEmptyPersonRows ->
-            let
-                updateAddedPersonRows addedVotes =
-                    List.filter (\av -> not <| String.isEmpty av.name) addedVotes
-
-                doFn changesInPoll =
-                    { changesInPoll | addedPersonRows = updateAddedPersonRows changesInPoll.addedPersonRows }
-            in
-            ( doWithEachPollChanges model doFn, Cmd.none )
-
-        SaveChanges ->
-            case model.projectState of
-                Loaded project changesInProject viewStates ->
-                    let
-                        actChanges =
-                            actualChanges changesInProject project
-
-                        merged =
-                            mergeWithChanges project actChanges
-
-                        encoded =
-                            encodeProjectAndKeys merged model.keys
-                    in
-                    ( { model | projectState = Saving project changesInProject viewStates }, modify encoded )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        SetExistingPersonRowOption pollId personId optionId selectedOption ->
-            let
-                doFn : PersonRow -> ChangesInPersonRow -> ChangesInPersonRow
-                doFn personRow changesInPersonRow =
-                    let
-                        orig =
-                            Maybe.withDefault No <| Dict.get (optionIdInt optionId) personRow.selectedOptions
-
-                        updatedOptions =
-                            if orig == selectedOption then
-                                Dict.remove (optionIdInt optionId) changesInPersonRow.changedOptions
-
-                            else
-                                Dict.insert (optionIdInt optionId) selectedOption changesInPersonRow.changedOptions
-                    in
-                    { changesInPersonRow | changedOptions = updatedOptions }
-            in
-            ( doWithExistingVote model pollId personId doFn, Cmd.none )
-
-        SetExistingPersonRowName pollId personId newName ->
-            let
-                doFn : PersonRow -> ChangesInPersonRow -> ChangesInPersonRow
-                doFn personRow changesInPersonRow =
-                    if newName == personRow.name then
-                        { changesInPersonRow | changedName = Nothing }
-
-                    else
-                        { changesInPersonRow | changedName = Just newName }
-            in
-            ( doWithExistingVote model pollId personId doFn, Cmd.none )
-
-        DeleteExistingPersonRow pollId personId ->
-            let
-                doFn poll changesInPoll viewState =
-                    let
-                        updatedChanges =
-                            { changesInPoll
-                                | deletedPersonRows = Set.insert (personIdInt personId) changesInPoll.deletedPersonRows
-                            }
-                    in
-                    ( poll, updatedChanges, viewState )
-            in
-            ( doWithPoll model pollId doFn, Cmd.none )
-
-        UndeleteExistingPersonRow pollId personId ->
-            let
-                doFn poll changesInPoll viewState =
-                    let
-                        updatedChanges =
-                            { changesInPoll
-                                | deletedPersonRows = Set.remove (personIdInt personId) changesInPoll.deletedPersonRows
-                            }
-                    in
-                    ( poll, updatedChanges, viewState )
-            in
-            ( doWithPoll model pollId doFn, Cmd.none )
-
-        RetrySaveChanges json ->
-            let
-                loadResult =
-                    loadProject json
-            in
-            case model.projectState of
-                Saving _ origChanges _ ->
-                    case loadResult of
-                        Loaded project _ _ ->
-                            let
-                                actChanges =
-                                    actualChanges origChanges project
-
-                                merged =
-                                    mergeWithChanges project actChanges
-
-                                encoded =
-                                    encodeProjectAndKeys merged model.keys
-                            in
-                            ( model, modify encoded )
-
-                        _ ->
-                            ( model, Cmd.none )
-
-                SavingDefinition _ changesInProjectDefinition ->
-                    case loadResult of
-                        Loaded project _ _ ->
-                            let
-                                merged =
-                                    mergeProjectWithDefinitionChanges project changesInProjectDefinition
-
-                                encoded =
-                                    encodeProjectAndKeys merged model.keys
-                            in
-                            ( model, modify encoded )
-
-                        _ ->
-                            ( model, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        SwitchToDefinitionEditor ->
-            case model.projectState of
-                Loaded project _ _ ->
-                    ( { model | projectState = Editing project (EditProject.EditProjectUpdate.init project model.today) }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        SwitchToVotesEditor scroll ->
-            let
-                cmd =
-                    if scroll then
-                        Browser.Dom.setViewport 0 0
-                            |> Task.attempt (\_ -> NoOp)
-
-                    else
-                        Cmd.none
-            in
-            case model.projectState of
-                Editing project _ ->
-                    ( { model | projectState = Loaded project (emptyChangesInProject project) Dict.empty }, cmd )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        SaveProjectDefinitionChanges ->
-            case model.projectState of
-                Editing project changesInProjectDefinition ->
-                    let
-                        merged =
-                            mergeProjectWithDefinitionChanges project changesInProjectDefinition
-
-                        encoded =
-                            encodeProjectAndKeys merged model.keys
-                    in
-                    ( { model | projectState = SavingDefinition project changesInProjectDefinition }, modify encoded )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        EditProjectMsg editProjectMsg ->
-            case model.projectState of
-                Editing project changesInProjectDefinition ->
-                    let
-                        ( updatedProjectState, cmd ) =
-                            EditProject.EditProjectUpdate.update editProjectMsg project changesInProjectDefinition EditProjectMsg
-                    in
-                    ( { model | projectState = Editing project updatedProjectState }, cmd )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        SetTranslation code ->
-            ( { model | translation = Translations.get code }, Cmd.none )
-
-
-doWithLoadedProject : Model -> (Project -> ChangesInProject -> ViewStates -> ProjectState) -> Model
-doWithLoadedProject model fn =
-    case model.projectState of
-        Loaded project changesInPoll viewStates ->
-            { model | projectState = fn project changesInPoll viewStates }
-
-        _ ->
-            model
-
-
-doWithPoll : Model -> PollId -> (Poll -> ChangesInPoll -> ViewState -> ( Poll, ChangesInPoll, ViewState )) -> Model
-doWithPoll model pollId fn =
+exampleProjectState : ProjectState
+exampleProjectState =
     let
-        updatePoll : Poll -> List Poll -> ChangesInProject -> ViewStates -> ( List Poll, ChangesInProject, ViewStates )
-        updatePoll actualPoll previousPolls changesInProject viewStates =
-            let
-                pId =
-                    pollIdInt actualPoll.pollId
+        poll1 : Poll
+        poll1 =
+            { pollId = PollId 1
+            , title = Just "Datum foceni"
+            , description = Just ""
+            , pollInfo =
+                { candidatesInfo =
+                    DateCandidatesInfo
+                        [ { candidateId = CandidateId 1
+                          , value = dayFromTuple ( 2025, 11, 11 ) |> Maybe.withDefault defaultDay
+                          , hidden = False
+                          }
+                        , { candidateId = CandidateId 2
+                          , value = dayFromTuple ( 2025, 11, 13 ) |> Maybe.withDefault defaultDay
+                          , hidden = False
+                          }
+                        ]
+                , votesInfo =
+                    YesNoVotesInfo
+                        { settings = { allowIfNeeded = True, allowMaybe = False }
+                        , votes =
+                            Dict.fromList
+                                [ ( 1, { voterVotes = Dict.fromList [ ( 1, { comment = VoteComment "", vote = Yes } ) ], rowComment = RowComment "", status = Valid } )
+                                , ( 2, { voterVotes = Dict.fromList [ ( 1, { comment = VoteComment "Cool", vote = No } ) ], rowComment = RowComment "", status = Valid } )
+                                ]
+                        }
+                }
+            }
 
-                changesItem =
-                    Maybe.withDefault emptyChangesInPoll <| Dict.get pId changesInProject.changesInPolls
+        poll2 : Poll
+        poll2 =
+            { pollId = PollId 1
+            , title = Just "Zvire"
+            , description = Just ""
+            , pollInfo =
+                { candidatesInfo =
+                    TextCandidatesInfo
+                        [ { candidateId = CandidateId 1
+                          , value = "Veverka"
+                          , hidden = False
+                          }
+                        , { candidateId = CandidateId 2
+                          , value = "Nutrie"
+                          , hidden = False
+                          }
+                        ]
+                , votesInfo =
+                    YesNoVotesInfo
+                        { settings = { allowIfNeeded = True, allowMaybe = False }
+                        , votes =
+                            Dict.fromList
+                                [ ( 1
+                                  , { voterVotes =
+                                        Dict.fromList
+                                            [ ( 1, { comment = VoteComment "", vote = IfNeeded } )
+                                            , ( 2, { comment = VoteComment "", vote = IfNeeded } )
+                                            ]
+                                    , rowComment = RowComment "I do not care much"
+                                    , status = Valid
+                                    }
+                                  )
+                                , ( 2
+                                  , { voterVotes =
+                                        Dict.fromList
+                                            [ ( 1, { comment = VoteComment "", vote = Yes } )
+                                            , ( 2, { comment = VoteComment "", vote = No } )
+                                            ]
+                                    , rowComment = RowComment "Veverka FTW"
+                                    , status = Valid
+                                    }
+                                  )
+                                ]
+                        }
+                }
+            }
 
-                viewState =
-                    Maybe.withDefault emptyViewState <| Dict.get pId viewStates
+        voters : List Voter
+        voters =
+            [ { voterId = VoterId 1, name = "Pat" }, { voterId = VoterId 2, name = "Mat" } ]
 
-                ( updatedPoll, updatedChangesItem, updatedViewState ) =
-                    fn actualPoll changesItem viewState
-            in
-            ( updatedPoll :: previousPolls
-            , { changesInProject | changesInPolls = Dict.insert pId updatedChangesItem changesInProject.changesInPolls }
-            , Dict.insert pId updatedViewState viewStates
-            )
+        project : Project
+        project =
+            { title = Just "Sample hardcoded project"
+            , polls = [ poll1, poll2 ]
+            , voters = voters
+            , lastPollId = 2
+            , lastVoterId = 1
+            }
 
-        doFn : Project -> ChangesInProject -> ViewStates -> ProjectState
-        doFn project changesInProject viewStates =
-            let
-                foldInitial =
-                    ( [], changesInProject, viewStates )
+        changesInProject : ChangesInProject
+        changesInProject =
+            AddedVoter
+                { voterName = "Novy"
+                , rowsInPolls =
+                    Dict.fromList
+                        [ ( 1, YesNoVoterRow { voterVotes = Dict.fromList [ ( 1, { comment = VoteComment "", vote = Yes } ) ], rowComment = RowComment "", status = Valid } )
+                        , ( 2, YesNoVoterRow { voterVotes = Dict.fromList [ ( 1, { comment = VoteComment "", vote = Yes } ) ], rowComment = RowComment "", status = Valid } )
+                        ]
+                }
 
-                foldFn currentPoll ( previousPolls, previousChanges, previousViewStates ) =
-                    if currentPoll.pollId == pollId then
-                        updatePoll currentPoll previousPolls previousChanges previousViewStates
-
-                    else
-                        ( currentPoll :: previousPolls, previousChanges, previousViewStates )
-
-                ( updatedPolls, updatedChangesInProject, updatedViewStates ) =
-                    List.foldr foldFn foldInitial project.polls
-
-                updatedProject =
-                    { project | polls = updatedPolls }
-            in
-            Loaded updatedProject updatedChangesInProject updatedViewStates
+        viewStates : ViewStates
+        viewStates =
+            Dict.empty
     in
-    doWithLoadedProject model doFn
-
-
-doWithExistingVote : Model -> PollId -> PersonId -> (PersonRow -> ChangesInPersonRow -> ChangesInPersonRow) -> Model
-doWithExistingVote model pollId personId fn =
-    let
-        doFn poll changesInPoll viewState =
-            let
-                changesForPerson : ChangesInPersonRow
-                changesForPerson =
-                    Maybe.withDefault emptyChangesInPersonRow <| Dict.get (personIdInt personId) changesInPoll.changesInPersonRows
-
-                updateChanges : PersonRow -> Dict Int ChangesInPersonRow -> Dict Int ChangesInPersonRow
-                updateChanges personRow changesInPersonRows =
-                    if personRow.personId == personId then
-                        Dict.insert (personIdInt personId) (fn personRow changesForPerson) changesInPersonRows
-
-                    else
-                        changesInPersonRows
-
-                updatedPersonRows =
-                    List.foldl updateChanges changesInPoll.changesInPersonRows poll.personRows
-
-                updatedChanges =
-                    { changesInPoll | changesInPersonRows = updatedPersonRows }
-            in
-            ( poll, updatedChanges, viewState )
-    in
-    doWithPoll model pollId doFn
-
-
-doWithAddedVote : Model -> PollId -> Int -> (AddedPersonRow -> AddedPersonRow) -> Model
-doWithAddedVote model pollId addedVoteIndex fn =
-    let
-        mapFn index addedVote =
-            if index == addedVoteIndex then
-                fn addedVote
-
-            else
-                addedVote
-
-        doFn poll changesItem viewState =
-            let
-                updatedChangesItem =
-                    { changesItem | addedPersonRows = List.indexedMap mapFn changesItem.addedPersonRows }
-            in
-            ( poll, updatedChangesItem, viewState )
-    in
-    doWithPoll model pollId doFn
-
-
-doWithEachPollChanges : Model -> (ChangesInPoll -> ChangesInPoll) -> Model
-doWithEachPollChanges model fn =
-    let
-        doFn project changes viewState =
-            let
-                updatedChanges =
-                    Dict.map (\_ b -> fn b) changes.changesInPolls
-            in
-            Loaded project { changes | changesInPolls = updatedChanges } viewState
-    in
-    doWithLoadedProject model doFn
-
-
-loadProject : D.Value -> ProjectState
-loadProject json =
-    let
-        decodeResult =
-            decodeProject json
-    in
-    case decodeResult of
-        Ok r ->
-            Loaded r (emptyChangesInProject r) Dict.empty
-
-        Err e ->
-            Error (D.errorToString e)
+    Loaded project changesInProject viewStates
